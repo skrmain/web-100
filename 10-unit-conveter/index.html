@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unit Converter | Length & Weight</title>
+
+    <style>
+      /* ==========================================
+           CSS SECTION: Styling for Unit Converter
+           ========================================== */
+
+      /* Root Variables for theming - easily customizable */
+      :root {
+        /* Light mode colors */
+        --bg-primary: #ffffff;
+        --bg-secondary: #f5f5f5;
+        --text-primary: #1a1a1a;
+        --text-secondary: #666666;
+        --border-color: #e0e0e0;
+        --accent-color: #4a90e2;
+        --accent-hover: #357abd;
+        --success-color: #4caf50;
+        --error-color: #f44336;
+
+        /* Spacing and sizing */
+        --spacing-unit: 1rem;
+        --border-radius: 8px;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Dark mode support using prefers-color-scheme */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #1e1e1e;
+          --bg-secondary: #2d2d2d;
+          --text-primary: #ffffff;
+          --text-secondary: #b0b0b0;
+          --border-color: #404040;
+          --accent-color: #6ba3ff;
+          --accent-hover: #8ab4ff;
+          --success-color: #66bb6a;
+        }
+      }
+
+      /* Reset default styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* Body styling */
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        padding: var(--spacing-unit);
+        min-height: 100vh;
+      }
+
+      /* Main container - uses CSS Grid for responsive layout */
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: var(--bg-primary);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+      }
+
+      /* Header styling */
+      .header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+      }
+
+      .header p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+      }
+
+      /* Category selector using Flexbox */
+      .category-selector {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        justify-content: center;
+      }
+
+      /* Category buttons with active state */
+      .category-btn {
+        padding: 0.75rem 1.5rem;
+        border: 2px solid var(--border-color);
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+      }
+
+      .category-btn:hover {
+        border-color: var(--accent-color);
+        color: var(--accent-color);
+      }
+
+      /* Active category button styling */
+      .category-btn.active {
+        background-color: var(--accent-color);
+        color: white;
+        border-color: var(--accent-color);
+      }
+
+      /* Main conversion area using Flexbox */
+      .converter-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      /* Conversion item container */
+      .conversion-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      /* Label styling */
+      .label {
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+      }
+
+      /* Input and select container using Flexbox */
+      .input-group {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      /* Numeric input styling */
+      .input-value {
+        flex: 1;
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: border-color 0.3s ease;
+      }
+
+      .input-value:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+      }
+
+      /* Select dropdown styling */
+      .select-unit {
+        flex: 0.75;
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: var(--border-radius);
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: border-color 0.3s ease;
+      }
+
+      .select-unit:focus {
+        outline: none;
+        border-color: var(--accent-color);
+      }
+
+      /* Swap button styling */
+      .swap-btn {
+        padding: 0.75rem 1.5rem;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        align-self: center;
+      }
+
+      .swap-btn:hover {
+        background-color: var(--accent-hover);
+        transform: scale(1.05);
+      }
+
+      .swap-btn:active {
+        transform: scale(0.95);
+      }
+
+      /* Result display section */
+      .result-section {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background-color: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        text-align: center;
+        border: 2px solid var(--border-color);
+        transition: all 0.3s ease;
+      }
+
+      .result-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+      }
+
+      .result-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--accent-color);
+        word-break: break-word;
+      }
+
+      /* Error message styling */
+      .error-message {
+        color: var(--error-color);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+
+      /* Input validation error state */
+      .input-value.error {
+        border-color: var(--error-color);
+      }
+
+      /* Footer with info */
+      .footer {
+        margin-top: 2rem;
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        border-top: 1px solid var(--border-color);
+        padding-top: 1rem;
+      }
+
+      /* Responsive design for smaller screens */
+      @media (max-width: 480px) {
+        .container {
+          padding: 1.5rem;
+        }
+
+        .header h1 {
+          font-size: 1.5rem;
+        }
+
+        .category-selector {
+          flex-direction: column;
+        }
+
+        .input-group {
+          flex-direction: column;
+        }
+
+        .input-value,
+        .select-unit {
+          width: 100%;
+        }
+
+        .result-value {
+          font-size: 1.5rem;
+        }
+      }
+
+      /* Loading/updating animation */
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .result-section.updated {
+        animation: slideIn 0.3s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main container -->
+    <div class="container">
+      <!-- Header section -->
+      <header class="header">
+        <h1>🔄 Unit Converter</h1>
+        <p>Convert between Length and Weight units instantly</p>
+      </header>
+
+      <!-- Category selector - allows users to switch between Length and Weight -->
+      <section class="category-selector">
+        <button class="category-btn active" data-category="length">
+          📏 Length
+        </button>
+        <button class="category-btn" data-category="weight">⚖️ Weight</button>
+      </section>
+
+      <!-- Main converter section -->
+      <section class="converter-section">
+        <!-- FROM unit input group -->
+        <div class="conversion-item">
+          <label for="from-unit" class="label">From Unit</label>
+          <div class="input-group">
+            <input
+              type="number"
+              id="from-value"
+              class="input-value"
+              placeholder="Enter value"
+              step="any"
+              aria-label="Value to convert from"
+            />
+            <select
+              id="from-unit"
+              class="select-unit"
+              aria-label="Source unit selection"
+            >
+              <!-- Options populated by JavaScript -->
+            </select>
+          </div>
+          <span class="error-message" id="from-error"></span>
+        </div>
+
+        <!-- Swap button - swaps source and target units -->
+        <button class="swap-btn" id="swap-btn" aria-label="Swap units">
+          ⇅ Swap Units
+        </button>
+
+        <!-- TO unit input group -->
+        <div class="conversion-item">
+          <label for="to-unit" class="label">To Unit</label>
+          <div class="input-group">
+            <input
+              type="number"
+              id="to-value"
+              class="input-value"
+              placeholder="Result"
+              readonly
+              aria-label="Converted value (read-only)"
+            />
+            <select
+              id="to-unit"
+              class="select-unit"
+              aria-label="Target unit selection"
+            >
+              <!-- Options populated by JavaScript -->
+            </select>
+          </div>
+          <span class="error-message" id="to-error"></span>
+        </div>
+      </section>
+
+      <!-- Result display section -->
+      <section class="result-section">
+        <div class="result-label">Result</div>
+        <div class="result-value" id="result-display">-</div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>💡 Supports Length & Weight conversions with real-time updates</p>
+      </footer>
+    </div>
+
+    <!-- ==========================================
+         JAVASCRIPT SECTION: Conversion Logic
+         ========================================== -->
+    <script>
+      /**
+       * Unit Converter Application
+       * Converts between different units of Length and Weight
+       * Uses localStorage to remember user's last-used category and units
+       */
+
+      // ===== Unit Conversion Data =====
+      // Each unit is defined with its base conversion factor
+      // Base unit: Length = mm, Weight = mg
+
+      const CONVERSION_DATA = {
+        length: {
+          name: "📏 Length",
+          baseUnit: "mm", // millimeter is the base
+          units: {
+            mm: { name: "Millimeter (mm)", factor: 1 },
+            cm: { name: "Centimeter (cm)", factor: 10 },
+            m: { name: "Meter (m)", factor: 1000 },
+            km: { name: "Kilometer (km)", factor: 1000000 },
+            inch: { name: "Inch (in)", factor: 25.4 },
+            foot: { name: "Foot (ft)", factor: 304.8 },
+            mile: { name: "Mile (mi)", factor: 1609344 },
+          },
+        },
+        weight: {
+          name: "⚖️ Weight",
+          baseUnit: "mg", // milligram is the base
+          units: {
+            mg: { name: "Milligram (mg)", factor: 1 },
+            g: { name: "Gram (g)", factor: 1000 },
+            kg: { name: "Kilogram (kg)", factor: 1000000 },
+            ton: { name: "Metric Ton (t)", factor: 1000000000 },
+            oz: { name: "Ounce (oz)", factor: 28349.5 },
+            lb: { name: "Pound (lb)", factor: 453592 },
+          },
+        },
+      };
+
+      // ===== Formatter for consistent number display =====
+      // Uses Intl.NumberFormat for locale-aware number formatting
+      const numberFormatter = new Intl.NumberFormat("en-US", {
+        maximumFractionDigits: 10, // Show up to 10 decimal places
+        useGrouping: true, // Add thousand separators
+      });
+
+      // ===== DOM Elements =====
+      const categoryButtons = document.querySelectorAll(".category-btn");
+      const fromValueInput = document.getElementById("from-value");
+      const toValueInput = document.getElementById("to-value");
+      const fromUnitSelect = document.getElementById("from-unit");
+      const toUnitSelect = document.getElementById("to-unit");
+      const swapBtn = document.getElementById("swap-btn");
+      const resultDisplay = document.getElementById("result-display");
+
+      // ===== Application State =====
+      let currentCategory = "length"; // Default category
+
+      /**
+       * Initialize the application
+       * Loads saved preferences and sets up event listeners
+       */
+      function init() {
+        // Load saved category from localStorage
+        const savedCategory = localStorage.getItem("lastCategory");
+        if (savedCategory && CONVERSION_DATA[savedCategory]) {
+          currentCategory = savedCategory;
+        }
+
+        // Initialize the UI
+        populateUnitSelects();
+        setupEventListeners();
+        loadSavedUnits();
+
+        // Trigger initial conversion
+        convertUnits();
+      }
+
+      /**
+       * Populate unit select dropdowns based on current category
+       */
+      function populateUnitSelects() {
+        const units = CONVERSION_DATA[currentCategory].units;
+
+        // Clear existing options
+        fromUnitSelect.innerHTML = "";
+        toUnitSelect.innerHTML = "";
+
+        // Add options for each unit
+        Object.entries(units).forEach(([key, unit]) => {
+          // Create option for FROM select
+          const fromOption = document.createElement("option");
+          fromOption.value = key;
+          fromOption.textContent = unit.name;
+          fromUnitSelect.appendChild(fromOption);
+
+          // Create option for TO select
+          const toOption = document.createElement("option");
+          toOption.value = key;
+          toOption.textContent = unit.name;
+          toUnitSelect.appendChild(toOption);
+        });
+
+        // Set default selection (first two different units)
+        fromUnitSelect.value = Object.keys(units)[0];
+        const unitKeys = Object.keys(units);
+        toUnitSelect.value = unitKeys[Math.min(1, unitKeys.length - 1)];
+      }
+
+      /**
+       * Setup all event listeners for the application
+       */
+      function setupEventListeners() {
+        // Category button clicks
+        categoryButtons.forEach((btn) => {
+          btn.addEventListener("click", handleCategoryChange);
+        });
+
+        // Input and select changes
+        fromValueInput.addEventListener("input", handleFromValueChange);
+        fromUnitSelect.addEventListener("change", handleConversion);
+        toUnitSelect.addEventListener("change", handleConversion);
+        swapBtn.addEventListener("click", handleSwap);
+      }
+
+      /**
+       * Handle category selection change
+       * @param {Event} event - Click event from category button
+       */
+      function handleCategoryChange(event) {
+        // Update active button styling
+        categoryButtons.forEach((btn) => btn.classList.remove("active"));
+        event.target.classList.add("active");
+
+        // Update current category
+        currentCategory = event.target.dataset.category;
+
+        // Save to localStorage
+        localStorage.setItem("lastCategory", currentCategory);
+
+        // Reset inputs and populate new units
+        fromValueInput.value = "";
+        toValueInput.value = "";
+        populateUnitSelects();
+        clearError();
+        convertUnits();
+      }
+
+      /**
+       * Handle input change in the FROM value field
+       * Validates input and triggers conversion
+       */
+      function handleFromValueChange() {
+        // Clear previous error
+        clearError();
+
+        // Get the input value
+        const value = parseFloat(fromValueInput.value);
+
+        // Validation checks
+        if (fromValueInput.value === "") {
+          toValueInput.value = "";
+          resultDisplay.textContent = "-";
+          return;
+        }
+
+        if (isNaN(value)) {
+          showError("Please enter a valid number");
+          toValueInput.value = "";
+          resultDisplay.textContent = "-";
+          return;
+        }
+
+        if (value < 0) {
+          showError("Please enter a positive number");
+          toValueInput.value = "";
+          resultDisplay.textContent = "-";
+          return;
+        }
+
+        // Conversion looks good, perform it
+        convertUnits();
+      }
+
+      /**
+       * Main conversion logic
+       * Converts from one unit to another
+       */
+      function convertUnits() {
+        const value = parseFloat(fromValueInput.value);
+
+        // Exit if no valid input
+        if (fromValueInput.value === "" || isNaN(value) || value < 0) {
+          return;
+        }
+
+        // Get selected units
+        const fromUnit = fromUnitSelect.value;
+        const toUnit = toUnitSelect.value;
+
+        // Get conversion factors
+        const units = CONVERSION_DATA[currentCategory].units;
+        const fromFactor = units[fromUnit].factor;
+        const toFactor = units[toUnit].factor;
+
+        // Convert through base unit
+        // Formula: (value * fromFactor) / toFactor
+        const convertedValue = (value * fromFactor) / toFactor;
+
+        // Format and display result
+        const formattedResult = numberFormatter.format(convertedValue);
+        toValueInput.value = convertedValue;
+        resultDisplay.textContent = formattedResult;
+
+        // Add animation to result
+        resultDisplay.parentElement.classList.add("updated");
+        setTimeout(() => {
+          resultDisplay.parentElement.classList.remove("updated");
+        }, 300);
+
+        // Save current units to localStorage
+        localStorage.setItem("lastFromUnit", fromUnit);
+        localStorage.setItem("lastToUnit", toUnit);
+      }
+
+      /**
+       * Handle conversion trigger (called on select changes)
+       */
+      function handleConversion() {
+        clearError();
+        convertUnits();
+      }
+
+      /**
+       * Swap source and target units
+       * Exchanges FROM and TO selects and their values
+       */
+      function handleSwap() {
+        // Swap select values
+        const tempUnit = fromUnitSelect.value;
+        fromUnitSelect.value = toUnitSelect.value;
+        toUnitSelect.value = tempUnit;
+
+        // Trigger conversion with new units
+        convertUnits();
+      }
+
+      /**
+       * Display error message
+       * @param {string} message - Error message to display
+       */
+      function showError(message) {
+        const errorElement = document.getElementById("from-error");
+        errorElement.textContent = message;
+        errorElement.classList.add("show");
+        fromValueInput.classList.add("error");
+      }
+
+      /**
+       * Clear error messages
+       */
+      function clearError() {
+        const errorElement = document.getElementById("from-error");
+        errorElement.textContent = "";
+        errorElement.classList.remove("show");
+        fromValueInput.classList.remove("error");
+      }
+
+      /**
+       * Load previously saved units from localStorage
+       */
+      function loadSavedUnits() {
+        const savedFromUnit = localStorage.getItem("lastFromUnit");
+        const savedToUnit = localStorage.getItem("lastToUnit");
+
+        if (
+          savedFromUnit &&
+          CONVERSION_DATA[currentCategory].units[savedFromUnit]
+        ) {
+          fromUnitSelect.value = savedFromUnit;
+        }
+
+        if (
+          savedToUnit &&
+          CONVERSION_DATA[currentCategory].units[savedToUnit]
+        ) {
+          toUnitSelect.value = savedToUnit;
+        }
+      }
+
+      /**
+       * Start the application when DOM is fully loaded
+       */
+      document.addEventListener("DOMContentLoaded", init);
+    </script>
+  </body>
+</html>
