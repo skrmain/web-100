@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Calculator</title>
+    <style>
+      /* ===========================
+           CSS CUSTOM PROPERTIES (Variables)
+           Used for theming and consistency
+           =========================== */
+      :root {
+        /* Light mode colors */
+        --bg-primary: #ffffff;
+        --bg-secondary: #f5f5f5;
+        --text-primary: #333333;
+        --text-secondary: #666666;
+        --border-color: #e0e0e0;
+        --button-bg: #f0f0f0;
+        --button-hover: #e0e0e0;
+        --button-active: #d0d0d0;
+        --operator-bg: #ff9500;
+        --operator-hover: #e68a00;
+        --operator-active: #cc7700;
+        --equals-bg: #4caf50;
+        --equals-hover: #45a049;
+        --equals-active: #3d8b40;
+        --display-bg: #222222;
+        --display-text: #ffffff;
+        --shadow: rgba(0, 0, 0, 0.1);
+      }
+
+      /* Dark mode: Automatically applied when user prefers dark scheme */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #1e1e1e;
+          --bg-secondary: #2d2d2d;
+          --text-primary: #ffffff;
+          --text-secondary: #b0b0b0;
+          --border-color: #404040;
+          --button-bg: #333333;
+          --button-hover: #404040;
+          --button-active: #505050;
+          --operator-bg: #ff9500;
+          --operator-hover: #e68a00;
+          --operator-active: #cc7700;
+          --equals-bg: #66bb6a;
+          --equals-hover: #5eb562;
+          --equals-active: #56a85a;
+          --display-bg: #0a0a0a;
+          --display-text: #00ff00;
+          --shadow: rgba(0, 0, 0, 0.5);
+        }
+      }
+
+      /* ===========================
+           GLOBAL STYLES
+           =========================== */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      /* ===========================
+           CALCULATOR CONTAINER
+           Main wrapper for the calculator
+           =========================== */
+      .calculator {
+        background-color: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 8px 32px var(--shadow);
+        max-width: 400px;
+        width: 100%;
+        transition: all 0.3s ease;
+      }
+
+      /* Responsive: Adjust padding on smaller screens */
+      @media (max-width: 480px) {
+        .calculator {
+          padding: 15px;
+        }
+      }
+
+      /* ===========================
+           DISPLAY STYLES
+           Shows current input and result
+           =========================== */
+      .display {
+        background-color: var(--display-bg);
+        color: var(--display-text);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: right;
+        font-size: 2.5rem;
+        font-weight: 300;
+        word-wrap: break-word;
+        word-break: break-all;
+        min-height: 70px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;
+        border: 2px solid var(--border-color);
+        font-family: "Courier New", monospace; /* Monospace for better number readability */
+        overflow: hidden;
+        transition: font-size 0.2s ease;
+      }
+
+      /* Responsive: Adjust font size on smaller screens */
+      @media (max-width: 480px) {
+        .display {
+          font-size: 2rem;
+          min-height: 60px;
+          padding: 15px;
+        }
+      }
+
+      /* ===========================
+           BUTTON GRID LAYOUT
+           Uses CSS Grid for responsive button layout
+           =========================== */
+      .buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+      }
+
+      /* Responsive: Adjust gap on smaller screens */
+      @media (max-width: 480px) {
+        .buttons {
+          gap: 8px;
+        }
+      }
+
+      /* ===========================
+           BUTTON STYLES
+           Base styling for all buttons
+           =========================== */
+      button {
+        padding: 20px;
+        font-size: 1.5rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        background-color: var(--button-bg);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.15s ease;
+        user-select: none;
+        border: 1px solid var(--border-color);
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Hover state: Provide visual feedback */
+      button:hover:not(:active) {
+        background-color: var(--button-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--shadow);
+      }
+
+      /* Active state: Pressed appearance */
+      button:active {
+        background-color: var(--button-active);
+        transform: translateY(0);
+        box-shadow: inset 0 2px 4px var(--shadow);
+      }
+
+      /* Focus state: Accessibility for keyboard navigation */
+      button:focus {
+        outline: 2px solid var(--operator-bg);
+        outline-offset: 2px;
+      }
+
+      /* Responsive: Adjust button size on smaller screens */
+      @media (max-width: 480px) {
+        button {
+          padding: 15px;
+          font-size: 1.25rem;
+        }
+      }
+
+      /* ===========================
+           OPERATOR BUTTONS
+           Distinct styling for +, −, ×, ÷
+           =========================== */
+      .operator {
+        background-color: var(--operator-bg);
+        color: white;
+        font-weight: 700;
+      }
+
+      .operator:hover:not(:active) {
+        background-color: var(--operator-hover);
+      }
+
+      .operator:active {
+        background-color: var(--operator-active);
+      }
+
+      /* ===========================
+           EQUALS BUTTON
+           Stands out for primary action
+           =========================== */
+      .equals {
+        background-color: var(--equals-bg);
+        color: white;
+        font-weight: 700;
+        grid-column: span 2;
+      }
+
+      .equals:hover:not(:active) {
+        background-color: var(--equals-hover);
+      }
+
+      .equals:active {
+        background-color: var(--equals-active);
+      }
+
+      /* ===========================
+           CLEAR BUTTON
+           Full width clear/reset button
+           =========================== */
+      .clear {
+        grid-column: span 2;
+        background-color: #f44336;
+        color: white;
+        font-weight: 700;
+      }
+
+      .clear:hover:not(:active) {
+        background-color: #da190b;
+      }
+
+      .clear:active {
+        background-color: #ba0000;
+      }
+
+      /* ===========================
+           DELETE BUTTON (Backspace)
+           Remove last character
+           =========================== */
+      .delete {
+        background-color: #ff6f00;
+        color: white;
+        font-weight: 700;
+      }
+
+      .delete:hover:not(:active) {
+        background-color: #e55100;
+      }
+
+      .delete:active {
+        background-color: #cc3d00;
+      }
+
+      /* ===========================
+           ACCESSIBILITY
+           Screen reader and keyboard support
+           =========================== */
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+      }
+
+      /* Header for context */
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+        color: var(--text-primary);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main calculator container -->
+    <main class="calculator">
+      <h1>Calculator</h1>
+
+      <!-- Display: Shows current input and calculation result -->
+      <div
+        class="display"
+        id="display"
+        role="status"
+        aria-live="polite"
+        aria-label="Display"
+      >
+        0
+      </div>
+
+      <!-- Button grid: All calculator buttons -->
+      <div class="buttons">
+        <!-- Row 1: Clear, Delete, Operators -->
+        <button class="clear" aria-label="Clear all" id="clear-btn">C</button>
+        <button class="delete" aria-label="Delete last digit" id="delete-btn">
+          ⌫
+        </button>
+        <button class="operator" data-operator="/" aria-label="Divide">
+          ÷
+        </button>
+        <button class="operator" data-operator="*" aria-label="Multiply">
+          ×
+        </button>
+
+        <!-- Row 2: Numbers 7, 8, 9, Subtract -->
+        <button data-number="7">7</button>
+        <button data-number="8">8</button>
+        <button data-number="9">9</button>
+        <button class="operator" data-operator="-" aria-label="Subtract">
+          −
+        </button>
+
+        <!-- Row 3: Numbers 4, 5, 6, Add -->
+        <button data-number="4">4</button>
+        <button data-number="5">5</button>
+        <button data-number="6">6</button>
+        <button class="operator" data-operator="+" aria-label="Add">+</button>
+
+        <!-- Row 4: Numbers 1, 2, 3, Equals (spans 2 columns) -->
+        <button data-number="1">1</button>
+        <button data-number="2">2</button>
+        <button data-number="3">3</button>
+        <button class="equals" id="equals-btn" aria-label="Calculate result">
+          =
+        </button>
+
+        <!-- Row 5: Number 0 (spans 2 columns), Decimal point -->
+        <button data-number="0" style="grid-column: span 2">0</button>
+        <button id="decimal-btn" data-number="." aria-label="Decimal point">
+          .
+        </button>
+      </div>
+    </main>
+
+    <script>
+      // ===========================
+      // CALCULATOR STATE MANAGEMENT
+      // Stores calculator state and logic
+      // ===========================
+      class Calculator {
+        constructor() {
+          // Current number being displayed or entered
+          this.currentNumber = "0";
+          // Previously entered number
+          this.previousNumber = "";
+          // Current operator (+, −, ×, ÷)
+          this.operator = null;
+          // Flag to check if we should clear display on next input
+          this.shouldResetDisplay = false;
+          // Display element reference
+          this.display = document.getElementById("display");
+        }
+
+        // ===========================
+        // APPEND NUMBER
+        // Adds a digit to the current number
+        // ===========================
+        appendNumber(num) {
+          // Prevent multiple leading zeros (e.g., "007" becomes "7")
+          if (this.currentNumber === "0" && num !== ".") {
+            this.currentNumber = String(num);
+          } else if (num === "." && this.currentNumber.includes(".")) {
+            // Prevent multiple decimal points in single number
+            return;
+          } else {
+            // Append the number to current display
+            this.currentNumber += String(num);
+          }
+
+          // Reset the flag so we don't clear on next append
+          this.shouldResetDisplay = false;
+          this.updateDisplay();
+        }
+
+        // ===========================
+        // SET OPERATOR
+        // Sets the operation to perform
+        // ===========================
+        setOperator(op) {
+          // If user presses operator without entering a number, do nothing
+          if (this.currentNumber === "") return;
+
+          // If there's a previous operator and number, calculate it first
+          // This allows chaining operations: 5 + 3 + = calculates 5 + 3 first
+          if (this.previousNumber !== "" && this.operator !== null) {
+            this.calculate();
+          } else {
+            // Store current number as previous and prepare for next input
+            this.previousNumber = this.currentNumber;
+          }
+
+          // Set the operator and mark to reset display on next number input
+          this.operator = op;
+          this.shouldResetDisplay = true;
+        }
+
+        // ===========================
+        // CALCULATE
+        // Performs the arithmetic operation
+        // Handles edge cases like division by zero
+        // ===========================
+        calculate() {
+          // If no operator set, nothing to calculate
+          if (this.operator === null || this.previousNumber === "") {
+            return;
+          }
+
+          // Parse numbers as floats for decimal operations
+          const prev = parseFloat(this.previousNumber);
+          const current = parseFloat(this.currentNumber);
+          let result;
+
+          // Perform operation based on operator
+          switch (this.operator) {
+            case "+":
+              result = prev + current;
+              break;
+            case "-":
+              result = prev - current;
+              break;
+            case "*":
+              result = prev * current;
+              break;
+            case "/":
+              // Handle division by zero: show error or return 0
+              if (current === 0) {
+                this.currentNumber = "0";
+                this.display.textContent = "Cannot divide by 0";
+                this.previousNumber = "";
+                this.operator = null;
+                this.shouldResetDisplay = true;
+                return;
+              }
+              result = prev / current;
+              break;
+            default:
+              return;
+          }
+
+          // Round to avoid floating point errors (e.g., 0.1 + 0.2)
+          // Round to 10 decimal places, then remove trailing zeros
+          this.currentNumber = String(
+            Math.round(result * 10000000000) / 10000000000
+          );
+
+          // Clear previous state
+          this.previousNumber = "";
+          this.operator = null;
+          this.shouldResetDisplay = true;
+          this.updateDisplay();
+        }
+
+        // ===========================
+        // DELETE LAST CHARACTER
+        // Removes the last digit from current number
+        // ===========================
+        deleteLast() {
+          // If only one character, set to 0
+          if (this.currentNumber.length === 1) {
+            this.currentNumber = "0";
+          } else {
+            // Remove last character
+            this.currentNumber = this.currentNumber.slice(0, -1);
+          }
+          this.shouldResetDisplay = false;
+          this.updateDisplay();
+        }
+
+        // ===========================
+        // CLEAR / RESET
+        // Resets calculator to initial state
+        // ===========================
+        clear() {
+          this.currentNumber = "0";
+          this.previousNumber = "";
+          this.operator = null;
+          this.shouldResetDisplay = false;
+          this.updateDisplay();
+        }
+
+        // ===========================
+        // UPDATE DISPLAY
+        // Updates the visual display with current number
+        // ===========================
+        updateDisplay() {
+          // Limit display width by showing only last 12 characters
+          const displayText = this.currentNumber;
+          this.display.textContent =
+            displayText.length > 12 ? displayText.slice(-12) : displayText;
+        }
+
+        // ===========================
+        // HANDLE KEYBOARD INPUT
+        // Processes keyboard events
+        // ===========================
+        handleKeyPress(event) {
+          const key = event.key;
+
+          // Number and decimal point keys
+          if (/[0-9.]/.test(key)) {
+            event.preventDefault();
+            // Reset display on first input after operator
+            if (this.shouldResetDisplay) {
+              this.currentNumber = "";
+              this.shouldResetDisplay = false;
+            }
+            this.appendNumber(key);
+          }
+          // Operator keys
+          else if (key === "+" || key === "-" || key === "*" || key === "/") {
+            event.preventDefault();
+            this.setOperator(key);
+          }
+          // Enter or = for calculate
+          else if (key === "Enter" || key === "=") {
+            event.preventDefault();
+            this.calculate();
+          }
+          // Backspace for delete
+          else if (key === "Backspace") {
+            event.preventDefault();
+            this.deleteLast();
+          }
+          // Escape for clear
+          else if (key === "Escape") {
+            event.preventDefault();
+            this.clear();
+          }
+        }
+      }
+
+      // ===========================
+      // INITIALIZE CALCULATOR
+      // Set up event listeners and create calculator instance
+      // ===========================
+      document.addEventListener("DOMContentLoaded", function () {
+        const calculator = new Calculator();
+
+        // ===========================
+        // NUMBER BUTTON LISTENERS
+        // Handle clicks on number buttons (0-9 and decimal)
+        // ===========================
+        document.querySelectorAll("[data-number]").forEach((button) => {
+          button.addEventListener("click", function () {
+            // If we just pressed an operator, clear the display for new input
+            if (calculator.shouldResetDisplay) {
+              calculator.currentNumber = "";
+              calculator.shouldResetDisplay = false;
+            }
+            calculator.appendNumber(this.dataset.number);
+          });
+        });
+
+        // ===========================
+        // OPERATOR BUTTON LISTENERS
+        // Handle clicks on operator buttons (+, −, ×, ÷)
+        // ===========================
+        document.querySelectorAll("[data-operator]").forEach((button) => {
+          button.addEventListener("click", function () {
+            calculator.setOperator(this.dataset.operator);
+          });
+        });
+
+        // ===========================
+        // EQUALS BUTTON LISTENER
+        // Calculates and displays result
+        // ===========================
+        document
+          .getElementById("equals-btn")
+          .addEventListener("click", function () {
+            calculator.calculate();
+          });
+
+        // ===========================
+        // CLEAR BUTTON LISTENER
+        // Resets calculator to initial state
+        // ===========================
+        document
+          .getElementById("clear-btn")
+          .addEventListener("click", function () {
+            calculator.clear();
+          });
+
+        // ===========================
+        // DELETE BUTTON LISTENER
+        // Removes last entered digit
+        // ===========================
+        document
+          .getElementById("delete-btn")
+          .addEventListener("click", function () {
+            calculator.deleteLast();
+          });
+
+        // ===========================
+        // KEYBOARD SUPPORT
+        // Allows using keyboard for input and operations
+        // Supported keys:
+        // - Numbers: 0-9, .
+        // - Operators: +, -, *, /
+        // - Calculate: Enter or =
+        // - Delete: Backspace
+        // - Clear: Escape
+        // ===========================
+        document.addEventListener("keydown", function (event) {
+          calculator.handleKeyPress(event);
+        });
+
+        // Initialize display
+        calculator.updateDisplay();
+      });
+    </script>
+  </body>
+</html>
