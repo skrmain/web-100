@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Viewport meta tag for responsive design on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Temperature Converter | Web-100</title>
+    <style>
+      /* ============================================================
+           CSS CUSTOM PROPERTIES (VARIABLES) & ROOT STYLING
+           ============================================================
+           Using CSS variables allows for easy theme switching and
+           maintains consistent spacing, colors, and typography
+           throughout the application.
+        */
+      :root {
+        /* Color Palette - Light Mode */
+        --color-primary: #3b82f6;
+        --color-primary-dark: #2563eb;
+        --color-primary-light: #dbeafe;
+        --color-success: #10b981;
+        --color-error: #ef4444;
+        --color-bg: #ffffff;
+        --color-bg-secondary: #f9fafb;
+        --color-text: #1f2937;
+        --color-text-secondary: #6b7280;
+        --color-border: #e5e7eb;
+        --color-shadow: rgba(0, 0, 0, 0.1);
+
+        /* Typography */
+        --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        --font-size-sm: 0.875rem;
+        --font-size-base: 1rem;
+        --font-size-lg: 1.125rem;
+        --font-size-xl: 1.5rem;
+        --font-size-2xl: 2rem;
+        --font-weight-regular: 400;
+        --font-weight-medium: 500;
+        --font-weight-bold: 700;
+
+        /* Spacing */
+        --spacing-xs: 0.25rem;
+        --spacing-sm: 0.5rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+        --spacing-2xl: 3rem;
+
+        /* Border Radius */
+        --radius-sm: 0.375rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+
+        /* Transitions */
+        --transition-fast: 150ms ease-in-out;
+        --transition-base: 300ms ease-in-out;
+      }
+
+      /* ============================================================
+           DARK MODE SUPPORT
+           ============================================================
+           Uses the 'prefers-color-scheme' media query to automatically
+           adapt to the user's system-level dark/light preference.
+           This provides an accessible dark mode without JavaScript.
+        */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          /* Color Palette - Dark Mode */
+          --color-primary: #60a5fa;
+          --color-primary-dark: #3b82f6;
+          --color-primary-light: #1e3a8a;
+          --color-bg: #111827;
+          --color-bg-secondary: #1f2937;
+          --color-text: #f3f4f6;
+          --color-text-secondary: #d1d5db;
+          --color-border: #374151;
+          --color-shadow: rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      /* ============================================================
+           GLOBAL STYLES
+           ============================================================
+           Reset browser defaults and apply consistent styling across
+           all elements.
+        */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: var(--font-family);
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-regular);
+        color: var(--color-text);
+        background-color: var(--color-bg);
+        line-height: 1.6;
+        transition: background-color var(--transition-base),
+          color var(--transition-base);
+      }
+
+      /* ============================================================
+           LAYOUT STYLES
+           ============================================================
+           Main container uses flexbox for centering and responsive
+           layout. The grid is used for multi-column layouts on larger
+           screens.
+        */
+      .container {
+        /* Centers content both horizontally and vertically */
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--spacing-md);
+        background: linear-gradient(
+          135deg,
+          var(--color-bg) 0%,
+          var(--color-bg-secondary) 100%
+        );
+      }
+
+      .card {
+        background-color: var(--color-bg);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 10px 25px var(--color-shadow);
+        padding: var(--spacing-2xl);
+        max-width: 600px;
+        width: 100%;
+        transition: box-shadow var(--transition-base),
+          transform var(--transition-base);
+      }
+
+      /* Subtle hover effect for better interactivity feedback */
+      .card:hover {
+        box-shadow: 0 20px 35px var(--color-shadow);
+        transform: translateY(-2px);
+      }
+
+      /* ============================================================
+           HEADER & TYPOGRAPHY
+           ============================================================
+        */
+      h1 {
+        font-size: var(--font-size-2xl);
+        font-weight: var(--font-weight-bold);
+        margin-bottom: var(--spacing-sm);
+        text-align: center;
+      }
+
+      .subtitle {
+        font-size: var(--font-size-base);
+        color: var(--color-text-secondary);
+        text-align: center;
+        margin-bottom: var(--spacing-xl);
+      }
+
+      /* ============================================================
+           FORM LAYOUT
+           ============================================================
+           Uses CSS Grid to create a responsive 2-column layout that
+           stacks on mobile devices (single column).
+        */
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ============================================================
+           FORM CONTROLS STYLING
+           ============================================================
+           Custom styling for inputs and labels with focus states for
+           better accessibility and visual feedback.
+        */
+      label {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text-secondary);
+        margin-bottom: var(--spacing-sm);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      input[type="number"] {
+        width: 100%;
+        padding: var(--spacing-md);
+        padding-right: var(--spacing-lg);
+        font-size: var(--font-size-base);
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-md);
+        background-color: var(--color-bg-secondary);
+        color: var(--color-text);
+        transition: border-color var(--transition-fast),
+          box-shadow var(--transition-fast),
+          background-color var(--transition-fast);
+      }
+
+      /* Focus state for accessibility - provides visible feedback */
+      input[type="number"]:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px var(--color-primary-light);
+        background-color: var(--color-bg);
+      }
+
+      /* Disabled state styling */
+      input[type="number"]:disabled {
+        background-color: var(--color-bg-secondary);
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      /* Unit indicator positioned inside input field for cleaner UI */
+      .unit-symbol {
+        position: absolute;
+        right: var(--spacing-md);
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-secondary);
+        pointer-events: none;
+      }
+
+      /* ============================================================
+           ERROR & VALIDATION STYLING
+           ============================================================
+           Visual feedback for validation states to guide user input.
+        */
+      .form-group.error input[type="number"] {
+        border-color: var(--color-error);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      }
+
+      .error-message {
+        font-size: var(--font-size-sm);
+        color: var(--color-error);
+        margin-top: var(--spacing-xs);
+        display: none;
+      }
+
+      .form-group.error .error-message {
+        display: block;
+      }
+
+      /* ============================================================
+           RESULTS DISPLAY
+           ============================================================
+           Grid layout for displaying the three temperature units in
+           a clean, organized manner.
+        */
+      .results {
+        background-color: var(--color-bg-secondary);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+      }
+
+      .results-title {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: var(--spacing-lg);
+      }
+
+      .result-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: var(--spacing-md);
+        background-color: var(--color-bg);
+        border-radius: var(--radius-md);
+        border: 2px solid var(--color-border);
+        transition: all var(--transition-base);
+      }
+
+      /* Highlight the result card when its input is focused */
+      .result-card.active {
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 3px var(--color-primary-light);
+      }
+
+      .result-value {
+        font-size: var(--font-size-xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-primary);
+        line-height: 1.2;
+      }
+
+      .result-unit {
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+        margin-top: var(--spacing-xs);
+        text-transform: uppercase;
+        font-weight: var(--font-weight-medium);
+      }
+
+      /* ============================================================
+           CONTROLS & BUTTONS
+           ============================================================
+           Button styling with hover and active states for good UX.
+        */
+      .controls {
+        display: flex;
+        gap: var(--spacing-md);
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: var(--spacing-lg);
+      }
+
+      button {
+        padding: var(--spacing-md) var(--spacing-lg);
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-medium);
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        font-family: var(--font-family);
+      }
+
+      .btn-primary {
+        background-color: var(--color-primary);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--color-primary-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+
+      .btn-secondary {
+        background-color: var(--color-bg-secondary);
+        color: var(--color-text);
+        border: 2px solid var(--color-border);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--color-border);
+        transform: translateY(-1px);
+      }
+
+      /* ============================================================
+           PRECISION CONTROL
+           ============================================================
+           Settings panel for adjusting decimal places.
+        */
+      .precision-control {
+        background-color: var(--color-bg-secondary);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .precision-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-md);
+        font-weight: var(--font-weight-medium);
+      }
+
+      /* Styled range slider for precision selection */
+      input[type="range"] {
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: var(--color-border);
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      /* Webkit browsers (Chrome, Safari) - slider thumb styling */
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      input[type="range"]::-webkit-slider-thumb:hover {
+        background: var(--color-primary-dark);
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.1);
+      }
+
+      /* Firefox - slider thumb styling */
+      input[type="range"]::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--color-primary);
+        cursor: pointer;
+        border: none;
+        transition: all var(--transition-fast);
+      }
+
+      input[type="range"]::-moz-range-thumb:hover {
+        background: var(--color-primary-dark);
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.1);
+      }
+
+      /* Range track background */
+      input[type="range"]::-webkit-slider-runnable-track {
+        background: var(--color-border);
+        height: 6px;
+        border-radius: 3px;
+      }
+
+      input[type="range"]::-moz-range-track {
+        background: var(--color-border);
+        height: 6px;
+        border-radius: 3px;
+        border: none;
+      }
+
+      .precision-value {
+        font-size: var(--font-size-lg);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-primary);
+        min-width: 40px;
+        text-align: right;
+      }
+
+      /* ============================================================
+           INFO & STATUS MESSAGES
+           ============================================================
+        */
+      .info-section {
+        background-color: rgba(59, 130, 246, 0.05);
+        border-left: 4px solid var(--color-primary);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-sm);
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .info-section p {
+        margin: var(--spacing-xs) 0;
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+      }
+
+      .info-section strong {
+        color: var(--color-text);
+      }
+
+      /* ============================================================
+           FOOTER & ATTRIBUTION
+           ============================================================
+        */
+      .footer {
+        text-align: center;
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+        margin-top: var(--spacing-xl);
+        padding-top: var(--spacing-lg);
+        border-top: 1px solid var(--color-border);
+      }
+
+      /* ============================================================
+           RESPONSIVE DESIGN
+           ============================================================
+           Tablet and mobile optimizations for smaller screens.
+        */
+      @media (max-width: 640px) {
+        .card {
+          padding: var(--spacing-xl);
+        }
+
+        h1 {
+          font-size: var(--font-size-xl);
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .results-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .controls {
+          gap: var(--spacing-sm);
+        }
+
+        button {
+          flex: 1;
+          min-width: 100px;
+        }
+      }
+
+      /* ============================================================
+           ANIMATION CLASSES
+           ============================================================
+           CSS animations for smooth transitions and feedback.
+        */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .animate-in {
+        animation: fadeIn var(--transition-base);
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      .pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="card">
+        <!-- =========================================================
+                 HEADER SECTION
+                 =========================================================
+            -->
+        <h1>🌡️ Temperature Converter</h1>
+        <p class="subtitle">Convert between Celsius, Fahrenheit, and Kelvin</p>
+
+        <!-- =========================================================
+                 INFORMATION PANEL
+                 =========================================================
+                 Educates users about absolute zero constraint.
+            -->
+        <div class="info-section">
+          <p>
+            <strong>Tip:</strong> Enter a value in any field and watch the other
+            units update in real-time. Temperature cannot go below -273.15°C
+            (absolute zero).
+          </p>
+        </div>
+
+        <!-- =========================================================
+                 MAIN INPUT FORM
+                 =========================================================
+                 Three input fields for each temperature unit. They sync
+                 in real-time as the user types. Using type="number"
+                 provides native validation and mobile number keyboards.
+            -->
+        <form id="temperatureForm">
+          <div class="form-grid">
+            <!-- Celsius Input -->
+            <div class="form-group">
+              <label for="celsius">Celsius (°C)</label>
+              <div class="input-wrapper">
+                <input
+                  type="number"
+                  id="celsius"
+                  placeholder="Enter temperature"
+                  step="0.01"
+                  aria-label="Temperature in Celsius"
+                  aria-describedby="celsius-help"
+                />
+                <span class="unit-symbol">°C</span>
+              </div>
+              <span class="error-message" id="celsius-error"></span>
+            </div>
+
+            <!-- Fahrenheit Input -->
+            <div class="form-group">
+              <label for="fahrenheit">Fahrenheit (°F)</label>
+              <div class="input-wrapper">
+                <input
+                  type="number"
+                  id="fahrenheit"
+                  placeholder="Enter temperature"
+                  step="0.01"
+                  aria-label="Temperature in Fahrenheit"
+                  aria-describedby="fahrenheit-help"
+                />
+                <span class="unit-symbol">°F</span>
+              </div>
+              <span class="error-message" id="fahrenheit-error"></span>
+            </div>
+
+            <!-- Kelvin Input -->
+            <div class="form-group">
+              <label for="kelvin">Kelvin (K)</label>
+              <div class="input-wrapper">
+                <input
+                  type="number"
+                  id="kelvin"
+                  placeholder="Enter temperature"
+                  step="0.01"
+                  aria-label="Temperature in Kelvin"
+                  aria-describedby="kelvin-help"
+                />
+                <span class="unit-symbol">K</span>
+              </div>
+              <span class="error-message" id="kelvin-error"></span>
+            </div>
+          </div>
+        </form>
+
+        <!-- =========================================================
+                 PRECISION CONTROL
+                 =========================================================
+                 Allows users to select decimal precision for results.
+                 Range slider provides intuitive control (0-6 decimals).
+            -->
+        <div class="precision-control">
+          <div class="precision-label">
+            <span>Decimal Precision</span>
+            <span class="precision-value" id="precisionValue">2</span>
+          </div>
+          <input
+            type="range"
+            id="precisionSlider"
+            min="0"
+            max="6"
+            value="2"
+            aria-label="Select decimal precision for results"
+          />
+        </div>
+
+        <!-- =========================================================
+                 CONTROL BUTTONS
+                 =========================================================
+                 Reset and swap functionality for better UX.
+            -->
+        <div class="controls">
+          <button type="button" class="btn-primary" id="resetBtn">
+            ↻ Reset All
+          </button>
+          <button type="button" class="btn-secondary" id="swapBtn">
+            ⇅ Swap Units
+          </button>
+        </div>
+
+        <!-- =========================================================
+                 RESULTS DISPLAY
+                 =========================================================
+                 Shows all three temperature conversions. Uses real-time
+                 Intl.NumberFormat for consistent number formatting
+                 across different locales.
+            -->
+        <div class="results">
+          <div class="results-title">Converted Values</div>
+          <div class="results-grid">
+            <div class="result-card" data-unit="celsius">
+              <div class="result-value" id="resultCelsius">—</div>
+              <div class="result-unit">Celsius</div>
+            </div>
+            <div class="result-card" data-unit="fahrenheit">
+              <div class="result-value" id="resultFahrenheit">—</div>
+              <div class="result-unit">Fahrenheit</div>
+            </div>
+            <div class="result-card" data-unit="kelvin">
+              <div class="result-value" id="resultKelvin">—</div>
+              <div class="result-unit">Kelvin</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <p>
+            Part of the <strong>web-100</strong> project • Temperature Converter
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /**
+       * ============================================================
+       * TEMPERATURE CONVERTER APPLICATION
+       * ============================================================
+       *
+       * This application demonstrates:
+       * - Real-time data binding and synchronization
+       * - Input validation and error handling
+       * - Modern JavaScript features (const, let, arrow functions)
+       * - DOM manipulation and event handling
+       * - Conversion formulas for temperature scales
+       * - localStorage for persisting user preferences
+       * - Intl.NumberFormat for locale-aware number formatting
+       *
+       * Architecture:
+       * - Model: Temperature data and conversion logic
+       * - View: DOM elements that display the data
+       * - Controller: Event handlers that update model and view
+       */
+
+      /**
+       * ============================================================
+       * CONFIGURATION & CONSTANTS
+       * ============================================================
+       */
+
+      // Absolute zero in Celsius (theoretical minimum temperature)
+      const ABSOLUTE_ZERO_CELSIUS = -273.15;
+
+      // Default precision for decimal places
+      const DEFAULT_PRECISION = 2;
+
+      // LocalStorage key for persisting user preferences
+      const STORAGE_KEY = "tempConverter_preferences";
+
+      /**
+       * ============================================================
+       * DOM ELEMENT REFERENCES
+       * ============================================================
+       * Caching DOM elements improves performance by avoiding
+       * repeated querySelector calls during frequent updates.
+       */
+
+      // Input fields for each temperature unit
+      const inputCelsius = document.getElementById("celsius");
+      const inputFahrenheit = document.getElementById("fahrenheit");
+      const inputKelvin = document.getElementById("kelvin");
+
+      // Result display elements
+      const resultCelsius = document.getElementById("resultCelsius");
+      const resultFahrenheit = document.getElementById("resultFahrenheit");
+      const resultKelvin = document.getElementById("resultKelvin");
+
+      // Control elements
+      const precisionSlider = document.getElementById("precisionSlider");
+      const precisionValue = document.getElementById("precisionValue");
+      const resetBtn = document.getElementById("resetBtn");
+      const swapBtn = document.getElementById("swapBtn");
+      const temperatureForm = document.getElementById("temperatureForm");
+
+      // Result card containers (for highlighting)
+      const resultCards = document.querySelectorAll(".result-card");
+
+      /**
+       * ============================================================
+       * STATE MANAGEMENT
+       * ============================================================
+       * Maintains the current state of the application.
+       */
+
+      let appState = {
+        precision: DEFAULT_PRECISION,
+        // Track which input was last edited to avoid circular updates
+        lastEditedUnit: null,
+      };
+
+      /**
+       * ============================================================
+       * TEMPERATURE CONVERSION FORMULAS
+       * ============================================================
+       *
+       * These functions perform the actual temperature conversions
+       * between different scales. All internal calculations use
+       * Celsius as the base unit for consistency.
+       *
+       * Conversion formulas:
+       * - C to F: (C × 9/5) + 32
+       * - C to K: C + 273.15
+       * - F to C: (F - 32) × 5/9
+       * - K to C: K - 273.15
+       */
+
+      /**
+       * Convert Celsius to Fahrenheit
+       * @param {number} celsius - Temperature in Celsius
+       * @returns {number} Temperature in Fahrenheit
+       */
+      function celsiusToFahrenheit(celsius) {
+        return (celsius * 9) / 5 + 32;
+      }
+
+      /**
+       * Convert Celsius to Kelvin
+       * @param {number} celsius - Temperature in Celsius
+       * @returns {number} Temperature in Kelvin
+       */
+      function celsiusToKelvin(celsius) {
+        return celsius + 273.15;
+      }
+
+      /**
+       * Convert Fahrenheit to Celsius
+       * @param {number} fahrenheit - Temperature in Fahrenheit
+       * @returns {number} Temperature in Celsius
+       */
+      function fahrenheitToCelsius(fahrenheit) {
+        return ((fahrenheit - 32) * 5) / 9;
+      }
+
+      /**
+       * Convert Kelvin to Celsius
+       * @param {number} kelvin - Temperature in Kelvin
+       * @returns {number} Temperature in Celsius
+       */
+      function kelvinToCelsius(kelvin) {
+        return kelvin - 273.15;
+      }
+
+      /**
+       * ============================================================
+       * INPUT VALIDATION
+       * ============================================================
+       * Validates user input and enforces physical constraints.
+       */
+
+      /**
+       * Validate a temperature value
+       * @param {number} value - The temperature value to validate
+       * @param {string} fromUnit - The unit of the input value ('celsius', 'fahrenheit', 'kelvin')
+       * @returns {object} Validation result with isValid flag and error message
+       */
+      function validateTemperature(value, fromUnit) {
+        // Check if value is a number
+        if (value === "" || value === null) {
+          return { isValid: false, error: "Please enter a value" };
+        }
+
+        if (isNaN(value)) {
+          return { isValid: false, error: "Please enter a valid number" };
+        }
+
+        // Convert to Celsius for validation (absolute zero check)
+        let celsius;
+        switch (fromUnit) {
+          case "celsius":
+            celsius = parseFloat(value);
+            break;
+          case "fahrenheit":
+            celsius = fahrenheitToCelsius(parseFloat(value));
+            break;
+          case "kelvin":
+            celsius = kelvinToCelsius(parseFloat(value));
+            break;
+          default:
+            return { isValid: false, error: "Unknown unit" };
+        }
+
+        // Check against absolute zero (-273.15°C)
+        if (celsius < ABSOLUTE_ZERO_CELSIUS) {
+          return {
+            isValid: false,
+            error: `Temperature cannot be below -273.15°C (absolute zero)`,
+          };
+        }
+
+        return { isValid: true };
+      }
+
+      /**
+       * Display error message for a specific input field
+       * @param {HTMLElement} inputElement - The input field
+       * @param {string} errorMessage - Error message to display
+       */
+      function showError(inputElement, errorMessage) {
+        const formGroup = inputElement.closest(".form-group");
+        const errorElement = formGroup.querySelector(".error-message");
+
+        formGroup.classList.add("error");
+        errorElement.textContent = errorMessage;
+      }
+
+      /**
+       * Clear error message for a specific input field
+       * @param {HTMLElement} inputElement - The input field
+       */
+      function clearError(inputElement) {
+        const formGroup = inputElement.closest(".form-group");
+        formGroup.classList.remove("error");
+      }
+
+      /**
+       * ============================================================
+       * CONVERSION & DISPLAY LOGIC
+       * ============================================================
+       */
+
+      /**
+       * Format a number using Intl.NumberFormat for locale-aware
+       * formatting with the appropriate number of decimal places.
+       * This ensures consistent formatting across different locales
+       * and browsers.
+       *
+       * @param {number} value - The number to format
+       * @param {number} precision - Number of decimal places
+       * @returns {string} Formatted number string
+       */
+      function formatNumber(value, precision) {
+        // Handle special cases
+        if (value === null || value === undefined || isNaN(value)) {
+          return "—";
+        }
+
+        // Use Intl.NumberFormat for proper locale formatting
+        const formatter = new Intl.NumberFormat("en-US", {
+          minimumFractionDigits: precision,
+          maximumFractionDigits: precision,
+        });
+
+        return formatter.format(value);
+      }
+
+      /**
+       * Perform conversions and update all result displays
+       * This function is called whenever any input changes.
+       * It calculates all three temperature values and updates
+       * the results section.
+       */
+      function updateAllResults() {
+        let celsiusValue = null;
+
+        // Step 1: Determine which input has a value and convert to Celsius
+        if (inputCelsius.value !== "") {
+          celsiusValue = parseFloat(inputCelsius.value);
+          appState.lastEditedUnit = "celsius";
+        } else if (inputFahrenheit.value !== "") {
+          celsiusValue = fahrenheitToCelsius(parseFloat(inputFahrenheit.value));
+          appState.lastEditedUnit = "fahrenheit";
+        } else if (inputKelvin.value !== "") {
+          celsiusValue = kelvinToCelsius(parseFloat(inputKelvin.value));
+          appState.lastEditedUnit = "kelvin";
+        }
+
+        // Step 2: If we have a valid Celsius value, calculate and display conversions
+        if (celsiusValue !== null && !isNaN(celsiusValue)) {
+          const fahrenheitValue = celsiusToFahrenheit(celsiusValue);
+          const kelvinValue = celsiusToKelvin(celsiusValue);
+
+          // Format and display results
+          resultCelsius.textContent = formatNumber(
+            celsiusValue,
+            appState.precision
+          );
+          resultFahrenheit.textContent = formatNumber(
+            fahrenheitValue,
+            appState.precision
+          );
+          resultKelvin.textContent = formatNumber(
+            kelvinValue,
+            appState.precision
+          );
+        } else {
+          // No valid input, reset results
+          resultCelsius.textContent = "—";
+          resultFahrenheit.textContent = "—";
+          resultKelvin.textContent = "—";
+        }
+      }
+
+      /**
+       * Sync input values when one input changes
+       * Updates the other two input fields to match the entered value.
+       * This provides real-time two-way binding.
+       */
+      function syncInputs(changedInput) {
+        const value = changedInput.value;
+
+        // Early return if input is empty
+        if (value === "") {
+          inputCelsius.value = "";
+          inputFahrenheit.value = "";
+          inputKelvin.value = "";
+          clearError(changedInput);
+          updateAllResults();
+          return;
+        }
+
+        // Validate the input
+        const unitMap = {
+          celsius: "celsius",
+          fahrenheit: "fahrenheit",
+          kelvin: "kelvin",
+        };
+        const unit = unitMap[changedInput.id];
+        const validation = validateTemperature(value, unit);
+
+        if (!validation.isValid) {
+          showError(changedInput, validation.error);
+          return;
+        }
+
+        clearError(changedInput);
+
+        // Convert to Celsius first
+        let celsiusValue;
+        switch (changedInput.id) {
+          case "celsius":
+            celsiusValue = parseFloat(value);
+            break;
+          case "fahrenheit":
+            celsiusValue = fahrenheitToCelsius(parseFloat(value));
+            break;
+          case "kelvin":
+            celsiusValue = kelvinToCelsius(parseFloat(value));
+            break;
+        }
+
+        // Calculate the other two values
+        const fahrenheitValue = celsiusToFahrenheit(celsiusValue);
+        const kelvinValue = celsiusToKelvin(celsiusValue);
+
+        // Update inputs (without triggering change events)
+        // Round to a reasonable precision for input fields
+        const displayPrecision = 6;
+
+        if (changedInput.id !== "celsius") {
+          inputCelsius.value = formatNumberForInput(
+            celsiusValue,
+            displayPrecision
+          );
+        }
+        if (changedInput.id !== "fahrenheit") {
+          inputFahrenheit.value = formatNumberForInput(
+            fahrenheitValue,
+            displayPrecision
+          );
+        }
+        if (changedInput.id !== "kelvin") {
+          inputKelvin.value = formatNumberForInput(
+            kelvinValue,
+            displayPrecision
+          );
+        }
+
+        // Update result displays
+        updateAllResults();
+      }
+
+      /**
+       * Format a number for input field display
+       * (Removes trailing zeros for cleaner appearance)
+       * @param {number} value - The number to format
+       * @param {number} maxPrecision - Maximum decimal places
+       * @returns {string} Formatted number
+       */
+      function formatNumberForInput(value, maxPrecision) {
+        if (isNaN(value)) return "";
+        const rounded =
+          Math.round(value * Math.pow(10, maxPrecision)) /
+          Math.pow(10, maxPrecision);
+        return rounded.toString();
+      }
+
+      /**
+       * ============================================================
+       * EVENT HANDLERS
+       * ============================================================
+       */
+
+      /**
+       * Handle input changes with visual feedback
+       * When user types in an input field, sync all values and highlight
+       * the corresponding result card.
+       */
+      [inputCelsius, inputFahrenheit, inputKelvin].forEach((input) => {
+        input.addEventListener("input", (e) => {
+          syncInputs(e.target);
+          updateResultHighlight(e.target.id);
+        });
+
+        // Remove result highlight when input loses focus
+        input.addEventListener("blur", () => {
+          resultCards.forEach((card) => card.classList.remove("active"));
+        });
+      });
+
+      /**
+       * Update result card highlighting based on active input
+       * @param {string} unitId - The ID of the active input ('celsius', 'fahrenheit', 'kelvin')
+       */
+      function updateResultHighlight(unitId) {
+        resultCards.forEach((card) => {
+          if (card.dataset.unit === unitId) {
+            card.classList.add("active");
+          } else {
+            card.classList.remove("active");
+          }
+        });
+      }
+
+      /**
+       * Handle precision slider changes
+       * Updates the decimal precision and refreshes result displays
+       */
+      precisionSlider.addEventListener("input", (e) => {
+        appState.precision = parseInt(e.target.value);
+        precisionValue.textContent = appState.precision;
+        updateAllResults();
+        savePreferences();
+      });
+
+      /**
+       * Handle reset button click
+       * Clears all inputs and results
+       */
+      resetBtn.addEventListener("click", () => {
+        inputCelsius.value = "";
+        inputFahrenheit.value = "";
+        inputKelvin.value = "";
+        resultCelsius.textContent = "—";
+        resultFahrenheit.textContent = "—";
+        resultKelvin.textContent = "—";
+        clearError(inputCelsius);
+        clearError(inputFahrenheit);
+        clearError(inputKelvin);
+        resultCards.forEach((card) => card.classList.remove("active"));
+        appState.lastEditedUnit = null;
+      });
+
+      /**
+       * Handle swap button click
+       * Cycles through the three temperature units as the "primary" input
+       * Demonstrates a practical UI pattern for quick unit switching
+       */
+      swapBtn.addEventListener("click", () => {
+        // Determine the next unit to cycle to
+        const unitsOrder = ["celsius", "fahrenheit", "kelvin"];
+        const currentIndex = unitsOrder.indexOf(
+          appState.lastEditedUnit || "celsius"
+        );
+        const nextIndex = (currentIndex + 1) % unitsOrder.length;
+        const nextUnit = unitsOrder[nextIndex];
+
+        // Focus the next input
+        switch (nextUnit) {
+          case "celsius":
+            inputCelsius.focus();
+            break;
+          case "fahrenheit":
+            inputFahrenheit.focus();
+            break;
+          case "kelvin":
+            inputKelvin.focus();
+            break;
+        }
+      });
+
+      /**
+       * ============================================================
+       * LOCALSTORAGE PERSISTENCE
+       * ============================================================
+       * Saves user preferences (precision) to localStorage so they
+       * persist across browser sessions.
+       */
+
+      /**
+       * Save user preferences to localStorage
+       */
+      function savePreferences() {
+        const preferences = {
+          precision: appState.precision,
+          lastSaved: new Date().toISOString(),
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+      }
+
+      /**
+       * Load user preferences from localStorage
+       */
+      function loadPreferences() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            const preferences = JSON.parse(saved);
+            appState.precision = preferences.precision || DEFAULT_PRECISION;
+            precisionSlider.value = appState.precision;
+            precisionValue.textContent = appState.precision;
+          }
+        } catch (error) {
+          // If parsing fails, silently fall back to defaults
+          console.warn("Could not load saved preferences:", error);
+        }
+      }
+
+      /**
+       * ============================================================
+       * APPLICATION INITIALIZATION
+       * ============================================================
+       * Runs once when the page loads to set up the application state.
+       */
+
+      function init() {
+        // Load saved preferences from localStorage
+        loadPreferences();
+
+        // Set initial result displays
+        updateAllResults();
+
+        // Focus first input for better UX
+        inputCelsius.focus();
+
+        console.log("Temperature Converter initialized");
+      }
+
+      // Start the application when DOM is ready
+      init();
+    </script>
+  </body>
+</html>

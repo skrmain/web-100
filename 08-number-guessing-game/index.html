@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Number Guessing Game</title>
+    <style>
+      /* ============================================
+           CSS VARIABLES FOR THEMING
+           Using :root to define reusable color values
+           that can be easily updated throughout the app
+           ============================================ */
+      :root {
+        --bg-primary: #f0f4f8;
+        --bg-secondary: #ffffff;
+        --text-primary: #1a202c;
+        --text-secondary: #4a5568;
+        --accent-primary: #4f46e5;
+        --accent-hover: #4338ca;
+        --success: #10b981;
+        --error: #ef4444;
+        --warning: #f59e0b;
+        --border: #e2e8f0;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --transition-speed: 0.3s;
+      }
+
+      /* ============================================
+           DARK MODE SUPPORT
+           Using prefers-color-scheme media query to
+           automatically adapt to system preferences
+           ============================================ */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #1a202c;
+          --bg-secondary: #2d3748;
+          --text-primary: #f7fafc;
+          --text-secondary: #cbd5e0;
+          --border: #4a5568;
+          --shadow: rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      /* ============================================
+           GLOBAL RESET & BASE STYLES
+           Ensuring consistent box-sizing and removing
+           default margins for better control
+           ============================================ */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+        /* Using Flexbox to center content vertically and horizontally */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem;
+        transition: background-color var(--transition-speed);
+      }
+
+      /* ============================================
+           MAIN GAME CONTAINER
+           Using CSS Grid for structured layout
+           ============================================ */
+      .game-container {
+        background: var(--bg-secondary);
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px var(--shadow);
+        padding: 2rem;
+        max-width: 500px;
+        width: 100%;
+        transition: background-color var(--transition-speed);
+      }
+
+      /* ============================================
+           HEADER SECTION
+           Semantic header with title and instructions
+           ============================================ */
+      header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        color: var(--accent-primary);
+      }
+
+      .instructions {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+      }
+
+      /* ============================================
+           GAME STATS SECTION
+           Using CSS Grid for equal-width stat boxes
+           ============================================ */
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .stat-box {
+        background: var(--bg-primary);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        text-align: center;
+        border: 2px solid var(--border);
+      }
+
+      .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .stat-value {
+        font-size: 1.75rem;
+        font-weight: bold;
+        color: var(--accent-primary);
+        margin-top: 0.25rem;
+      }
+
+      /* ============================================
+           FEEDBACK MESSAGE AREA
+           Dynamic state classes for different messages
+           ============================================ */
+      .feedback {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-weight: 500;
+        /* Smooth transition for state changes */
+        transition: all var(--transition-speed);
+        min-height: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .feedback.neutral {
+        background: var(--bg-primary);
+        color: var(--text-secondary);
+      }
+
+      .feedback.too-high {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--error);
+        border: 2px solid var(--error);
+        /* Subtle animation for feedback */
+        animation: shake 0.5s;
+      }
+
+      .feedback.too-low {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+        border: 2px solid var(--warning);
+        animation: shake 0.5s;
+      }
+
+      .feedback.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+        border: 2px solid var(--success);
+        animation: pulse 0.6s;
+      }
+
+      /* ============================================
+           ANIMATIONS
+           Keyframe animations for visual feedback
+           ============================================ */
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-10px);
+        }
+        75% {
+          transform: translateX(10px);
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+      }
+
+      /* ============================================
+           INPUT SECTION
+           Form controls for user interaction
+           ============================================ */
+      .input-section {
+        margin-bottom: 1.5rem;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      /* Accessible, styled input field */
+      input[type="number"] {
+        flex: 1;
+        padding: 0.75rem;
+        font-size: 1rem;
+        border: 2px solid var(--border);
+        border-radius: 0.5rem;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        transition: border-color var(--transition-speed);
+      }
+
+      input[type="number"]:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+      }
+
+      /* ============================================
+           BUTTONS
+           Reusable button styles with state variants
+           ============================================ */
+      button {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all var(--transition-speed);
+        font-family: inherit;
+      }
+
+      .btn-primary {
+        background: var(--accent-primary);
+        color: white;
+        flex: 1;
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--shadow);
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .btn-secondary {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border);
+        width: 100%;
+      }
+
+      .btn-secondary:hover {
+        background: var(--border);
+        transform: translateY(-2px);
+      }
+
+      /* ============================================
+           GUESS HISTORY
+           Scrollable list of previous attempts
+           ============================================ */
+      .history-section {
+        margin-top: 2rem;
+      }
+
+      .history-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: var(--text-secondary);
+      }
+
+      .history-list {
+        max-height: 150px;
+        overflow-y: auto;
+        background: var(--bg-primary);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+      }
+
+      /* Custom scrollbar styling */
+      .history-list::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .history-list::-webkit-scrollbar-track {
+        background: var(--bg-primary);
+      }
+
+      .history-list::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+      }
+
+      .history-item {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+        background: var(--bg-secondary);
+        border-radius: 0.25rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+      }
+
+      .history-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .history-empty {
+        text-align: center;
+        color: var(--text-secondary);
+        padding: 1rem;
+        font-style: italic;
+      }
+
+      /* ============================================
+           RESPONSIVE DESIGN
+           Mobile-first approach with tablet breakpoint
+           ============================================ */
+      @media (max-width: 480px) {
+        .game-container {
+          padding: 1.5rem;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        .stats {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ============================================
+         SEMANTIC HTML STRUCTURE
+         Using appropriate semantic elements for
+         accessibility and SEO
+         ============================================ -->
+    <main class="game-container">
+      <!-- Game Header with Title and Instructions -->
+      <header>
+        <h1>🎯 Number Guessing Game</h1>
+        <p class="instructions">
+          I'm thinking of a number between
+          <span id="rangeDisplay">1 and 100</span>
+        </p>
+      </header>
+
+      <!-- Game Statistics Display -->
+      <section class="stats" aria-label="Game Statistics">
+        <div class="stat-box">
+          <div class="stat-label">Attempts</div>
+          <div class="stat-value" id="attempts">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Best Score</div>
+          <div class="stat-value" id="bestScore">-</div>
+        </div>
+      </section>
+
+      <!-- Feedback Message Area -->
+      <div
+        class="feedback neutral"
+        id="feedback"
+        role="status"
+        aria-live="polite"
+      >
+        Make your first guess!
+      </div>
+
+      <!-- Input Section for User Guesses -->
+      <section class="input-section">
+        <form id="guessForm">
+          <div class="input-group">
+            <input
+              type="number"
+              id="guessInput"
+              placeholder="Enter your guess"
+              min="1"
+              max="100"
+              required
+              aria-label="Your guess"
+              autofocus
+            />
+            <button type="submit" class="btn-primary" id="submitBtn">
+              Guess
+            </button>
+          </div>
+        </form>
+        <button class="btn-secondary" id="resetBtn">🔄 New Game</button>
+      </section>
+
+      <!-- Guess History -->
+      <section class="history-section" aria-label="Guess History">
+        <h2 class="history-title">Your Guesses</h2>
+        <div class="history-list" id="historyList">
+          <div class="history-empty">No guesses yet</div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      /* ============================================
+           GAME STATE & CONFIGURATION
+           Central object to manage all game data
+           ============================================ */
+      const gameState = {
+        min: 1, // Minimum number in range
+        max: 100, // Maximum number in range
+        targetNumber: null, // The secret number to guess
+        attempts: 0, // Current number of attempts
+        guessHistory: [], // Array of previous guesses
+        gameOver: false, // Flag to track if game has ended
+      };
+
+      /* ============================================
+           DOM ELEMENT REFERENCES
+           Caching DOM queries for better performance
+           ============================================ */
+      const elements = {
+        guessForm: document.getElementById("guessForm"),
+        guessInput: document.getElementById("guessInput"),
+        submitBtn: document.getElementById("submitBtn"),
+        resetBtn: document.getElementById("resetBtn"),
+        feedback: document.getElementById("feedback"),
+        attemptsDisplay: document.getElementById("attempts"),
+        bestScoreDisplay: document.getElementById("bestScore"),
+        historyList: document.getElementById("historyList"),
+        rangeDisplay: document.getElementById("rangeDisplay"),
+      };
+
+      /* ============================================
+           RANDOM NUMBER GENERATION
+           Using Math.random() with proper range handling
+           Formula: Math.floor(Math.random() * (max - min + 1)) + min
+           This ensures inclusive range [min, max]
+           ============================================ */
+      function generateRandomNumber(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      /* ============================================
+           INITIALIZE NEW GAME
+           Resets all state and generates new target
+           ============================================ */
+      function initializeGame() {
+        // Generate new target number
+        gameState.targetNumber = generateRandomNumber(
+          gameState.min,
+          gameState.max
+        );
+        gameState.attempts = 0;
+        gameState.guessHistory = [];
+        gameState.gameOver = false;
+
+        // Reset UI
+        elements.guessInput.value = "";
+        elements.guessInput.disabled = false;
+        elements.submitBtn.disabled = false;
+        elements.attemptsDisplay.textContent = "0";
+
+        // Reset feedback
+        updateFeedback("Make your first guess!", "neutral");
+
+        // Clear history display
+        renderHistory();
+
+        // Focus input for immediate play
+        elements.guessInput.focus();
+
+        // Log for debugging (remove in production)
+        console.log("New game started! Target:", gameState.targetNumber);
+      }
+
+      /* ============================================
+           UPDATE FEEDBACK MESSAGE
+           Changes message and applies appropriate styling
+           ============================================ */
+      function updateFeedback(message, type) {
+        elements.feedback.textContent = message;
+        // Remove all state classes
+        elements.feedback.className = "feedback";
+        // Add new state class
+        elements.feedback.classList.add(type);
+      }
+
+      /* ============================================
+           PROCESS USER GUESS
+           Main game logic for evaluating guesses
+           ============================================ */
+      function processGuess(guess) {
+        // Increment attempt counter
+        gameState.attempts++;
+        elements.attemptsDisplay.textContent = gameState.attempts;
+
+        // Add guess to history
+        gameState.guessHistory.push({
+          number: guess,
+          attempt: gameState.attempts,
+        });
+
+        // Render updated history
+        renderHistory();
+
+        // Check if guess is correct
+        if (guess === gameState.targetNumber) {
+          handleCorrectGuess();
+        } else if (guess > gameState.targetNumber) {
+          updateFeedback(`📉 Too High! Try a lower number.`, "too-high");
+        } else {
+          updateFeedback(`📈 Too Low! Try a higher number.`, "too-low");
+        }
+      }
+
+      /* ============================================
+           HANDLE CORRECT GUESS
+           Manages win state and best score tracking
+           ============================================ */
+      function handleCorrectGuess() {
+        gameState.gameOver = true;
+
+        // Disable input and submit button
+        elements.guessInput.disabled = true;
+        elements.submitBtn.disabled = true;
+
+        // Create victory message
+        const message =
+          gameState.attempts === 1
+            ? `🎉 Amazing! You got it in just 1 try!`
+            : `🎉 Correct! You found ${gameState.targetNumber} in ${gameState.attempts} attempts!`;
+
+        updateFeedback(message, "success");
+
+        // Update best score using localStorage
+        updateBestScore(gameState.attempts);
+      }
+
+      /* ============================================
+           BEST SCORE MANAGEMENT WITH LOCALSTORAGE
+           Persists best score across browser sessions
+           Key: 'numberGameBestScore'
+           ============================================ */
+      function loadBestScore() {
+        // Try to retrieve from localStorage
+        const saved = localStorage.getItem("numberGameBestScore");
+        if (saved) {
+          elements.bestScoreDisplay.textContent = saved;
+        }
+      }
+
+      function updateBestScore(currentScore) {
+        const saved = localStorage.getItem("numberGameBestScore");
+        const bestScore = saved ? parseInt(saved) : Infinity;
+
+        // Update if current score is better (lower)
+        if (currentScore < bestScore) {
+          localStorage.setItem("numberGameBestScore", currentScore);
+          elements.bestScoreDisplay.textContent = currentScore;
+        }
+      }
+
+      /* ============================================
+           RENDER GUESS HISTORY
+           Dynamically updates the history list
+           ============================================ */
+      function renderHistory() {
+        // Clear existing content
+        elements.historyList.innerHTML = "";
+
+        if (gameState.guessHistory.length === 0) {
+          elements.historyList.innerHTML =
+            '<div class="history-empty">No guesses yet</div>';
+          return;
+        }
+
+        // Render in reverse order (newest first)
+        [...gameState.guessHistory].reverse().forEach((item) => {
+          const historyItem = document.createElement("div");
+          historyItem.className = "history-item";
+
+          // Determine feedback indicator
+          let indicator = "";
+          if (item.number === gameState.targetNumber) {
+            indicator = "✅";
+          } else if (item.number > gameState.targetNumber) {
+            indicator = "⬇️";
+          } else {
+            indicator = "⬆️";
+          }
+
+          historyItem.innerHTML = `
+                    <span>Attempt #${item.attempt}</span>
+                    <span><strong>${item.number}</strong> ${indicator}</span>
+                `;
+
+          elements.historyList.appendChild(historyItem);
+        });
+      }
+
+      /* ============================================
+           INPUT VALIDATION
+           Ensures guess is within valid range
+           ============================================ */
+      function validateGuess(guess) {
+        if (isNaN(guess)) {
+          updateFeedback("Please enter a valid number", "neutral");
+          return false;
+        }
+
+        if (guess < gameState.min || guess > gameState.max) {
+          updateFeedback(
+            `Please enter a number between ${gameState.min} and ${gameState.max}`,
+            "neutral"
+          );
+          return false;
+        }
+
+        // Check for duplicate guesses
+        if (gameState.guessHistory.some((item) => item.number === guess)) {
+          updateFeedback(
+            `You already guessed ${guess}! Try a different number.`,
+            "neutral"
+          );
+          return false;
+        }
+
+        return true;
+      }
+
+      /* ============================================
+           EVENT LISTENERS
+           Handling user interactions
+           ============================================ */
+
+      // Form submission (guess button)
+      elements.guessForm.addEventListener("submit", (e) => {
+        e.preventDefault(); // Prevent page reload
+
+        if (gameState.gameOver) return;
+
+        const guess = parseInt(elements.guessInput.value);
+
+        if (validateGuess(guess)) {
+          processGuess(guess);
+          elements.guessInput.value = ""; // Clear input
+          elements.guessInput.focus(); // Refocus for next guess
+        }
+      });
+
+      // Reset button (new game)
+      elements.resetBtn.addEventListener("click", () => {
+        initializeGame();
+      });
+
+      // Keyboard accessibility - Enter key on input
+      elements.guessInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          elements.guessForm.dispatchEvent(new Event("submit"));
+        }
+      });
+
+      /* ============================================
+           GAME INITIALIZATION
+           Start the game when page loads
+           ============================================ */
+      document.addEventListener("DOMContentLoaded", () => {
+        loadBestScore();
+        initializeGame();
+      });
+    </script>
+  </body>
+</html>

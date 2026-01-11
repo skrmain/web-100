@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A modern, accessible tip calculator with real-time calculations"
+    />
+    <title>Tip Calculator</title>
+
+    <style>
+      /* ============================================
+           CSS VARIABLES & ROOT STYLING
+           ============================================ */
+      :root {
+        /* Color Theme - Light Mode (Default) */
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8f9fa;
+        --text-primary: #1a1a1a;
+        --text-secondary: #666666;
+        --border-color: #e0e0e0;
+        --accent-color: #4caf50;
+        --accent-hover: #45a049;
+        --accent-light: #f1f8f4;
+        --error-color: #d32f2f;
+
+        /* Spacing & Typography */
+        --spacing-unit: 1rem;
+        --radius: 8px;
+        --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+
+        /* Transitions */
+        --transition: all 0.3s ease;
+      }
+
+      /* Dark Mode */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #1e1e1e;
+          --bg-secondary: #2d2d2d;
+          --text-primary: #ffffff;
+          --text-secondary: #b0b0b0;
+          --border-color: #404040;
+          --accent-light: #1a3a1f;
+        }
+      }
+
+      /* ============================================
+           GLOBAL STYLES
+           ============================================ */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--font-primary);
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        transition: var(--transition);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: var(--spacing-unit);
+      }
+
+      /* ============================================
+           MAIN CONTAINER & LAYOUT (CSS GRID)
+           ============================================ */
+      .container {
+        width: 100%;
+        max-width: 600px;
+        background-color: var(--bg-secondary);
+        border-radius: var(--radius);
+        padding: calc(var(--spacing-unit) * 2);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: var(--transition);
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: calc(var(--spacing-unit) * 2);
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin-bottom: calc(var(--spacing-unit) * 0.5);
+        color: var(--accent-color);
+      }
+
+      .subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+      }
+
+      /* ============================================
+           FORM SECTION
+           ============================================ */
+      .form-section {
+        margin-bottom: calc(var(--spacing-unit) * 2);
+      }
+
+      .form-group {
+        margin-bottom: calc(var(--spacing-unit) * 1.5);
+      }
+
+      label {
+        display: block;
+        margin-bottom: calc(var(--spacing-unit) * 0.5);
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+      }
+
+      /* Input Fields */
+      input[type="number"],
+      input[type="range"] {
+        width: 100%;
+        padding: calc(var(--spacing-unit) * 0.75) var(--spacing-unit);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        font-family: var(--font-primary);
+        transition: var(--transition);
+      }
+
+      input[type="number"]:focus,
+      input[type="range"]:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px var(--accent-light);
+      }
+
+      /* Invalid Input State */
+      input[type="number"]:invalid {
+        border-color: var(--error-color);
+      }
+
+      input[type="number"]:invalid:focus {
+        box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+      }
+
+      /* Range Slider Styling */
+      input[type="range"] {
+        padding: 0;
+        height: 8px;
+        cursor: pointer;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      /* Range Slider - Webkit browsers (Chrome, Safari, Edge) */
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: var(--accent-color);
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      input[type="range"]::-webkit-slider-thumb:hover {
+        background-color: var(--accent-hover);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Range Slider - Firefox */
+      input[type="range"]::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: var(--accent-color);
+        cursor: pointer;
+        border: none;
+        transition: var(--transition);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      input[type="range"]::-moz-range-thumb:hover {
+        background-color: var(--accent-hover);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      /* Range Track */
+      input[type="range"]::-webkit-slider-runnable-track {
+        height: 8px;
+        background: linear-gradient(
+            to right,
+            var(--accent-color),
+            var(--accent-color)
+          )
+          no-repeat;
+        background-size: 0% 100%;
+        border-radius: 4px;
+        background-color: var(--border-color);
+      }
+
+      input[type="range"]::-moz-range-track {
+        background-color: var(--border-color);
+        border-radius: 4px;
+        border: none;
+      }
+
+      /* ============================================
+           PRESET TIP BUTTONS (FLEXBOX)
+           ============================================ */
+      .tip-buttons {
+        display: flex;
+        gap: var(--spacing-unit);
+        margin-bottom: var(--spacing-unit);
+        flex-wrap: wrap;
+      }
+
+      .tip-btn {
+        flex: 1;
+        min-width: 60px;
+        padding: calc(var(--spacing-unit) * 0.75);
+        border: 2px solid var(--border-color);
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        border-radius: var(--radius);
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      /* Hover and Active States */
+      .tip-btn:hover {
+        border-color: var(--accent-color);
+        background-color: var(--accent-light);
+      }
+
+      .tip-btn.active {
+        background-color: var(--accent-color);
+        color: white;
+        border-color: var(--accent-color);
+      }
+
+      /* Focus for Accessibility */
+      .tip-btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px var(--accent-light);
+      }
+
+      /* ============================================
+           RESULTS SECTION (CSS GRID)
+           ============================================ */
+      .results {
+        background-color: var(--bg-primary);
+        border-radius: var(--radius);
+        padding: calc(var(--spacing-unit) * 1.5);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-unit);
+        margin-top: calc(var(--spacing-unit) * 2);
+        border: 2px solid var(--border-color);
+      }
+
+      .result-item {
+        text-align: center;
+      }
+
+      .result-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: calc(var(--spacing-unit) * 0.5);
+      }
+
+      .result-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--accent-color);
+      }
+
+      /* Total Amount - Full Width */
+      .result-total {
+        grid-column: 1 / -1;
+        border-top: 2px solid var(--border-color);
+        padding-top: var(--spacing-unit);
+      }
+
+      .result-total .result-value {
+        font-size: 2.2rem;
+      }
+
+      /* ============================================
+           UTILITY & HELPER CLASSES
+           ============================================ */
+      .input-group {
+        position: relative;
+      }
+
+      .custom-input-label {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin-top: calc(var(--spacing-unit) * 0.5);
+      }
+
+      .error-message {
+        color: var(--error-color);
+        font-size: 0.85rem;
+        margin-top: calc(var(--spacing-unit) * 0.25);
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+      }
+
+      /* ============================================
+           RESPONSIVE DESIGN
+           ============================================ */
+      @media (max-width: 600px) {
+        :root {
+          --spacing-unit: 0.875rem;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        .container {
+          border-radius: 12px;
+        }
+
+        .result-value {
+          font-size: 1.5rem;
+        }
+
+        .result-total .result-value {
+          font-size: 1.85rem;
+        }
+
+        .tip-buttons {
+          gap: calc(var(--spacing-unit) * 0.5);
+        }
+
+        .tip-btn {
+          font-size: 0.85rem;
+          min-width: 50px;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .container {
+          padding: var(--spacing-unit);
+        }
+
+        h1 {
+          font-size: 1.25rem;
+        }
+
+        .tip-buttons {
+          grid-template-columns: repeat(2, 1fr);
+          gap: var(--spacing-unit);
+        }
+
+        .results {
+          grid-template-columns: 1fr;
+        }
+
+        .result-total {
+          grid-column: 1;
+        }
+      }
+
+      /* ============================================
+           PRINT STYLES (Accessibility)
+           ============================================ */
+      @media print {
+        body {
+          background-color: white;
+        }
+
+        .container {
+          box-shadow: none;
+          border: 1px solid #999;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main Container -->
+    <div class="container">
+      <!-- Header -->
+      <header>
+        <h1>💰 Tip Calculator</h1>
+        <p class="subtitle">Calculate tips and split bills with ease</p>
+      </header>
+
+      <!-- Form Section -->
+      <form id="tipForm" class="form-section">
+        <!-- Bill Amount Input -->
+        <div class="form-group">
+          <label for="billAmount">Bill Amount</label>
+          <div class="input-group">
+            <input
+              type="number"
+              id="billAmount"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+              required
+              aria-label="Enter the bill amount"
+              aria-describedby="billError"
+            />
+          </div>
+          <div id="billError" class="error-message">
+            Please enter a valid bill amount (minimum $0.01)
+          </div>
+        </div>
+
+        <!-- Tip Percentage: Preset Buttons -->
+        <div class="form-group">
+          <label>Tip Percentage - Quick Select</label>
+          <div
+            class="tip-buttons"
+            role="group"
+            aria-label="Preset tip percentage buttons"
+          >
+            <button
+              type="button"
+              class="tip-btn"
+              data-tip="5"
+              aria-label="Select 5% tip"
+            >
+              5%
+            </button>
+            <button
+              type="button"
+              class="tip-btn"
+              data-tip="10"
+              aria-label="Select 10% tip"
+            >
+              10%
+            </button>
+            <button
+              type="button"
+              class="tip-btn"
+              data-tip="15"
+              aria-label="Select 15% tip"
+            >
+              15%
+            </button>
+            <button
+              type="button"
+              class="tip-btn"
+              data-tip="20"
+              aria-label="Select 20% tip"
+            >
+              20%
+            </button>
+          </div>
+        </div>
+
+        <!-- Tip Percentage: Range Slider -->
+        <div class="form-group">
+          <label for="tipRange">Tip Percentage (0% - 50%)</label>
+          <input
+            type="range"
+            id="tipRange"
+            min="0"
+            max="50"
+            value="15"
+            step="1"
+            aria-label="Adjust tip percentage with slider"
+            aria-valuemin="0"
+            aria-valuemax="50"
+          />
+          <p class="custom-input-label" aria-live="polite">
+            Selected: <strong id="tipValue">15</strong>%
+          </p>
+        </div>
+
+        <!-- Number of People Input -->
+        <div class="form-group">
+          <label for="numPeople">Number of People</label>
+          <div class="input-group">
+            <input
+              type="number"
+              id="numPeople"
+              placeholder="1"
+              min="1"
+              step="1"
+              value="1"
+              required
+              aria-label="Enter the number of people to split the bill"
+              aria-describedby="peopleError"
+            />
+          </div>
+          <div id="peopleError" class="error-message">
+            Please enter at least 1 person
+          </div>
+        </div>
+      </form>
+
+      <!-- Results Section -->
+      <section
+        class="results"
+        aria-label="Calculation results"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <!-- Tip Amount -->
+        <div class="result-item">
+          <div class="result-label">Tip Amount</div>
+          <div class="result-value" id="tipAmount">$0.00</div>
+        </div>
+
+        <!-- Amount Per Person -->
+        <div class="result-item">
+          <div class="result-label">Per Person</div>
+          <div class="result-value" id="perPerson">$0.00</div>
+        </div>
+
+        <!-- Total Bill (Full Width) -->
+        <div class="result-item result-total">
+          <div class="result-label">Total Amount (with tip)</div>
+          <div class="result-value" id="totalAmount">$0.00</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      /* ============================================
+           TIP CALCULATOR - VANILLA JAVASCRIPT
+           ============================================ */
+
+      // ============================================
+      // DOM ELEMENTS SELECTION
+      // ============================================
+      // Input fields
+      const billAmountInput = document.getElementById("billAmount");
+      const tipRangeInput = document.getElementById("tipRange");
+      const numPeopleInput = document.getElementById("numPeople");
+      const tipValueDisplay = document.getElementById("tipValue");
+
+      // Result elements
+      const tipAmountDisplay = document.getElementById("tipAmount");
+      const totalAmountDisplay = document.getElementById("totalAmount");
+      const perPersonDisplay = document.getElementById("perPerson");
+
+      // Buttons and form
+      const tipButtons = document.querySelectorAll(".tip-btn");
+      const tipForm = document.getElementById("tipForm");
+
+      // Error messages
+      const billError = document.getElementById("billError");
+      const peopleError = document.getElementById("peopleError");
+
+      // ============================================
+      // STATE MANAGEMENT
+      // ============================================
+      // Store calculation state
+      const state = {
+        billAmount: 0,
+        tipPercentage: 15,
+        numPeople: 1,
+      };
+
+      // ============================================
+      // CURRENCY FORMATTER (Intl.NumberFormat API)
+      // ============================================
+      // Format numbers as USD currency with proper locale support
+      const currencyFormatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+      // ============================================
+      // VALIDATION FUNCTIONS
+      // ============================================
+
+      /**
+       * Validate bill amount input
+       * @returns {boolean} true if valid, false otherwise
+       */
+      function validateBillAmount() {
+        const amount = parseFloat(billAmountInput.value);
+        const isValid = !isNaN(amount) && amount > 0;
+
+        if (!isValid) {
+          billError.classList.add("show");
+          billAmountInput.setAttribute("aria-invalid", "true");
+        } else {
+          billError.classList.remove("show");
+          billAmountInput.setAttribute("aria-invalid", "false");
+        }
+
+        return isValid;
+      }
+
+      /**
+       * Validate number of people input
+       * @returns {boolean} true if valid, false otherwise
+       */
+      function validateNumPeople() {
+        const num = parseInt(numPeopleInput.value);
+        const isValid = !isNaN(num) && num > 0;
+
+        if (!isValid) {
+          peopleError.classList.add("show");
+          numPeopleInput.setAttribute("aria-invalid", "true");
+        } else {
+          peopleError.classList.remove("show");
+          numPeopleInput.setAttribute("aria-invalid", "false");
+        }
+
+        return isValid;
+      }
+
+      // ============================================
+      // CALCULATION FUNCTIONS
+      // ============================================
+
+      /**
+       * Calculate tip amount and total
+       * Performs real-time calculations and updates display
+       */
+      function calculateTip() {
+        // Validate inputs before calculating
+        if (!validateBillAmount() || !validateNumPeople()) {
+          // Reset display if inputs are invalid
+          tipAmountDisplay.textContent = currencyFormatter.format(0);
+          totalAmountDisplay.textContent = currencyFormatter.format(0);
+          perPersonDisplay.textContent = currencyFormatter.format(0);
+          return;
+        }
+
+        // Get current values from inputs
+        const billAmount = parseFloat(billAmountInput.value);
+        const tipPercentage = parseFloat(tipRangeInput.value);
+        const numPeople = parseInt(numPeopleInput.value);
+
+        // Update state
+        state.billAmount = billAmount;
+        state.tipPercentage = tipPercentage;
+        state.numPeople = numPeople;
+
+        // Calculate values
+        const tipAmount = (billAmount * tipPercentage) / 100;
+        const totalAmount = billAmount + tipAmount;
+        const perPerson = totalAmount / numPeople;
+
+        // Update display with formatted currency
+        tipAmountDisplay.textContent = currencyFormatter.format(tipAmount);
+        totalAmountDisplay.textContent = currencyFormatter.format(totalAmount);
+        perPersonDisplay.textContent = currencyFormatter.format(perPerson);
+
+        // Save last-used tip percentage to localStorage (optional feature)
+        saveTipPercentageToStorage(tipPercentage);
+      }
+
+      // ============================================
+      // EVENT HANDLERS
+      // ============================================
+
+      /**
+       * Handle preset tip button clicks
+       * Updates the range slider and triggers calculation
+       */
+      function handleTipButtonClick(event) {
+        const button = event.target;
+
+        // Only handle buttons with data-tip attribute
+        if (!button.dataset.tip) return;
+
+        // Remove active class from all buttons
+        tipButtons.forEach((btn) => btn.classList.remove("active"));
+
+        // Add active class to clicked button
+        button.classList.add("active");
+
+        // Update the range slider value
+        const tipValue = button.dataset.tip;
+        tipRangeInput.value = tipValue;
+        tipValueDisplay.textContent = tipValue;
+
+        // Trigger calculation
+        calculateTip();
+      }
+
+      /**
+       * Handle range slider input
+       * Update display and trigger calculation in real-time
+       */
+      function handleRangeSliderInput() {
+        const tipValue = tipRangeInput.value;
+        tipValueDisplay.textContent = tipValue;
+
+        // Remove active state from preset buttons when using slider
+        tipButtons.forEach((btn) => btn.classList.remove("active"));
+
+        // Re-activate button if slider matches a preset value
+        const matchingButton = Array.from(tipButtons).find(
+          (btn) => btn.dataset.tip === tipValue
+        );
+        if (matchingButton) {
+          matchingButton.classList.add("active");
+        }
+
+        // Trigger calculation
+        calculateTip();
+      }
+
+      /**
+       * Handle input field changes
+       * Validates and triggers calculation in real-time
+       */
+      function handleInputChange() {
+        calculateTip();
+      }
+
+      // ============================================
+      // STORAGE FUNCTIONS (Optional Feature)
+      // ============================================
+
+      /**
+       * Save tip percentage to localStorage for persistence
+       * @param {number} tipPercentage - The tip percentage to save
+       */
+      function saveTipPercentageToStorage(tipPercentage) {
+        try {
+          localStorage.setItem(
+            "lastTipPercentage",
+            JSON.stringify(tipPercentage)
+          );
+        } catch (error) {
+          // Silently fail if localStorage is not available
+          console.warn("localStorage is not available:", error);
+        }
+      }
+
+      /**
+       * Load last-used tip percentage from localStorage
+       * @returns {number} The saved tip percentage or default 15
+       */
+      function loadTipPercentageFromStorage() {
+        try {
+          const saved = localStorage.getItem("lastTipPercentage");
+          if (saved) {
+            return JSON.parse(saved);
+          }
+        } catch (error) {
+          console.warn("Error reading localStorage:", error);
+        }
+        return 15; // Default value
+      }
+
+      // ============================================
+      // INITIALIZATION
+      // ============================================
+
+      /**
+       * Initialize the application
+       * Set up event listeners and load saved preferences
+       */
+      function init() {
+        // Load saved tip percentage from localStorage
+        const savedTipPercentage = loadTipPercentageFromStorage();
+        tipRangeInput.value = savedTipPercentage;
+        tipValueDisplay.textContent = savedTipPercentage;
+
+        // Activate corresponding preset button if it matches
+        const matchingButton = Array.from(tipButtons).find(
+          (btn) => btn.dataset.tip === String(savedTipPercentage)
+        );
+        if (matchingButton) {
+          matchingButton.classList.add("active");
+        }
+
+        // Attach event listeners to preset tip buttons
+        tipButtons.forEach((button) => {
+          button.addEventListener("click", handleTipButtonClick);
+        });
+
+        // Attach event listeners to input fields
+        billAmountInput.addEventListener("input", handleInputChange);
+        tipRangeInput.addEventListener("input", handleRangeSliderInput);
+        numPeopleInput.addEventListener("input", handleInputChange);
+
+        // Prevent form submission (since we're using buttons)
+        tipForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+        });
+
+        // Initial calculation
+        calculateTip();
+      }
+
+      // Run initialization when DOM is loaded
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+    </script>
+  </body>
+</html>
