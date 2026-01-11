@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Color Picker Tool</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Color Picker Tool</h1>
+
+      <div
+        class="color-preview"
+        id="colorPreview"
+        role="img"
+        aria-label="Current color preview"
+      ></div>
+
+      <div class="native-picker">
+        <input
+          type="color"
+          id="nativeColorPicker"
+          value="#4CAF50"
+          aria-label="Color picker"
+        />
+        <button
+          class="eyedropper-btn"
+          id="eyedropperBtn"
+          aria-label="Pick color from screen"
+        >
+          🎨 Pick from Screen
+        </button>
+      </div>
+
+      <div class="controls">
+        <div class="mode-toggle" role="tablist">
+          <button
+            class="mode-btn active"
+            data-mode="rgb"
+            role="tab"
+            aria-selected="true"
+          >
+            RGB
+          </button>
+          <button
+            class="mode-btn"
+            data-mode="hsl"
+            role="tab"
+            aria-selected="false"
+          >
+            HSL
+          </button>
+        </div>
+
+        <div id="rgbSliders">
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>Red</span>
+              <span id="rValue">76</span>
+            </div>
+            <input
+              type="range"
+              id="rSlider"
+              min="0"
+              max="255"
+              value="76"
+              aria-label="Red value"
+            />
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>Green</span>
+              <span id="gValue">175</span>
+            </div>
+            <input
+              type="range"
+              id="gSlider"
+              min="0"
+              max="255"
+              value="175"
+              aria-label="Green value"
+            />
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>Blue</span>
+              <span id="bValue">80</span>
+            </div>
+            <input
+              type="range"
+              id="bSlider"
+              min="0"
+              max="255"
+              value="80"
+              aria-label="Blue value"
+            />
+          </div>
+        </div>
+
+        <div id="hslSliders" style="display: none">
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>Hue</span>
+              <span id="hValue">134°</span>
+            </div>
+            <input
+              type="range"
+              id="hSlider"
+              min="0"
+              max="360"
+              value="134"
+              aria-label="Hue value"
+            />
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>Saturation</span>
+              <span id="sValue">40%</span>
+            </div>
+            <input
+              type="range"
+              id="sSlider"
+              min="0"
+              max="100"
+              value="40"
+              aria-label="Saturation value"
+            />
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-label">
+              <span>Lightness</span>
+              <span id="lValue">49%</span>
+            </div>
+            <input
+              type="range"
+              id="lSlider"
+              min="0"
+              max="100"
+              value="49"
+              aria-label="Lightness value"
+            />
+          </div>
+        </div>
+      </div>
+
+      <section class="output-section">
+        <h2>Color Formats</h2>
+        <div class="color-formats">
+          <div class="format-item">
+            <span class="format-label">HEX</span>
+            <span class="format-value" id="hexValue">#4CAF50</span>
+            <button
+              class="copy-btn"
+              data-format="hex"
+              aria-label="Copy HEX color"
+            >
+              Copy
+            </button>
+          </div>
+
+          <div class="format-item">
+            <span class="format-label">RGB</span>
+            <span class="format-value" id="rgbValue">rgb(76, 175, 80)</span>
+            <button
+              class="copy-btn"
+              data-format="rgb"
+              aria-label="Copy RGB color"
+            >
+              Copy
+            </button>
+          </div>
+
+          <div class="format-item">
+            <span class="format-label">HSL</span>
+            <span class="format-value" id="hslValue">hsl(134, 40%, 49%)</span>
+            <button
+              class="copy-btn"
+              data-format="hsl"
+              aria-label="Copy HSL color"
+            >
+              Copy
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="recent-colors">
+        <h2>Recent Colors</h2>
+        <div class="color-swatches" id="recentColors" role="list"></div>
+      </section>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

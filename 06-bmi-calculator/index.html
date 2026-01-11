@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BMI Calculator</title>
+    <style>
+      /* ===========================
+           CSS VARIABLES & THEMING
+           =========================== */
+      :root {
+        /* Light mode colors */
+        --bg-primary: #f5f7fa;
+        --bg-secondary: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #4a5568;
+        --border-color: #e2e8f0;
+        --accent-color: #3182ce;
+        --accent-hover: #2c5282;
+        --error-color: #e53e3e;
+        --success-color: #38a169;
+
+        /* BMI Category colors */
+        --underweight-color: #3182ce;
+        --normal-color: #38a169;
+        --overweight-color: #ed8936;
+        --obese-color: #e53e3e;
+
+        /* Spacing */
+        --spacing-sm: 0.5rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+
+        /* Border radius */
+        --radius-sm: 0.375rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+      }
+
+      /* Dark mode using prefers-color-scheme */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #1a202c;
+          --bg-secondary: #2d3748;
+          --text-primary: #f7fafc;
+          --text-secondary: #e2e8f0;
+          --border-color: #4a5568;
+          --accent-color: #4299e1;
+          --accent-hover: #3182ce;
+        }
+      }
+
+      /* ===========================
+           BASE STYLES
+           =========================== */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        padding: var(--spacing-md);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* ===========================
+           LAYOUT - FLEXBOX
+           =========================== */
+      .container {
+        width: 100%;
+        max-width: 500px;
+        background-color: var(--bg-secondary);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      /* ===========================
+           HEADER SECTION
+           =========================== */
+      .header {
+        text-align: center;
+        margin-bottom: var(--spacing-xl);
+      }
+
+      .header h1 {
+        font-size: 2rem;
+        margin-bottom: var(--spacing-sm);
+        color: var(--text-primary);
+      }
+
+      .header p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+      }
+
+      /* ===========================
+           UNIT TOGGLE
+           =========================== */
+      .unit-toggle {
+        display: flex;
+        justify-content: center;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+        background-color: var(--bg-primary);
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-md);
+      }
+
+      .unit-toggle button {
+        flex: 1;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: 2px solid transparent;
+        background-color: transparent;
+        color: var(--text-secondary);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      .unit-toggle button.active {
+        background-color: var(--accent-color);
+        color: white;
+        border-color: var(--accent-color);
+      }
+
+      .unit-toggle button:hover:not(.active) {
+        background-color: var(--bg-secondary);
+      }
+
+      /* ===========================
+           FORM ELEMENTS
+           =========================== */
+      .form-group {
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: var(--spacing-sm);
+        color: var(--text-primary);
+        font-weight: 500;
+        font-size: 0.95rem;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: var(--spacing-md);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        font-size: 1rem;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        transition: border-color 0.2s ease;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+      }
+
+      .form-group input:invalid:not(:placeholder-shown) {
+        border-color: var(--error-color);
+      }
+
+      /* Imperial unit inputs (feet + inches) */
+      .input-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+      }
+
+      .error-message {
+        color: var(--error-color);
+        font-size: 0.875rem;
+        margin-top: var(--spacing-sm);
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+
+      /* ===========================
+           BUTTON STYLES
+           =========================== */
+      .btn {
+        width: 100%;
+        padding: var(--spacing-md);
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .btn:hover {
+        background-color: var(--accent-hover);
+      }
+
+      .btn:active {
+        transform: translateY(1px);
+      }
+
+      /* ===========================
+           RESULTS SECTION
+           =========================== */
+      .results {
+        margin-top: var(--spacing-xl);
+        padding: var(--spacing-lg);
+        background-color: var(--bg-primary);
+        border-radius: var(--radius-md);
+        text-align: center;
+        display: none;
+      }
+
+      .results.show {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .bmi-value {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: var(--spacing-sm);
+        color: var(--text-primary);
+      }
+
+      .bmi-category {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: var(--spacing-md);
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        display: inline-block;
+      }
+
+      /* Category-specific colors */
+      .bmi-category.underweight {
+        background-color: var(--underweight-color);
+        color: white;
+      }
+
+      .bmi-category.normal {
+        background-color: var(--normal-color);
+        color: white;
+      }
+
+      .bmi-category.overweight {
+        background-color: var(--overweight-color);
+        color: white;
+      }
+
+      .bmi-category.obese {
+        background-color: var(--obese-color);
+        color: white;
+      }
+
+      .bmi-description {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+
+      /* ===========================
+           VISUAL INDICATOR (Progress bar)
+           =========================== */
+      .bmi-scale {
+        margin-top: var(--spacing-lg);
+        height: 10px;
+        background: linear-gradient(
+          to right,
+          var(--underweight-color) 0%,
+          var(--underweight-color) 25%,
+          var(--normal-color) 25%,
+          var(--normal-color) 50%,
+          var(--overweight-color) 50%,
+          var(--overweight-color) 75%,
+          var(--obese-color) 75%,
+          var(--obese-color) 100%
+        );
+        border-radius: var(--radius-sm);
+        position: relative;
+      }
+
+      .bmi-indicator {
+        position: absolute;
+        top: -8px;
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-top: 12px solid var(--text-primary);
+        transform: translateX(-8px);
+        transition: left 0.3s ease;
+      }
+
+      /* ===========================
+           RESPONSIVE DESIGN
+           =========================== */
+      @media (max-width: 480px) {
+        .container {
+          padding: var(--spacing-lg);
+        }
+
+        .header h1 {
+          font-size: 1.5rem;
+        }
+
+        .bmi-value {
+          font-size: 2.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ===========================
+         MAIN CONTAINER
+         =========================== -->
+    <div class="container">
+      <!-- Header Section -->
+      <header class="header">
+        <h1>BMI Calculator</h1>
+        <p>Calculate your Body Mass Index to assess your health</p>
+      </header>
+
+      <!-- Unit Toggle Buttons -->
+      <div class="unit-toggle" role="group" aria-label="Unit selection">
+        <button type="button" id="metricBtn" class="active" aria-pressed="true">
+          Metric (kg, cm)
+        </button>
+        <button type="button" id="imperialBtn" aria-pressed="false">
+          Imperial (lbs, ft/in)
+        </button>
+      </div>
+
+      <!-- BMI Calculator Form -->
+      <form id="bmiForm" novalidate>
+        <!-- Height Input (Metric) -->
+        <div class="form-group" id="heightMetricGroup">
+          <label for="heightCm">Height (cm)</label>
+          <input
+            type="number"
+            id="heightCm"
+            name="heightCm"
+            placeholder="e.g., 170"
+            min="50"
+            max="300"
+            step="0.1"
+            required
+            aria-describedby="heightError"
+          />
+          <div id="heightError" class="error-message" role="alert"></div>
+        </div>
+
+        <!-- Height Input (Imperial) -->
+        <div class="form-group" id="heightImperialGroup" style="display: none">
+          <label>Height</label>
+          <div class="input-group">
+            <div>
+              <input
+                type="number"
+                id="heightFt"
+                name="heightFt"
+                placeholder="Feet"
+                min="1"
+                max="9"
+                step="1"
+                aria-label="Height in feet"
+              />
+            </div>
+            <div>
+              <input
+                type="number"
+                id="heightIn"
+                name="heightIn"
+                placeholder="Inches"
+                min="0"
+                max="11"
+                step="0.1"
+                aria-label="Height in inches"
+              />
+            </div>
+          </div>
+          <div
+            id="heightImperialError"
+            class="error-message"
+            role="alert"
+          ></div>
+        </div>
+
+        <!-- Weight Input (Metric) -->
+        <div class="form-group" id="weightMetricGroup">
+          <label for="weightKg">Weight (kg)</label>
+          <input
+            type="number"
+            id="weightKg"
+            name="weightKg"
+            placeholder="e.g., 70"
+            min="20"
+            max="500"
+            step="0.1"
+            required
+            aria-describedby="weightError"
+          />
+          <div id="weightError" class="error-message" role="alert"></div>
+        </div>
+
+        <!-- Weight Input (Imperial) -->
+        <div class="form-group" id="weightImperialGroup" style="display: none">
+          <label for="weightLbs">Weight (lbs)</label>
+          <input
+            type="number"
+            id="weightLbs"
+            name="weightLbs"
+            placeholder="e.g., 154"
+            min="44"
+            max="1100"
+            step="0.1"
+            aria-describedby="weightImperialError"
+          />
+          <div
+            id="weightImperialError"
+            class="error-message"
+            role="alert"
+          ></div>
+        </div>
+
+        <!-- Calculate Button -->
+        <button type="submit" class="btn">Calculate BMI</button>
+      </form>
+
+      <!-- Results Section -->
+      <div id="results" class="results" role="region" aria-live="polite">
+        <div class="bmi-value" id="bmiValue">0.0</div>
+        <div class="bmi-category" id="bmiCategory">Normal</div>
+        <p class="bmi-description" id="bmiDescription"></p>
+
+        <!-- Visual BMI Scale -->
+        <div class="bmi-scale" aria-hidden="true">
+          <div class="bmi-indicator" id="bmiIndicator"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ===========================
+           GLOBAL STATE & CONSTANTS
+           =========================== */
+
+      // Current unit system ('metric' or 'imperial')
+      let currentUnit = "metric";
+
+      // BMI category thresholds (standard WHO guidelines)
+      const BMI_CATEGORIES = {
+        underweight: {
+          max: 18.5,
+          label: "Underweight",
+          description:
+            "You may need to gain weight. Consult a healthcare provider.",
+        },
+        normal: {
+          max: 24.9,
+          label: "Normal Weight",
+          description: "You have a healthy weight. Keep up the good work!",
+        },
+        overweight: {
+          max: 29.9,
+          label: "Overweight",
+          description:
+            "You may benefit from losing weight. Consider a balanced diet and exercise.",
+        },
+        obese: {
+          max: Infinity,
+          label: "Obese",
+          description:
+            "Consult a healthcare provider for guidance on weight management.",
+        },
+      };
+
+      /* ===========================
+           DOM ELEMENT REFERENCES
+           =========================== */
+      const metricBtn = document.getElementById("metricBtn");
+      const imperialBtn = document.getElementById("imperialBtn");
+      const bmiForm = document.getElementById("bmiForm");
+      const results = document.getElementById("results");
+
+      // Metric inputs
+      const heightMetricGroup = document.getElementById("heightMetricGroup");
+      const weightMetricGroup = document.getElementById("weightMetricGroup");
+      const heightCm = document.getElementById("heightCm");
+      const weightKg = document.getElementById("weightKg");
+
+      // Imperial inputs
+      const heightImperialGroup = document.getElementById(
+        "heightImperialGroup"
+      );
+      const weightImperialGroup = document.getElementById(
+        "weightImperialGroup"
+      );
+      const heightFt = document.getElementById("heightFt");
+      const heightIn = document.getElementById("heightIn");
+      const weightLbs = document.getElementById("weightLbs");
+
+      // Result elements
+      const bmiValue = document.getElementById("bmiValue");
+      const bmiCategory = document.getElementById("bmiCategory");
+      const bmiDescription = document.getElementById("bmiDescription");
+      const bmiIndicator = document.getElementById("bmiIndicator");
+
+      /* ===========================
+           INITIALIZATION
+           Load saved preferences from localStorage
+           =========================== */
+      function init() {
+        // Load unit preference
+        const savedUnit = window.localStorage.getItem("bmiUnit");
+        if (savedUnit) {
+          currentUnit = savedUnit;
+          if (savedUnit === "imperial") {
+            switchToImperial();
+          }
+        }
+
+        // Load last inputs
+        loadSavedInputs();
+      }
+
+      /* ===========================
+           UNIT TOGGLE FUNCTIONALITY
+           =========================== */
+      metricBtn.addEventListener("click", () => {
+        if (currentUnit !== "metric") {
+          switchToMetric();
+        }
+      });
+
+      imperialBtn.addEventListener("click", () => {
+        if (currentUnit !== "imperial") {
+          switchToImperial();
+        }
+      });
+
+      function switchToMetric() {
+        currentUnit = "metric";
+
+        // Update button states
+        metricBtn.classList.add("active");
+        imperialBtn.classList.remove("active");
+        metricBtn.setAttribute("aria-pressed", "true");
+        imperialBtn.setAttribute("aria-pressed", "false");
+
+        // Show/hide appropriate input groups
+        heightMetricGroup.style.display = "block";
+        weightMetricGroup.style.display = "block";
+        heightImperialGroup.style.display = "none";
+        weightImperialGroup.style.display = "none";
+
+        // Update required attributes
+        heightCm.required = true;
+        weightKg.required = true;
+        heightFt.required = false;
+        heightIn.required = false;
+        weightLbs.required = false;
+
+        // Save preference
+        window.localStorage.setItem("bmiUnit", "metric");
+
+        // Hide results
+        results.classList.remove("show");
+      }
+
+      function switchToImperial() {
+        currentUnit = "imperial";
+
+        // Update button states
+        imperialBtn.classList.add("active");
+        metricBtn.classList.remove("active");
+        imperialBtn.setAttribute("aria-pressed", "true");
+        metricBtn.setAttribute("aria-pressed", "false");
+
+        // Show/hide appropriate input groups
+        heightMetricGroup.style.display = "none";
+        weightMetricGroup.style.display = "none";
+        heightImperialGroup.style.display = "block";
+        weightImperialGroup.style.display = "block";
+
+        // Update required attributes
+        heightCm.required = false;
+        weightKg.required = false;
+        heightFt.required = true;
+        heightIn.required = true;
+        weightLbs.required = true;
+
+        // Save preference
+        window.localStorage.setItem("bmiUnit", "imperial");
+
+        // Hide results
+        results.classList.remove("show");
+      }
+
+      /* ===========================
+           FORM SUBMISSION & VALIDATION
+           =========================== */
+      bmiForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        // Clear previous errors
+        clearErrors();
+
+        // Validate and calculate
+        if (currentUnit === "metric") {
+          handleMetricCalculation();
+        } else {
+          handleImperialCalculation();
+        }
+      });
+
+      function handleMetricCalculation() {
+        const height = parseFloat(heightCm.value);
+        const weight = parseFloat(weightKg.value);
+
+        // Validate inputs
+        if (!validateMetricInputs(height, weight)) {
+          return;
+        }
+
+        // Calculate BMI
+        // Formula: BMI = weight (kg) / (height (m))²
+        const heightInMeters = height / 100;
+        const bmi = weight / (heightInMeters * heightInMeters);
+
+        // Save inputs to localStorage
+        saveInputs({ heightCm: height, weightKg: weight });
+
+        // Display results
+        displayResults(bmi);
+      }
+
+      function handleImperialCalculation() {
+        const feet = parseFloat(heightFt.value);
+        const inches = parseFloat(heightIn.value);
+        const weight = parseFloat(weightLbs.value);
+
+        // Validate inputs
+        if (!validateImperialInputs(feet, inches, weight)) {
+          return;
+        }
+
+        // Convert to metric for calculation
+        // 1 foot = 30.48 cm, 1 inch = 2.54 cm
+        const heightInCm = feet * 30.48 + inches * 2.54;
+        const heightInMeters = heightInCm / 100;
+
+        // 1 lb = 0.453592 kg
+        const weightInKg = weight * 0.453592;
+
+        // Calculate BMI
+        const bmi = weightInKg / (heightInMeters * heightInMeters);
+
+        // Save inputs to localStorage
+        saveInputs({ heightFt: feet, heightIn: inches, weightLbs: weight });
+
+        // Display results
+        displayResults(bmi);
+      }
+
+      /* ===========================
+           INPUT VALIDATION
+           =========================== */
+      function validateMetricInputs(height, weight) {
+        let isValid = true;
+
+        // Validate height
+        if (isNaN(height) || height < 50 || height > 300) {
+          showError(
+            "heightError",
+            "Please enter a valid height between 50-300 cm"
+          );
+          isValid = false;
+        }
+
+        // Validate weight
+        if (isNaN(weight) || weight < 20 || weight > 500) {
+          showError(
+            "weightError",
+            "Please enter a valid weight between 20-500 kg"
+          );
+          isValid = false;
+        }
+
+        return isValid;
+      }
+
+      function validateImperialInputs(feet, inches, weight) {
+        let isValid = true;
+
+        // Validate height
+        if (
+          isNaN(feet) ||
+          feet < 1 ||
+          feet > 9 ||
+          isNaN(inches) ||
+          inches < 0 ||
+          inches > 11
+        ) {
+          showError(
+            "heightImperialError",
+            "Please enter a valid height (1-9 feet, 0-11 inches)"
+          );
+          isValid = false;
+        }
+
+        // Validate weight
+        if (isNaN(weight) || weight < 44 || weight > 1100) {
+          showError(
+            "weightImperialError",
+            "Please enter a valid weight between 44-1100 lbs"
+          );
+          isValid = false;
+        }
+
+        return isValid;
+      }
+
+      function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.textContent = message;
+        errorElement.classList.add("show");
+      }
+
+      function clearErrors() {
+        const errorElements = document.querySelectorAll(".error-message");
+        errorElements.forEach((el) => {
+          el.textContent = "";
+          el.classList.remove("show");
+        });
+      }
+
+      /* ===========================
+           BMI CALCULATION & DISPLAY
+           =========================== */
+      function displayResults(bmi) {
+        // Format BMI value using Intl.NumberFormat
+        const formatter = new Intl.NumberFormat("en-US", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        });
+
+        bmiValue.textContent = formatter.format(bmi);
+
+        // Determine category
+        const category = getBMICategory(bmi);
+
+        // Update category display
+        bmiCategory.textContent = category.label;
+        bmiCategory.className = "bmi-category " + getCategoryClass(bmi);
+
+        // Update description
+        bmiDescription.textContent = category.description;
+
+        // Update visual indicator
+        updateBMIIndicator(bmi);
+
+        // Show results with animation
+        results.classList.add("show");
+
+        // Scroll to results on mobile
+        setTimeout(() => {
+          results.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 100);
+      }
+
+      function getBMICategory(bmi) {
+        if (bmi < BMI_CATEGORIES.underweight.max) {
+          return BMI_CATEGORIES.underweight;
+        } else if (bmi < BMI_CATEGORIES.normal.max) {
+          return BMI_CATEGORIES.normal;
+        } else if (bmi < BMI_CATEGORIES.overweight.max) {
+          return BMI_CATEGORIES.overweight;
+        } else {
+          return BMI_CATEGORIES.obese;
+        }
+      }
+
+      function getCategoryClass(bmi) {
+        if (bmi < 18.5) return "underweight";
+        if (bmi < 25) return "normal";
+        if (bmi < 30) return "overweight";
+        return "obese";
+      }
+
+      /* ===========================
+           VISUAL INDICATOR UPDATE
+           =========================== */
+      function updateBMIIndicator(bmi) {
+        // Map BMI to scale position (0-100%)
+        // Scale: 15 (0%) to 40 (100%)
+        const minBMI = 15;
+        const maxBMI = 40;
+
+        let position = ((bmi - minBMI) / (maxBMI - minBMI)) * 100;
+
+        // Clamp between 0 and 100
+        position = Math.max(0, Math.min(100, position));
+
+        bmiIndicator.style.left = position + "%";
+      }
+
+      /* ===========================
+           LOCAL STORAGE FUNCTIONS
+           =========================== */
+      function saveInputs(inputs) {
+        window.localStorage.setItem("bmiInputs", JSON.stringify(inputs));
+      }
+
+      function loadSavedInputs() {
+        const saved = window.localStorage.getItem("bmiInputs");
+        if (saved) {
+          try {
+            const inputs = JSON.parse(saved);
+
+            // Load metric inputs
+            if (inputs.heightCm) heightCm.value = inputs.heightCm;
+            if (inputs.weightKg) weightKg.value = inputs.weightKg;
+
+            // Load imperial inputs
+            if (inputs.heightFt) heightFt.value = inputs.heightFt;
+            if (inputs.heightIn) heightIn.value = inputs.heightIn;
+            if (inputs.weightLbs) weightLbs.value = inputs.weightLbs;
+          } catch (e) {
+            console.error("Error loading saved inputs:", e);
+          }
+        }
+      }
+
+      /* ===========================
+           START THE APPLICATION
+           =========================== */
+      init();
+    </script>
+  </body>
+</html>

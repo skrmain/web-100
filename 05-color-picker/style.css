@@ -1,0 +1,351 @@
+/* ===========================
+   CSS VARIABLES & THEMING
+   ========================== */
+/* Define color scheme based on user's system preference */
+:root {
+  /* Light mode colors (default) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --text-primary: #222222;
+  --text-secondary: #666666;
+  --border-color: #e0e0e0;
+  --shadow: rgba(0, 0, 0, 0.1);
+  --accent: #4caf50;
+}
+
+/* Dark mode colors - automatically applied if user prefers dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #2d2d2d;
+    --text-primary: #ffffff;
+    --text-secondary: #b0b0b0;
+    --border-color: #404040;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --accent: #66bb6a;
+  }
+}
+
+/* ===========================
+   GLOBAL STYLES
+   ========================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ===========================
+   MAIN CONTAINER LAYOUT
+   ========================== */
+.container {
+  max-width: 800px;
+  width: 100%;
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 8px 32px var(--shadow);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 32px;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+/* ===========================
+   COLOR PREVIEW SECTION
+   ========================== */
+.color-preview {
+  width: 100%;
+  height: 200px;
+  border-radius: 12px;
+  margin-bottom: 32px;
+  border: 3px solid var(--border-color);
+  transition: background-color 0.2s ease;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ===========================
+   NATIVE COLOR INPUT SECTION
+   ========================== */
+.native-picker {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+/* Style the native color input */
+input[type="color"] {
+  width: 80px;
+  height: 80px;
+  border: 3px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  background: none;
+}
+
+/* Remove default styling in WebKit browsers */
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 8px;
+}
+
+.eyedropper-btn {
+  padding: 12px 24px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.eyedropper-btn:hover {
+  opacity: 0.9;
+}
+
+.eyedropper-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===========================
+   SLIDER CONTROLS SECTION
+   ========================== */
+.controls {
+  margin-bottom: 32px;
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  justify-content: center;
+}
+
+.mode-btn {
+  padding: 10px 24px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.mode-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* Individual slider group */
+.slider-group {
+  margin-bottom: 20px;
+}
+
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* Custom styled range input */
+input[type="range"] {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--border-color);
+  outline: none;
+  cursor: pointer;
+  /* -webkit-appearance: none; */
+}
+
+/* Slider thumb styling for WebKit browsers */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 2px 4px var(--shadow);
+}
+
+/* Slider thumb styling for Firefox */
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px var(--shadow);
+}
+
+/* ===========================
+   COLOR FORMAT OUTPUT SECTION
+   ========================== */
+.output-section {
+  margin-bottom: 32px;
+}
+
+.output-section h2 {
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.color-formats {
+  display: grid;
+  gap: 12px;
+}
+
+/* Individual format display row */
+.format-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.format-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 60px;
+}
+
+.format-value {
+  flex: 1;
+  font-family: "Courier New", monospace;
+  font-size: 0.95rem;
+  margin: 0 16px;
+}
+
+/* Copy button styling */
+.copy-btn {
+  padding: 8px 16px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.copy-btn:hover {
+  opacity: 0.9;
+}
+
+.copy-btn.copied {
+  background: #4caf50;
+}
+
+/* ===========================
+   RECENT COLORS SECTION
+   ========================== */
+.recent-colors {
+  margin-top: 32px;
+}
+
+.recent-colors h2 {
+  font-size: 1.1rem;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.color-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 12px;
+}
+
+/* Individual color swatch */
+.color-swatch {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 3px solid var(--border-color);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.color-swatch:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.color-swatch.empty {
+  background: var(--bg-primary);
+  cursor: default;
+}
+
+.color-swatch.empty:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ===========================
+   RESPONSIVE DESIGN
+   ========================== */
+@media (max-width: 640px) {
+  .container {
+    padding: 24px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .color-preview {
+    height: 150px;
+  }
+
+  .format-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .format-value {
+    margin: 0;
+    width: 100%;
+  }
+
+  .copy-btn {
+    width: 100%;
+  }
+}

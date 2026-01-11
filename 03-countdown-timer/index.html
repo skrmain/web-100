@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Countdown Timer</title>
+    <style>
+      /* ============================================
+       CSS VARIABLES FOR THEMING
+       Using :root to define reusable values
+       ============================================ */
+      :root {
+        --bg-primary: #f5f7fa;
+        --bg-secondary: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #4a5568;
+        --accent-color: #4299e1;
+        --accent-hover: #3182ce;
+        --border-color: #e2e8f0;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        --success-color: #48bb78;
+        --danger-color: #f56565;
+        --warning-color: #ed8936;
+      }
+
+      /* Dark mode using prefers-color-scheme media query */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #1a202c;
+          --bg-secondary: #2d3748;
+          --text-primary: #f7fafc;
+          --text-secondary: #e2e8f0;
+          --border-color: #4a5568;
+          --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      /* ============================================
+       BASE STYLES
+       ============================================ */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        transition: background-color 0.3s ease;
+      }
+
+      /* ============================================
+       CONTAINER LAYOUT (CSS Grid)
+       ============================================ */
+      .container {
+        background: var(--bg-secondary);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        padding: 40px;
+        max-width: 600px;
+        width: 100%;
+        transition: all 0.3s ease;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2rem;
+        font-weight: 600;
+      }
+
+      /* ============================================
+       INPUT SECTION (Flexbox for responsive layout)
+       ============================================ */
+      .input-section {
+        margin-bottom: 30px;
+      }
+
+      .input-mode-toggle {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        justify-content: center;
+      }
+
+      .mode-btn {
+        padding: 8px 20px;
+        border: 2px solid var(--border-color);
+        background: transparent;
+        color: var(--text-primary);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .mode-btn:hover {
+        border-color: var(--accent-color);
+      }
+
+      .mode-btn.active {
+        background: var(--accent-color);
+        color: white;
+        border-color: var(--accent-color);
+      }
+
+      .input-group {
+        display: none;
+      }
+
+      .input-group.active {
+        display: block;
+      }
+
+      /* Time inputs using Flexbox */
+      .time-inputs {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .input-field {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+
+      label {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        letter-spacing: 0.5px;
+      }
+
+      input[type="number"],
+      input[type="datetime-local"] {
+        padding: 12px;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 16px;
+        width: 80px;
+        text-align: center;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        transition: border-color 0.2s ease;
+      }
+
+      input[type="datetime-local"] {
+        width: 100%;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+      }
+
+      /* Remove spinner arrows for number inputs */
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      /* ============================================
+       COUNTDOWN DISPLAY
+       Large, readable display for accessibility
+       ============================================ */
+      .countdown-display {
+        text-align: center;
+        margin: 40px 0;
+        padding: 30px;
+        background: var(--bg-primary);
+        border-radius: 12px;
+        min-height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .timer {
+        font-size: 3.5rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 2px;
+        color: var(--accent-color);
+        transition: color 0.3s ease;
+      }
+
+      /* State-based styling */
+      .timer.warning {
+        color: var(--warning-color);
+      }
+
+      .timer.expired {
+        color: var(--danger-color);
+        animation: pulse 1s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+      }
+
+      .status-message {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      /* ============================================
+       CONTROL BUTTONS (Flexbox)
+       ============================================ */
+      .controls {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      button {
+        padding: 14px 28px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* Accessible focus states for keyboard navigation */
+      button:focus {
+        outline: 3px solid var(--accent-color);
+        outline-offset: 2px;
+      }
+
+      .btn-primary {
+        background: var(--accent-color);
+        color: white;
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(66, 153, 225, 0.3);
+      }
+
+      .btn-secondary {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+      }
+
+      .btn-secondary:hover:not(:disabled) {
+        border-color: var(--accent-color);
+        transform: translateY(-2px);
+      }
+
+      .btn-danger {
+        background: var(--danger-color);
+        color: white;
+      }
+
+      .btn-danger:hover:not(:disabled) {
+        background: #e53e3e;
+        transform: translateY(-2px);
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      /* ============================================
+       RESPONSIVE DESIGN
+       ============================================ */
+      @media (max-width: 600px) {
+        .container {
+          padding: 24px;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        .timer {
+          font-size: 2.5rem;
+        }
+
+        .time-inputs {
+          gap: 10px;
+        }
+
+        input[type="number"] {
+          width: 70px;
+        }
+
+        button {
+          padding: 12px 20px;
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Semantic HTML for accessibility -->
+    <main class="container" role="main">
+      <h1>Countdown Timer</h1>
+
+      <!-- Input Section with ARIA labels for screen readers -->
+      <section class="input-section" aria-label="Timer Configuration">
+        <!-- Mode toggle buttons -->
+        <div class="input-mode-toggle" role="tablist">
+          <button
+            class="mode-btn active"
+            data-mode="duration"
+            role="tab"
+            aria-selected="true"
+            aria-controls="duration-inputs"
+          >
+            Duration
+          </button>
+          <button
+            class="mode-btn"
+            data-mode="target"
+            role="tab"
+            aria-selected="false"
+            aria-controls="target-inputs"
+          >
+            Target Date/Time
+          </button>
+        </div>
+
+        <!-- Duration input mode -->
+        <div class="input-group active" id="duration-inputs" role="tabpanel">
+          <div class="time-inputs">
+            <div class="input-field">
+              <label for="hours">Hours</label>
+              <input
+                type="number"
+                id="hours"
+                min="0"
+                max="99"
+                value="0"
+                aria-label="Hours"
+              />
+            </div>
+            <div class="input-field">
+              <label for="minutes">Minutes</label>
+              <input
+                type="number"
+                id="minutes"
+                min="0"
+                max="59"
+                value="1"
+                aria-label="Minutes"
+              />
+            </div>
+            <div class="input-field">
+              <label for="seconds">Seconds</label>
+              <input
+                type="number"
+                id="seconds"
+                min="0"
+                max="59"
+                value="0"
+                aria-label="Seconds"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Target date/time input mode -->
+        <div class="input-group" id="target-inputs" role="tabpanel">
+          <div class="input-field">
+            <label for="target-datetime">Target Date & Time</label>
+            <input
+              type="datetime-local"
+              id="target-datetime"
+              aria-label="Target date and time"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- Countdown Display with ARIA live region for screen readers -->
+      <section class="countdown-display" aria-live="polite" aria-atomic="true">
+        <div class="timer" id="display">00:01:00</div>
+      </section>
+
+      <!-- Control Buttons with ARIA labels -->
+      <section class="controls" aria-label="Timer Controls">
+        <button class="btn-primary" id="startBtn" aria-label="Start countdown">
+          Start
+        </button>
+        <button
+          class="btn-secondary"
+          id="pauseBtn"
+          disabled
+          aria-label="Pause countdown"
+        >
+          Pause
+        </button>
+        <button
+          class="btn-secondary"
+          id="resumeBtn"
+          disabled
+          aria-label="Resume countdown"
+        >
+          Resume
+        </button>
+        <button class="btn-danger" id="resetBtn" aria-label="Reset countdown">
+          Reset
+        </button>
+      </section>
+    </main>
+
+    <script>
+      /* ============================================
+       COUNTDOWN TIMER APPLICATION
+       Uses performance.now() for accurate timing
+       ============================================ */
+
+      // ============================================
+      // STATE MANAGEMENT
+      // Centralized application state
+      // ============================================
+      const state = {
+        mode: "duration", // 'duration' or 'target'
+        targetTime: null, // Target timestamp in milliseconds
+        remainingMs: 60000, // Remaining time in milliseconds (default: 1 minute)
+        isRunning: false,
+        isPaused: false,
+        startTime: null, // When countdown started (performance.now())
+        pausedTime: null, // Remaining time when paused
+        animationId: null, // requestAnimationFrame ID
+      };
+
+      // ============================================
+      // DOM ELEMENT REFERENCES
+      // Cache DOM queries for performance
+      // ============================================
+      const elements = {
+        display: document.getElementById("display"),
+        startBtn: document.getElementById("startBtn"),
+        pauseBtn: document.getElementById("pauseBtn"),
+        resumeBtn: document.getElementById("resumeBtn"),
+        resetBtn: document.getElementById("resetBtn"),
+        hoursInput: document.getElementById("hours"),
+        minutesInput: document.getElementById("minutes"),
+        secondsInput: document.getElementById("seconds"),
+        targetInput: document.getElementById("target-datetime"),
+        modeBtns: document.querySelectorAll(".mode-btn"),
+        inputGroups: document.querySelectorAll(".input-group"),
+      };
+
+      // ============================================
+      // UTILITY FUNCTIONS
+      // ============================================
+
+      /**
+       * Format milliseconds to DD:HH:MM:SS string
+       * @param {number} ms - Time in milliseconds
+       * @returns {string} Formatted time string
+       */
+      function formatTime(ms) {
+        // Ensure non-negative value
+        const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        // Pad numbers with leading zeros
+        const pad = (num) => String(num).padStart(2, "0");
+
+        // Only show days if > 0
+        if (days > 0) {
+          return `${pad(days)}:${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        }
+        return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+      }
+
+      /**
+       * Update the visual display with current time
+       * @param {number} ms - Time in milliseconds
+       */
+      function updateDisplay(ms) {
+        const formatted = formatTime(ms);
+        elements.display.textContent = formatted;
+
+        // Remove all state classes
+        elements.display.classList.remove("warning", "expired");
+
+        // Add warning class if under 10 seconds
+        if (ms > 0 && ms < 10000) {
+          elements.display.classList.add("warning");
+        }
+
+        // Update ARIA label for screen readers
+        elements.display.setAttribute(
+          "aria-label",
+          `Time remaining: ${formatted}`
+        );
+      }
+
+      /**
+       * Calculate remaining time from inputs (duration mode)
+       * @returns {number} Time in milliseconds
+       */
+      function calculateDuration() {
+        const hours = parseInt(elements.hoursInput.value) || 0;
+        const minutes = parseInt(elements.minutesInput.value) || 0;
+        const seconds = parseInt(elements.secondsInput.value) || 0;
+
+        return (hours * 3600 + minutes * 60 + seconds) * 1000;
+      }
+
+      /**
+       * Calculate remaining time from target date/time
+       * @returns {number|null} Time in milliseconds or null if invalid
+       */
+      function calculateTargetTime() {
+        const targetValue = elements.targetInput.value;
+        if (!targetValue) return null;
+
+        const targetDate = new Date(targetValue);
+        const now = Date.now();
+        const diff = targetDate.getTime() - now;
+
+        return diff > 0 ? diff : 0;
+      }
+
+      // ============================================
+      // TIMER CORE LOGIC
+      // Using performance.now() for drift-free timing
+      // ============================================
+
+      /**
+       * Main countdown update function
+       * Called by requestAnimationFrame for smooth updates
+       */
+      function updateCountdown() {
+        if (!state.isRunning || state.isPaused) return;
+
+        // Calculate elapsed time using performance.now() for accuracy
+        const elapsed = performance.now() - state.startTime;
+        const remaining = state.pausedTime - elapsed;
+
+        if (remaining <= 0) {
+          // Timer completed
+          finishCountdown();
+          return;
+        }
+
+        // Update display
+        updateDisplay(remaining);
+
+        // Continue animation loop
+        state.animationId = requestAnimationFrame(updateCountdown);
+      }
+
+      /**
+       * Start the countdown
+       */
+      function startCountdown() {
+        // Get initial time based on mode
+        let initialTime;
+        if (state.mode === "duration") {
+          initialTime = calculateDuration();
+        } else {
+          initialTime = calculateTargetTime();
+        }
+
+        // Validate time
+        if (!initialTime || initialTime <= 0) {
+          alert("Please enter a valid time!");
+          return;
+        }
+
+        // Update state
+        state.remainingMs = initialTime;
+        state.isRunning = true;
+        state.isPaused = false;
+        state.startTime = performance.now();
+        state.pausedTime = initialTime;
+
+        // Update UI
+        updateButtonStates();
+        updateDisplay(initialTime);
+
+        // Save state to localStorage
+        saveState();
+
+        // Start animation loop
+        state.animationId = requestAnimationFrame(updateCountdown);
+      }
+
+      /**
+       * Pause the countdown
+       */
+      function pauseCountdown() {
+        if (!state.isRunning || state.isPaused) return;
+
+        state.isPaused = true;
+
+        // Calculate and store remaining time
+        const elapsed = performance.now() - state.startTime;
+        state.pausedTime = state.pausedTime - elapsed;
+
+        // Cancel animation
+        if (state.animationId) {
+          cancelAnimationFrame(state.animationId);
+        }
+
+        updateButtonStates();
+        saveState();
+      }
+
+      /**
+       * Resume the countdown after pause
+       */
+      function resumeCountdown() {
+        if (!state.isRunning || !state.isPaused) return;
+
+        state.isPaused = false;
+        state.startTime = performance.now();
+
+        updateButtonStates();
+        saveState();
+
+        // Restart animation loop
+        state.animationId = requestAnimationFrame(updateCountdown);
+      }
+
+      /**
+       * Reset the countdown to initial state
+       */
+      function resetCountdown() {
+        // Cancel any running animation
+        if (state.animationId) {
+          cancelAnimationFrame(state.animationId);
+        }
+
+        // Reset state
+        state.isRunning = false;
+        state.isPaused = false;
+        state.startTime = null;
+        state.pausedTime = null;
+
+        // Calculate and display initial time
+        let initialTime;
+        if (state.mode === "duration") {
+          initialTime = calculateDuration();
+        } else {
+          initialTime = calculateTargetTime() || 0;
+        }
+
+        state.remainingMs = initialTime;
+        updateDisplay(initialTime);
+
+        // Reset display styling
+        elements.display.classList.remove("warning", "expired");
+
+        updateButtonStates();
+        saveState();
+      }
+
+      /**
+       * Handle countdown completion
+       */
+      function finishCountdown() {
+        // Cancel animation
+        if (state.animationId) {
+          cancelAnimationFrame(state.animationId);
+        }
+
+        // Update state
+        state.isRunning = false;
+        state.isPaused = false;
+        state.remainingMs = 0;
+
+        // Update display
+        elements.display.textContent = "Time's Up!";
+        elements.display.classList.add("expired");
+        elements.display.setAttribute(
+          "aria-label",
+          "Countdown finished! Time's up!"
+        );
+
+        // Play a simple notification (browser will handle if allowed)
+        try {
+          const audio = new Audio(
+            "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIHGe5673KlTYMUKbk8K1pIQU1ktT0xHkqBSh+zfDBiTUJEV+y6OKZURU="
+          );
+          audio.play().catch(() => {}); // Ignore if audio fails
+        } catch (e) {}
+
+        updateButtonStates();
+        saveState();
+      }
+
+      // ============================================
+      // UI STATE MANAGEMENT
+      // ============================================
+
+      /**
+       * Update button enabled/disabled states
+       */
+      function updateButtonStates() {
+        elements.startBtn.disabled = state.isRunning && !state.isPaused;
+        elements.pauseBtn.disabled = !state.isRunning || state.isPaused;
+        elements.resumeBtn.disabled = !state.isPaused;
+      }
+
+      /**
+       * Switch between duration and target date modes
+       */
+      function switchMode(newMode) {
+        state.mode = newMode;
+
+        // Update button states
+        elements.modeBtns.forEach((btn) => {
+          const isActive = btn.dataset.mode === newMode;
+          btn.classList.toggle("active", isActive);
+          btn.setAttribute("aria-selected", isActive);
+        });
+
+        // Update input visibility
+        elements.inputGroups.forEach((group) => {
+          group.classList.toggle("active", group.id === `${newMode}-inputs`);
+        });
+
+        // Reset if mode changes while running
+        if (state.isRunning) {
+          resetCountdown();
+        }
+
+        saveState();
+      }
+
+      // ============================================
+      // LOCALSTORAGE PERSISTENCE
+      // Save/load timer state across sessions
+      // ============================================
+
+      /**
+       * Save current state to localStorage
+       */
+      function saveState() {
+        const stateToSave = {
+          mode: state.mode,
+          remainingMs: state.remainingMs,
+          isRunning: state.isRunning,
+          isPaused: state.isPaused,
+          hours: elements.hoursInput.value,
+          minutes: elements.minutesInput.value,
+          seconds: elements.secondsInput.value,
+          targetDateTime: elements.targetInput.value,
+        };
+
+        try {
+          localStorage.setItem("countdownState", JSON.stringify(stateToSave));
+        } catch (e) {
+          console.warn("Could not save state:", e);
+        }
+      }
+
+      /**
+       * Load saved state from localStorage
+       */
+      function loadState() {
+        try {
+          const saved = localStorage.getItem("countdownState");
+          if (!saved) return;
+
+          const parsed = JSON.parse(saved);
+
+          // Restore input values
+          elements.hoursInput.value = parsed.hours || 0;
+          elements.minutesInput.value = parsed.minutes || 1;
+          elements.secondsInput.value = parsed.seconds || 0;
+          elements.targetInput.value = parsed.targetDateTime || "";
+
+          // Restore mode
+          if (parsed.mode) {
+            switchMode(parsed.mode);
+          }
+
+          // Restore display (but don't auto-start)
+          if (parsed.remainingMs) {
+            updateDisplay(parsed.remainingMs);
+          }
+        } catch (e) {
+          console.warn("Could not load state:", e);
+        }
+      }
+
+      // ============================================
+      // EVENT LISTENERS
+      // ============================================
+
+      // Start button
+      elements.startBtn.addEventListener("click", startCountdown);
+
+      // Pause button
+      elements.pauseBtn.addEventListener("click", pauseCountdown);
+
+      // Resume button
+      elements.resumeBtn.addEventListener("click", resumeCountdown);
+
+      // Reset button
+      elements.resetBtn.addEventListener("click", resetCountdown);
+
+      // Mode toggle buttons
+      elements.modeBtns.forEach((btn) => {
+        btn.addEventListener("click", () => switchMode(btn.dataset.mode));
+      });
+
+      // Update display when inputs change (duration mode)
+      [
+        elements.hoursInput,
+        elements.minutesInput,
+        elements.secondsInput,
+      ].forEach((input) => {
+        input.addEventListener("input", () => {
+          if (!state.isRunning && state.mode === "duration") {
+            const duration = calculateDuration();
+            updateDisplay(duration);
+            saveState();
+          }
+        });
+      });
+
+      // Update display when target date changes
+      elements.targetInput.addEventListener("change", () => {
+        if (!state.isRunning && state.mode === "target") {
+          const target = calculateTargetTime();
+          if (target !== null) {
+            updateDisplay(target);
+            saveState();
+          }
+        }
+      });
+
+      // Keyboard accessibility - Enter key to start
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !state.isRunning) {
+          startCountdown();
+        }
+      });
+
+      // ============================================
+      // INITIALIZATION
+      // ============================================
+
+      // Set minimum datetime to now
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      elements.targetInput.min = now.toISOString().slice(0, 16);
+
+      // Load saved state
+      loadState();
+
+      // Initial display update
+      if (state.mode === "duration") {
+        updateDisplay(calculateDuration());
+      }
+
+      // Initial button states
+      updateButtonStates();
+    </script>
+  </body>
+</html>
