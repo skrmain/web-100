@@ -1,0 +1,413 @@
+/* ==========================================
+   CSS Variables & Root Styling
+   ========================================== */
+
+:root {
+  /* Light mode color scheme */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f5f5f5;
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #666666;
+  --color-border: #e0e0e0;
+  --color-accent: #6366f1;
+  --color-accent-hover: #4f46e5;
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+
+  /* Spacing values */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2rem;
+
+  /* Border radius for rounded corners */
+  --border-radius: 0.5rem;
+
+  /* Transition timing for smooth animations */
+  --transition-speed: 300ms;
+  --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark mode color scheme using prefers-color-scheme */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-primary: #1a1a1a;
+    --color-bg-secondary: #2d2d2d;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #b3b3b3;
+    --color-border: #404040;
+    --color-accent: #818cf8;
+    --color-accent-hover: #6366f1;
+  }
+}
+
+/* ==========================================
+   Global Styles
+   ========================================== */
+
+* {
+  /* Reset default margins and padding */
+  margin: 0;
+  padding: 0;
+  /* Ensure padding doesn't increase element width */
+  box-sizing: border-box;
+}
+
+body {
+  /* Use CSS variables for consistent theming */
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+
+  /* Smooth transition when switching between light/dark mode */
+  transition: background-color var(--transition-speed) var(--transition-timing),
+    color var(--transition-speed) var(--transition-timing);
+
+  /* Ensure minimum height for proper layout */
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Add padding for mobile devices */
+  padding: var(--spacing-md);
+}
+
+/* ==========================================
+   Container & Layout
+   ========================================== */
+
+.container {
+  /* Set maximum width for better readability on large screens */
+  max-width: 600px;
+  width: 100%;
+
+  /* Background and styling for the main container */
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-2xl);
+
+  /* Add subtle shadow for depth */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  /* Smooth animation when page loads */
+  animation: slideUp var(--transition-speed) var(--transition-timing);
+}
+
+/* Keyframe animation for smooth entry */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================
+   Header Section
+   ========================================== */
+
+header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+h1 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--spacing-md);
+  /* Gradient color effect using CSS */
+  background: linear-gradient(
+    135deg,
+    var(--color-accent),
+    var(--color-accent-hover)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  margin-bottom: 0;
+}
+
+/* ==========================================
+   Form Styling
+   ========================================== */
+
+.form-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+label {
+  /* Label styling for better visibility */
+  font-weight: 600;
+  color: var(--color-text-primary);
+  display: block;
+}
+
+.text-input {
+  /* Input field styling */
+  padding: var(--spacing-md);
+  font-size: var(--font-size-base);
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+
+  /* Smooth transition for focus state */
+  transition: border-color var(--transition-speed) var(--transition-timing),
+    box-shadow var(--transition-speed) var(--transition-timing);
+}
+
+/* Focus state for better accessibility */
+.text-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  /* Add blue glow when focused */
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* ==========================================
+   Button Styling
+   ========================================== */
+
+.check-btn {
+  /* Button styling with accent color */
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  background-color: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+
+  /* Smooth transition for hover and active states */
+  transition: background-color var(--transition-speed) var(--transition-timing),
+    transform var(--transition-speed) var(--transition-timing),
+    box-shadow var(--transition-speed) var(--transition-timing);
+}
+
+/* Hover state - change color slightly */
+.check-btn:hover {
+  background-color: var(--color-accent-hover);
+  /* Subtle lift effect on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Active state - button pressed */
+.check-btn:active {
+  transform: translateY(0);
+}
+
+/* Keyboard focus state for accessibility */
+.check-btn:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ==========================================
+   Result Section
+   ========================================== */
+
+.result-container {
+  /* Result box styling */
+  padding: var(--spacing-lg);
+  background-color: var(--color-bg-primary);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--color-accent);
+
+  /* Smooth fade-in animation */
+  animation: fadeIn var(--transition-speed) var(--transition-timing);
+}
+
+/* Hidden class to hide elements */
+.hidden {
+  display: none;
+}
+
+/* Keyframe animation for fade-in effect */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.result-text {
+  /* Output text styling */
+  display: block;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  word-wrap: break-word;
+}
+
+/* Success state - when input IS a palindrome */
+.result-container.success {
+  border-left-color: var(--color-success);
+}
+
+.result-container.success .result-text {
+  color: var(--color-success);
+}
+
+/* Error state - when input is NOT a palindrome */
+.result-container.error {
+  border-left-color: var(--color-error);
+}
+
+.result-container.error .result-text {
+  color: var(--color-error);
+}
+
+/* Result indicator (visual icon/dot) */
+.result-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  /* Default neutral color */
+  background-color: var(--color-text-secondary);
+}
+
+.result-container.success .result-indicator {
+  background-color: var(--color-success);
+  /* Pulse animation for success */
+  animation: pulse var(--transition-speed * 2) var(--transition-timing) infinite;
+}
+
+.result-container.error .result-indicator {
+  background-color: var(--color-error);
+}
+
+/* Pulse animation for visual feedback */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* ==========================================
+   Error Message
+   ========================================== */
+
+.error-message {
+  /* Error message styling */
+  padding: var(--spacing-md);
+  background-color: var(--color-error);
+  color: white;
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-lg);
+
+  /* Smooth fade-in animation */
+  animation: fadeIn var(--transition-speed) var(--transition-timing);
+}
+
+/* ==========================================
+   Footer Section
+   ========================================== */
+
+footer {
+  text-align: center;
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.info-text {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* ==========================================
+   Responsive Design
+   ========================================== */
+
+/* Mobile devices - smaller screens */
+@media (max-width: 480px) {
+  .container {
+    padding: var(--spacing-lg);
+  }
+
+  h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  .form-wrapper {
+    gap: var(--spacing-md);
+  }
+
+  .check-btn {
+    padding: var(--spacing-md);
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Tablet and above - larger screens */
+@media (min-width: 768px) {
+  body {
+    padding: var(--spacing-xl);
+  }
+
+  .form-wrapper {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: var(--spacing-md);
+  }
+
+  .input-group {
+    flex: 1;
+  }
+
+  .check-btn {
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+}
+
+/* Print styles - optimize for printing */
+@media print {
+  body {
+    background: white;
+  }
+
+  .container {
+    box-shadow: none;
+    max-width: 100%;
+  }
+}

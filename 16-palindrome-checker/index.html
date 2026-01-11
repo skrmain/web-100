@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Metadata for character encoding and viewport scaling -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Palindrome Checker</title>
+    <!-- Link to external CSS stylesheet -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Main container for the application -->
+    <div class="container">
+      <!-- Header section -->
+      <header>
+        <h1>Palindrome Checker</h1>
+        <p class="subtitle">
+          Check if your text reads the same forwards and backwards
+        </p>
+      </header>
+
+      <!-- Main form for user input -->
+      <main>
+        <form id="palindromeForm" class="form-wrapper">
+          <!-- Input group for better accessibility -->
+          <div class="input-group">
+            <!-- Label associated with input for accessibility -->
+            <label for="textInput">Enter text to check:</label>
+
+            <!-- Text input field where user enters text to check -->
+            <input
+              type="text"
+              id="textInput"
+              class="text-input"
+              placeholder="e.g., 'racecar', 'A man, a plan, a canal: Panama'"
+              aria-label="Text input for palindrome checking"
+              autocomplete="off"
+            />
+          </div>
+
+          <!-- Submit button to trigger palindrome check -->
+          <button type="submit" class="check-btn">Check</button>
+        </form>
+
+        <!-- Result section that displays after checking -->
+        <div id="resultContainer" class="result-container hidden">
+          <!-- Output element displays the result text -->
+          <output
+            id="resultOutput"
+            class="result-text"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+          </output>
+
+          <!-- Visual indicator showing if it's a palindrome -->
+          <div
+            id="resultIndicator"
+            class="result-indicator"
+            aria-hidden="true"
+          ></div>
+        </div>
+
+        <!-- Error/validation message container -->
+        <div
+          id="errorMessage"
+          class="error-message hidden"
+          role="alert"
+          aria-live="polite"
+        ></div>
+      </main>
+
+      <!-- Footer with helpful information -->
+      <footer>
+        <p class="info-text">
+          💡 Tip: The checker ignores spaces, punctuation, and capitalization
+        </p>
+      </footer>
+    </div>
+
+    <!-- Link to external JavaScript file -->
+    <script src="script.js"></script>
+  </body>
+</html>
