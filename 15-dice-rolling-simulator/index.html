@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎲 Dice Rolling Simulator</title>
+    <style>
+      /* ========================================
+       CSS VARIABLES & THEMING
+       ======================================== */
+
+      :root {
+        /* Light mode colors */
+        --bg-primary: #f0f4f8;
+        --bg-secondary: #ffffff;
+        --text-primary: #1a202c;
+        --text-secondary: #4a5568;
+        --accent: #3182ce;
+        --accent-hover: #2c5aa0;
+        --dice-bg: #ffffff;
+        --dice-dot: #1a202c;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-hover: rgba(0, 0, 0, 0.2);
+        --border: #e2e8f0;
+      }
+
+      /* Dark mode colors - respects system preference */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #1a202c;
+          --bg-secondary: #2d3748;
+          --text-primary: #f7fafc;
+          --text-secondary: #cbd5e0;
+          --accent: #4299e1;
+          --accent-hover: #63b3ed;
+          --dice-bg: #2d3748;
+          --dice-dot: #f7fafc;
+          --shadow: rgba(0, 0, 0, 0.3);
+          --shadow-hover: rgba(0, 0, 0, 0.5);
+          --border: #4a5568;
+        }
+      }
+
+      /* ========================================
+       GLOBAL RESET & BASE STYLES
+       ======================================== */
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem 1rem;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      /* ========================================
+       LAYOUT & CONTAINER
+       ======================================== */
+
+      .container {
+        width: 100%;
+        max-width: 800px;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      /* Header section */
+      header {
+        text-align: center;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+      }
+
+      .subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+      }
+
+      /* ========================================
+       CONTROLS SECTION
+       ======================================== */
+
+      .controls {
+        background: var(--bg-secondary);
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px var(--shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      /* Dice count selector */
+      .dice-selector {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .dice-selector label {
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      .dice-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .dice-count-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--border);
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+      }
+
+      .dice-count-btn:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+      }
+
+      .dice-count-btn.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+      }
+
+      .dice-count-btn:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      /* Roll button */
+      .roll-button {
+        padding: 1rem 2rem;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.25rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px var(--shadow);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .roll-button:hover:not(:disabled) {
+        background: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px var(--shadow-hover);
+      }
+
+      .roll-button:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      .roll-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .roll-button:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: 4px;
+      }
+
+      /* ========================================
+       DICE DISPLAY SECTION
+       ======================================== */
+
+      .dice-display {
+        background: var(--bg-secondary);
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px var(--shadow);
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .dice-container {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* Individual dice styling */
+      .dice {
+        width: 100px;
+        height: 100px;
+        background: var(--dice-bg);
+        border: 3px solid var(--border);
+        border-radius: 12px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        padding: 10px;
+        gap: 8px;
+        box-shadow: 0 4px 8px var(--shadow);
+        position: relative;
+      }
+
+      /* Dice dot styling */
+      .dot {
+        width: 16px;
+        height: 16px;
+        background: var(--dice-dot);
+        border-radius: 50%;
+        margin: auto;
+      }
+
+      /* Dot positioning for each number (1-6) */
+      .dice[data-value="1"] .dot:nth-child(1) {
+        grid-area: 2 / 2;
+      }
+
+      .dice[data-value="2"] .dot:nth-child(1) {
+        grid-area: 1 / 1;
+      }
+      .dice[data-value="2"] .dot:nth-child(2) {
+        grid-area: 3 / 3;
+      }
+
+      .dice[data-value="3"] .dot:nth-child(1) {
+        grid-area: 1 / 1;
+      }
+      .dice[data-value="3"] .dot:nth-child(2) {
+        grid-area: 2 / 2;
+      }
+      .dice[data-value="3"] .dot:nth-child(3) {
+        grid-area: 3 / 3;
+      }
+
+      .dice[data-value="4"] .dot:nth-child(1) {
+        grid-area: 1 / 1;
+      }
+      .dice[data-value="4"] .dot:nth-child(2) {
+        grid-area: 1 / 3;
+      }
+      .dice[data-value="4"] .dot:nth-child(3) {
+        grid-area: 3 / 1;
+      }
+      .dice[data-value="4"] .dot:nth-child(4) {
+        grid-area: 3 / 3;
+      }
+
+      .dice[data-value="5"] .dot:nth-child(1) {
+        grid-area: 1 / 1;
+      }
+      .dice[data-value="5"] .dot:nth-child(2) {
+        grid-area: 1 / 3;
+      }
+      .dice[data-value="5"] .dot:nth-child(3) {
+        grid-area: 2 / 2;
+      }
+      .dice[data-value="5"] .dot:nth-child(4) {
+        grid-area: 3 / 1;
+      }
+      .dice[data-value="5"] .dot:nth-child(5) {
+        grid-area: 3 / 3;
+      }
+
+      .dice[data-value="6"] .dot:nth-child(1) {
+        grid-area: 1 / 1;
+      }
+      .dice[data-value="6"] .dot:nth-child(2) {
+        grid-area: 1 / 3;
+      }
+      .dice[data-value="6"] .dot:nth-child(3) {
+        grid-area: 2 / 1;
+      }
+      .dice[data-value="6"] .dot:nth-child(4) {
+        grid-area: 2 / 3;
+      }
+      .dice[data-value="6"] .dot:nth-child(5) {
+        grid-area: 3 / 1;
+      }
+      .dice[data-value="6"] .dot:nth-child(6) {
+        grid-area: 3 / 3;
+      }
+
+      /* ========================================
+       ANIMATIONS
+       ======================================== */
+
+      /* Rolling animation - shakes and rotates dice */
+      @keyframes roll {
+        0%,
+        100% {
+          transform: rotate(0deg);
+        }
+        25% {
+          transform: rotate(-15deg) scale(1.05);
+        }
+        50% {
+          transform: rotate(15deg) scale(0.95);
+        }
+        75% {
+          transform: rotate(-10deg) scale(1.05);
+        }
+      }
+
+      .dice.rolling {
+        animation: roll 0.5s ease-in-out;
+      }
+
+      /* Reduced motion for accessibility */
+      @media (prefers-reduced-motion: reduce) {
+        .dice.rolling {
+          animation: none;
+          opacity: 0.7;
+        }
+      }
+
+      /* Result display with total */
+      .result-display {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      /* ========================================
+       HISTORY SECTION
+       ======================================== */
+
+      .history-section {
+        background: var(--bg-secondary);
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px var(--shadow);
+      }
+
+      .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .history-section h2 {
+        font-size: 1.5rem;
+        color: var(--text-primary);
+      }
+
+      .clear-history-btn {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+      }
+
+      .clear-history-btn:hover {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+      }
+
+      .history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .history-item {
+        padding: 0.75rem;
+        background: var(--bg-primary);
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.95rem;
+      }
+
+      .history-item .dice-values {
+        font-weight: 600;
+        color: var(--accent);
+      }
+
+      .history-item .total {
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .no-history {
+        text-align: center;
+        color: var(--text-secondary);
+        padding: 2rem;
+        font-style: italic;
+      }
+
+      /* ========================================
+       RESPONSIVE DESIGN
+       ======================================== */
+
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 2rem;
+        }
+
+        .dice {
+          width: 80px;
+          height: 80px;
+        }
+
+        .dot {
+          width: 12px;
+          height: 12px;
+        }
+
+        .roll-button {
+          font-size: 1rem;
+          padding: 0.875rem 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main container for the entire application -->
+    <div class="container">
+      <!-- Header section with title and description -->
+      <header>
+        <h1>🎲 Dice Rolling Simulator</h1>
+        <p class="subtitle">Roll the dice and test your luck!</p>
+      </header>
+
+      <!-- Controls section for dice count and roll button -->
+      <section class="controls">
+        <!-- Dice count selector - allows user to choose 1-6 dice -->
+        <div class="dice-selector">
+          <label for="dice-count">Number of dice:</label>
+          <div
+            class="dice-buttons"
+            role="group"
+            aria-label="Select number of dice"
+          >
+            <button
+              class="dice-count-btn active"
+              data-count="1"
+              aria-pressed="true"
+            >
+              1
+            </button>
+            <button class="dice-count-btn" data-count="2" aria-pressed="false">
+              2
+            </button>
+            <button class="dice-count-btn" data-count="3" aria-pressed="false">
+              3
+            </button>
+            <button class="dice-count-btn" data-count="4" aria-pressed="false">
+              4
+            </button>
+            <button class="dice-count-btn" data-count="5" aria-pressed="false">
+              5
+            </button>
+            <button class="dice-count-btn" data-count="6" aria-pressed="false">
+              6
+            </button>
+          </div>
+        </div>
+
+        <!-- Roll button - main action button -->
+        <button class="roll-button" id="rollBtn" aria-label="Roll dice">
+          🎲 Roll Dice
+        </button>
+      </section>
+
+      <!-- Dice display section - shows the actual dice with dots -->
+      <section class="dice-display" aria-live="polite" aria-atomic="true">
+        <div class="dice-container" id="diceContainer">
+          <!-- Dice will be dynamically inserted here -->
+        </div>
+      </section>
+
+      <!-- History section - shows last 10 rolls -->
+      <section class="history-section">
+        <div class="history-header">
+          <h2>Roll History</h2>
+          <button
+            class="clear-history-btn"
+            id="clearHistoryBtn"
+            aria-label="Clear roll history"
+          >
+            Clear History
+          </button>
+        </div>
+        <div class="history-list" id="historyList">
+          <p class="no-history">No rolls yet. Roll the dice to get started!</p>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      /* ========================================
+       STATE MANAGEMENT
+       ======================================== */
+
+      // Application state object - holds all current values
+      const state = {
+        diceCount: 1, // Current number of dice to roll (1-6)
+        isRolling: false, // Prevents multiple simultaneous rolls
+        history: [], // Array of past rolls (max 10)
+        currentRoll: [], // Array of current dice values
+      };
+
+      /* ========================================
+       DOM ELEMENT REFERENCES
+       ======================================== */
+
+      const rollBtn = document.getElementById("rollBtn");
+      const diceContainer = document.getElementById("diceContainer");
+      const historyList = document.getElementById("historyList");
+      const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+      const diceCountBtns = document.querySelectorAll(".dice-count-btn");
+
+      /* ========================================
+       UTILITY FUNCTIONS
+       ======================================== */
+
+      /**
+       * Generates a cryptographically secure random number between 1 and 6
+       * Uses crypto.getRandomValues() for better randomness than Math.random()
+       * @returns {number} Random integer from 1 to 6
+       */
+      function rollDice() {
+        const randomArray = new Uint32Array(1);
+        crypto.getRandomValues(randomArray);
+        // Map the random value to 1-6 range
+        return (randomArray[0] % 6) + 1;
+      }
+
+      /**
+       * Creates a dice DOM element with the appropriate dots for the given value
+       * @param {number} value - The dice value (1-6)
+       * @returns {HTMLElement} The dice element with dots
+       */
+      function createDiceElement(value) {
+        const dice = document.createElement("div");
+        dice.className = "dice";
+        dice.setAttribute("data-value", value);
+        dice.setAttribute("role", "img");
+        dice.setAttribute("aria-label", `Dice showing ${value}`);
+
+        // Add the correct number of dots based on the value
+        for (let i = 0; i < value; i++) {
+          const dot = document.createElement("div");
+          dot.className = "dot";
+          dice.appendChild(dot);
+        }
+
+        return dice;
+      }
+
+      /**
+       * Displays the current roll results in the dice container
+       * @param {number[]} values - Array of dice values to display
+       */
+      function displayDice(values) {
+        // Clear previous dice
+        diceContainer.innerHTML = "";
+
+        // Create and append each dice element
+        values.forEach((value) => {
+          const diceElement = createDiceElement(value);
+          diceContainer.appendChild(diceElement);
+        });
+
+        // Show total if rolling multiple dice
+        if (values.length > 1) {
+          const total = values.reduce((sum, val) => sum + val, 0);
+          const resultDisplay = document.createElement("div");
+          resultDisplay.className = "result-display";
+          resultDisplay.textContent = `Total: ${total}`;
+          diceContainer.parentElement.appendChild(resultDisplay);
+        }
+      }
+
+      /**
+       * Adds animation class to dice for rolling effect
+       */
+      function animateDice() {
+        const allDice = diceContainer.querySelectorAll(".dice");
+        allDice.forEach((dice) => dice.classList.add("rolling"));
+
+        // Remove animation class after animation completes
+        setTimeout(() => {
+          allDice.forEach((dice) => dice.classList.remove("rolling"));
+        }, 500);
+      }
+
+      /**
+       * Main roll function - generates random values and updates display
+       */
+      async function performRoll() {
+        // Prevent multiple simultaneous rolls
+        if (state.isRolling) return;
+
+        state.isRolling = true;
+        rollBtn.disabled = true;
+
+        // Generate random values for each dice
+        const values = [];
+        for (let i = 0; i < state.diceCount; i++) {
+          values.push(rollDice());
+        }
+
+        state.currentRoll = values;
+
+        // Show temporary animation with random values
+        const tempValues = Array(state.diceCount)
+          .fill(0)
+          .map(() => rollDice());
+        displayDice(tempValues);
+        animateDice();
+
+        // Wait for animation to complete, then show final result
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Display final result
+        displayDice(values);
+
+        // Add to history
+        addToHistory(values);
+
+        // Save history to localStorage
+        saveHistory();
+
+        // Re-enable roll button
+        state.isRolling = false;
+        rollBtn.disabled = false;
+        rollBtn.focus(); // Return focus for keyboard users
+      }
+
+      /* ========================================
+       HISTORY MANAGEMENT
+       ======================================== */
+
+      /**
+       * Adds a roll result to the history
+       * @param {number[]} values - Array of dice values
+       */
+      function addToHistory(values) {
+        const total = values.reduce((sum, val) => sum + val, 0);
+        const timestamp = new Date().toLocaleTimeString();
+
+        // Add to beginning of history array
+        state.history.unshift({
+          values,
+          total,
+          timestamp,
+          diceCount: values.length,
+        });
+
+        // Keep only last 10 rolls
+        if (state.history.length > 10) {
+          state.history.pop();
+        }
+
+        renderHistory();
+      }
+
+      /**
+       * Renders the history list in the DOM
+       */
+      function renderHistory() {
+        if (state.history.length === 0) {
+          historyList.innerHTML =
+            '<p class="no-history">No rolls yet. Roll the dice to get started!</p>';
+          return;
+        }
+
+        historyList.innerHTML = "";
+
+        state.history.forEach((entry, index) => {
+          const item = document.createElement("div");
+          item.className = "history-item";
+
+          const valuesText = entry.values.join(", ");
+          const diceEmoji = "🎲".repeat(entry.diceCount);
+
+          item.innerHTML = `
+          <span>${diceEmoji} <span class="dice-values">[${valuesText}]</span></span>
+          <span class="total">Total: ${entry.total}</span>
+        `;
+
+          historyList.appendChild(item);
+        });
+      }
+
+      /**
+       * Clears all history
+       */
+      function clearHistory() {
+        state.history = [];
+        renderHistory();
+        saveHistory();
+      }
+
+      /* ========================================
+       LOCAL STORAGE FUNCTIONS
+       ======================================== */
+
+      /**
+       * Saves history to localStorage for persistence
+       */
+      function saveHistory() {
+        try {
+          localStorage.setItem("diceHistory", JSON.stringify(state.history));
+        } catch (e) {
+          console.error("Failed to save history to localStorage:", e);
+        }
+      }
+
+      /**
+       * Loads history from localStorage
+       */
+      function loadHistory() {
+        try {
+          const saved = localStorage.getItem("diceHistory");
+          if (saved) {
+            state.history = JSON.parse(saved);
+            renderHistory();
+          }
+        } catch (e) {
+          console.error("Failed to load history from localStorage:", e);
+        }
+      }
+
+      /* ========================================
+       EVENT LISTENERS
+       ======================================== */
+
+      // Roll button click
+      rollBtn.addEventListener("click", performRoll);
+
+      // Roll button keyboard support (Enter or Space)
+      rollBtn.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          performRoll();
+        }
+      });
+
+      // Dice count selection buttons
+      diceCountBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          // Update active state
+          diceCountBtns.forEach((b) => {
+            b.classList.remove("active");
+            b.setAttribute("aria-pressed", "false");
+          });
+          btn.classList.add("active");
+          btn.setAttribute("aria-pressed", "true");
+
+          // Update dice count in state
+          state.diceCount = parseInt(btn.dataset.count);
+
+          // Reset display
+          diceContainer.innerHTML = "";
+          const resultDisplay =
+            diceContainer.parentElement.querySelector(".result-display");
+          if (resultDisplay) {
+            resultDisplay.remove();
+          }
+        });
+      });
+
+      // Clear history button
+      clearHistoryBtn.addEventListener("click", clearHistory);
+
+      /* ========================================
+       INITIALIZATION
+       ======================================== */
+
+      // Load saved history when page loads
+      loadHistory();
+
+      // Initial display setup (show placeholder or initial state)
+      const initialValues = [1];
+      displayDice(initialValues);
+    </script>
+  </body>
+</html>
