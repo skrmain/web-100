@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Slider</title>
+
+    <style>
+      :root {
+        --slider-speed: 500ms;
+        --slider-ease: cubic-bezier(0.4, 0, 0.2, 1);
+        --primary-color: #ffffff;
+        --accent-color: #3498db;
+        --bg-overlay: rgba(0, 0, 0, 0.3);
+      }
+
+      /* Dark Mode Support */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --accent-color: #f1c40f;
+        }
+      }
+
+      .slider-container {
+        position: relative;
+        max-width: 1000px;
+        margin: 2rem auto;
+        overflow: hidden; /* Clips the slides outside the view */
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .slider-track {
+        display: flex;
+        transition: transform var(--slider-speed) var(--slider-ease);
+        will-change: transform;
+      }
+
+      /* Respect user motion preferences */
+      @media (prefers-reduced-motion: reduce) {
+        .slider-track {
+          transition: none !important;
+        }
+      }
+
+      .slide {
+        min-width: 100%; /* Each slide takes full width of container */
+        aspect-ratio: 16 / 9;
+      }
+
+      .slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      /* Navigation Buttons */
+      .nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--bg-overlay);
+        color: white;
+        border: none;
+        padding: 1rem;
+        cursor: pointer;
+        z-index: 10;
+        transition: background 0.3s;
+      }
+
+      .nav-btn:hover {
+        background: rgba(0, 0, 0, 0.6);
+      }
+      .prev {
+        left: 0;
+        border-radius: 0 4px 4px 0;
+      }
+      .next {
+        right: 0;
+        border-radius: 4px 0 0 4px;
+      }
+
+      /* Dots Navigation */
+      .dot-container {
+        position: absolute;
+        bottom: 1rem;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        border: none;
+        cursor: pointer;
+      }
+
+      .dot.active {
+        background: var(--accent-color);
+        transform: scale(1.2);
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slider-container" aria-label="Image Carousel" tabindex="0">
+      <div class="slider-track" data-slider-track>
+        <article
+          class="slide"
+          role="group"
+          aria-roledescription="slide"
+          aria-label="1 of 3"
+        >
+          <img
+            src="https://picsum.photos/id/10/1200/600"
+            alt="Mountain landscape with a lake"
+            loading="lazy"
+          />
+        </article>
+
+        <article
+          class="slide"
+          role="group"
+          aria-roledescription="slide"
+          aria-label="2 of 3"
+        >
+          <img
+            src="https://picsum.photos/id/20/1200/600"
+            alt="Work desk with a laptop"
+            loading="lazy"
+          />
+        </article>
+
+        <article
+          class="slide"
+          role="group"
+          aria-roledescription="slide"
+          aria-label="3 of 3"
+        >
+          <img
+            src="https://picsum.photos/id/28/1200/600"
+            alt="Forest path in autumn"
+            loading="lazy"
+          />
+        </article>
+      </div>
+
+      <button class="nav-btn prev" data-slider-prev aria-label="Previous Slide">
+        &#10094;
+      </button>
+      <button class="nav-btn next" data-slider-next aria-label="Next Slide">
+        &#10095;
+      </button>
+
+      <div class="dot-container" data-dot-container></div>
+    </section>
+
+    <script>
+      const track = document.querySelector("[data-slider-track]");
+      const slides = Array.from(track.children);
+      const nextBtn = document.querySelector("[data-slider-next]");
+      const prevBtn = document.querySelector("[data-slider-prev]");
+      const dotContainer = document.querySelector("[data-dot-container]");
+
+      let currentIndex = 0;
+      let autoplayTimer;
+
+      // 1. Initialize Dots
+      slides.forEach((_, index) => {
+        const dot = document.createElement("button");
+        dot.classList.add("dot");
+        if (index === 0) dot.classList.add("active");
+        dot.ariaLabel = `Go to slide ${index + 1}`;
+        dot.addEventListener("click", () => goToSlide(index));
+        dotContainer.appendChild(dot);
+      });
+
+      const dots = document.querySelectorAll(".dot");
+
+      // 2. Core Navigation Function
+      function goToSlide(index) {
+        // Handle Looping Logic
+        if (index >= slides.length) currentIndex = 0;
+        else if (index < 0) currentIndex = slides.length - 1;
+        else currentIndex = index;
+
+        // Move the track
+        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+        // Update Dots UI
+        dots.forEach((d) => d.classList.remove("active"));
+        dots[currentIndex].classList.add("active");
+      }
+
+      // 3. Autoplay Logic
+      function startAutoplay() {
+        autoplayTimer = setInterval(() => goToSlide(currentIndex + 1), 5000);
+      }
+
+      function stopAutoplay() {
+        clearInterval(autoplayTimer);
+      }
+
+      // 4. Event Listeners
+      nextBtn.addEventListener("click", () => {
+        goToSlide(currentIndex + 1);
+        stopAutoplay(); // Stop autoplay on manual interaction
+      });
+
+      prevBtn.addEventListener("click", () => {
+        goToSlide(currentIndex - 1);
+        stopAutoplay();
+      });
+
+      // Keyboard Navigation
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") goToSlide(currentIndex - 1);
+        if (e.key === "ArrowRight") goToSlide(currentIndex + 1);
+      });
+
+      // Pause on Hover
+      const container = document.querySelector(".slider-container");
+      container.addEventListener("mouseenter", stopAutoplay);
+      container.addEventListener("mouseleave", startAutoplay);
+
+      // Initialize
+      startAutoplay();
+    </script>
+  </body>
+</html>
