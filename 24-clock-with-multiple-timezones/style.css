@@ -1,0 +1,318 @@
+/* ============================================
+   ROOT VARIABLES & THEME CONFIGURATION
+   ============================================ */
+
+:root {
+  /* Color palette - Light mode */
+  --bg-primary: #f5f7fa;
+  --bg-secondary: #ffffff;
+  --text-primary: #1a1a2e;
+  --text-secondary: #555;
+  --border-color: #e0e0e0;
+  --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-medium: 0 8px 16px rgba(0, 0, 0, 0.1);
+  --accent-color: #3498db;
+  --accent-hover: #2980b9;
+
+  /* Spacing and sizing */
+  --border-radius: 12px;
+  --spacing-unit: 1rem;
+
+  /* Transitions */
+  --transition-smooth: all 0.3s ease;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #0f1419;
+    --bg-secondary: #1a1f2e;
+    --text-primary: #f0f0f0;
+    --text-secondary: #b0b0b0;
+    --border-color: #2a2f3e;
+    --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --shadow-medium: 0 8px 16px rgba(0, 0, 0, 0.4);
+    --accent-color: #3498db;
+    --accent-hover: #5dade2;
+  }
+}
+
+/* ============================================
+   GLOBAL STYLES
+   ============================================ */
+
+* {
+  /* Reset default margins and padding */
+  margin: 0;
+  padding: 0;
+  /* Use border-box for easier box model calculations */
+  box-sizing: border-box;
+}
+
+html {
+  /* Smooth scrolling for better UX */
+  scroll-behavior: smooth;
+}
+
+body {
+  /* Apply theme colors */
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+
+  /* Typography */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+
+  /* Smooth transitions when theme changes */
+  transition: var(--transition-smooth);
+
+  /* Prevent horizontal scroll on mobile */
+  overflow-x: hidden;
+}
+
+/* ============================================
+   CONTAINER & LAYOUT
+   ============================================ */
+
+.container {
+  /* Maximum width for better readability on large screens */
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-unit);
+}
+
+/* ============================================
+   HEADER SECTION
+   ============================================ */
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+  animation: slideDown 0.6s ease;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+}
+
+/* ============================================
+   CLOCKS GRID
+   ============================================ */
+
+.clocks-grid {
+  /* Responsive grid layout */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  animation: fadeIn 0.8s ease;
+}
+
+/* ============================================
+   CLOCK CARD STYLES
+   ============================================ */
+
+.clock-card {
+  /* Styling */
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+
+  /* Shadow and elevation */
+  box-shadow: var(--shadow-light);
+  transition: var(--transition-smooth);
+
+  /* Flexbox for vertical alignment */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  /* Animation */
+  animation: scaleUp 0.5s ease;
+}
+
+/* Hover effect for cards */
+.clock-card:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-4px);
+  border-color: var(--accent-color);
+}
+
+/* ============================================
+   TIMEZONE NAME
+   ============================================ */
+
+.timezone-name {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+}
+
+/* ============================================
+   TIME DISPLAY
+   ============================================ */
+
+.time-display {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: "Monaco", "Courier New", monospace;
+  margin-bottom: 0.5rem;
+  letter-spacing: 2px;
+}
+
+/* ============================================
+   DATE DISPLAY
+   ============================================ */
+
+.date-display {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.8rem;
+}
+
+/* ============================================
+   TIMEZONE OFFSET
+   ============================================ */
+
+.timezone-offset {
+  font-size: 0.8rem;
+  color: var(--accent-color);
+  background-color: rgba(52, 152, 219, 0.1);
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+/* Tablet devices (768px and above) */
+@media (max-width: 768px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .clocks-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .time-display {
+    font-size: 1.8rem;
+  }
+}
+
+/* Mobile devices (480px and below) */
+@media (max-width: 480px) {
+  .container {
+    padding: 0.8rem;
+  }
+
+  .header {
+    margin-bottom: 2rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .clocks-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .clock-card {
+    padding: 1.2rem;
+  }
+
+  .time-display {
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Focus styles for keyboard navigation */
+.clock-card:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  .clock-card {
+    border-width: 2px;
+  }
+
+  .timezone-offset {
+    border: 1px solid var(--accent-color);
+    background-color: transparent;
+  }
+}
