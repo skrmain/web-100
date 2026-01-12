@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Keyboard Key Detector - Real-Time Key Event Analyzer</title>
+
+    <!-- Semantic meta tags for better SEO and accessibility -->
+    <meta
+      name="description"
+      content="Interactive keyboard key detector displaying key codes, character codes, and keyboard event properties in real-time with light/dark mode support."
+    />
+    <meta
+      name="keywords"
+      content="keyboard detector, key events, JavaScript, web API, keyboard handler"
+    />
+    <meta name="theme-color" content="#667eea" />
+
+    <style>
+      /* ============================================
+           CSS VARIABLES FOR THEMING & MAINTAINABILITY
+           ============================================
+           
+           Best Practice: Using CSS custom properties (variables) allows for:
+           - Easy theme switching without duplicating styles
+           - Dynamic updates via JavaScript
+           - Fallback values for older browsers
+           - Better code organization and readability
+        */
+
+      :root {
+        /* Colors - Light Mode (Default) */
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --background-color: #f7f9fc;
+        --surface-color: #ffffff;
+        --text-primary: #1a202c;
+        --text-secondary: #4a5568;
+        --border-color: #e2e8f0;
+        --accent-color: #48bb78;
+        --warning-color: #ed8936;
+        --error-color: #f56565;
+        --shadow-color: rgba(0, 0, 0, 0.1);
+
+        /* Spacing - Following a consistent 8px scale */
+        --spacing-xs: 0.25rem;
+        --spacing-sm: 0.5rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+        --spacing-xxl: 3rem;
+
+        /* Typography */
+        --font-family-primary: -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, sans-serif;
+        --font-family-mono: "Courier New", "Courier", monospace;
+        --font-size-xs: 0.75rem;
+        --font-size-sm: 0.875rem;
+        --font-size-base: 1rem;
+        --font-size-lg: 1.125rem;
+        --font-size-xl: 1.5rem;
+        --font-size-2xl: 2rem;
+
+        /* Border Radius */
+        --radius-sm: 0.375rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+
+        /* Transitions */
+        --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --transition-fast: all 0.15s ease-out;
+
+        /* Z-Index Scale */
+        --z-base: 1;
+        --z-elevated: 10;
+        --z-modal: 100;
+      }
+
+      /* ============================================
+           DARK MODE CSS VARIABLES
+           ============================================
+           
+           Dark mode uses 'prefers-color-scheme' media query which respects
+           user's system preferences. This is the modern approach replacing
+           @media (prefers-dark-interface) which was never standardized.
+        */
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --background-color: #0f172a;
+          --surface-color: #1e293b;
+          --text-primary: #f1f5f9;
+          --text-secondary: #cbd5e1;
+          --border-color: #334155;
+          --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      /* ============================================
+           GLOBAL STYLES
+           ============================================
+           
+           Reset and base styles following modern CSS practices
+        */
+
+      * {
+        /* 
+               border-box makes sizing calculations more intuitive by
+               including padding and border in the element's width/height
+            */
+        box-sizing: border-box;
+      }
+
+      html {
+        /* 
+               Smooth scrolling enhances user experience
+               Note: Some users prefer reduced motion; this is addressed
+               in the prefers-reduced-motion media query below
+            */
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        padding: var(--spacing-md);
+        font-family: var(--font-family-primary);
+        font-size: var(--font-size-base);
+        color: var(--text-primary);
+        background-color: var(--background-color);
+        transition: var(--transition-base);
+      }
+
+      /* ============================================
+           ACCESSIBILITY: REDUCED MOTION SUPPORT
+           ============================================
+           
+           Best Practice: Always respect prefers-reduced-motion for users
+           with vestibular disorders or motion sensitivity. This disables
+           animations for those users while keeping them for others.
+        */
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+
+      /* ============================================
+           TYPOGRAPHY STYLES
+           ============================================
+        */
+
+      h1 {
+        margin: 0 0 var(--spacing-sm) 0;
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      h2 {
+        margin: var(--spacing-lg) 0 var(--spacing-md) 0;
+        font-size: var(--font-size-xl);
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      h3 {
+        margin: var(--spacing-md) 0 var(--spacing-sm) 0;
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      p {
+        margin: 0 0 var(--spacing-md) 0;
+        line-height: 1.6;
+        color: var(--text-secondary);
+      }
+
+      /* ============================================
+           BUTTON STYLES
+           ============================================
+           
+           Best Practice: Buttons should have:
+           - Clear focus states for keyboard navigation
+           - Sufficient color contrast (WCAG AA)
+           - Minimum 44x44px touch target (WCAG 2.1)
+        */
+
+      button {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-family: var(--font-family-primary);
+        font-size: var(--font-size-sm);
+        border: 2px solid transparent;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: var(--transition-fast);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px var(--shadow-color);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+
+      /* 
+           Focus state is critical for keyboard accessibility
+           Using outline instead of removing it to maintain visibility
+        */
+      button:focus {
+        outline: 3px solid var(--primary-color);
+        outline-offset: 2px;
+      }
+
+      .btn-secondary {
+        background-color: var(--surface-color);
+        color: var(--text-primary);
+        border-color: var(--border-color);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--border-color);
+      }
+
+      /* ============================================
+           LAYOUT: FLEXBOX (RESPONSIVE)
+           ============================================
+           
+           Modern layout using Flexbox for better responsive behavior
+           compared to older approaches like floats or tables
+        */
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: var(--spacing-xl) var(--spacing-md);
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-xl);
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+      }
+
+      .header-content {
+        flex: 1;
+        min-width: 250px;
+      }
+
+      .subtitle {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+        margin: 0;
+      }
+
+      /* ============================================
+           THEME TOGGLE BUTTON
+           ============================================
+        */
+
+      .theme-toggle {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-sm) var(--spacing-md);
+        background-color: var(--surface-color);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-size: var(--font-size-lg);
+        transition: var(--transition-fast);
+      }
+
+      .theme-toggle:hover {
+        background-color: var(--border-color);
+      }
+
+      .theme-toggle:focus {
+        outline: 3px solid var(--primary-color);
+        outline-offset: 2px;
+      }
+
+      /* ============================================
+           MAIN CONTENT AREA
+           ============================================
+        */
+
+      .content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
+      }
+
+      /* ============================================
+           CARD COMPONENT
+           ============================================
+           
+           Reusable card style with shadows and proper spacing
+        */
+
+      .card {
+        background-color: var(--surface-color);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 8px var(--shadow-color);
+        transition: var(--transition-base);
+      }
+
+      .card:hover {
+        box-shadow: 0 8px 16px var(--shadow-color);
+      }
+
+      /* ============================================
+           KEY INFO DISPLAY SECTION
+           ============================================
+        */
+
+      .key-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--spacing-lg);
+      }
+
+      .key-property {
+        text-align: center;
+      }
+
+      .key-property-label {
+        display: block;
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-sm);
+      }
+
+      .key-property-value {
+        display: block;
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-lg);
+        font-weight: 700;
+        color: var(--primary-color);
+        word-break: break-all;
+      }
+
+      /* ============================================
+           EVENT PROPERTIES TABLE
+           ============================================
+        */
+
+      .properties-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: var(--spacing-md);
+      }
+
+      .properties-table th {
+        background-color: var(--border-color);
+        padding: var(--spacing-md);
+        text-align: left;
+        font-weight: 600;
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+      }
+
+      .properties-table td {
+        padding: var(--spacing-md);
+        border: 1px solid var(--border-color);
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+
+      .properties-table tr:hover {
+        background-color: var(--border-color);
+      }
+
+      /* ============================================
+           EVENT LOG SECTION
+           ============================================
+        */
+
+      .event-log {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+        background-color: var(--background-color);
+      }
+
+      .log-entry {
+        padding: var(--spacing-sm);
+        margin: var(--spacing-sm) 0;
+        border-left: 4px solid var(--primary-color);
+        background-color: var(--surface-color);
+        border-radius: var(--radius-sm);
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+
+      .log-entry.keydown {
+        border-left-color: var(--accent-color);
+      }
+
+      .log-entry.keyup {
+        border-left-color: var(--warning-color);
+      }
+
+      .log-entry-timestamp {
+        color: var(--text-secondary);
+        font-size: var(--font-size-xs);
+      }
+
+      /* ============================================
+           KEYBOARD LAYOUT VISUALIZATION
+           ============================================
+        */
+
+      .keyboard-layout {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
+        gap: var(--spacing-xs);
+        margin-top: var(--spacing-lg);
+      }
+
+      .key-button {
+        padding: var(--spacing-sm);
+        background-color: var(--surface-color);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        font-family: var(--font-family-mono);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        cursor: default;
+        transition: var(--transition-fast);
+        text-align: center;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .key-button.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        box-shadow: 0 4px 12px var(--shadow-color);
+        transform: scale(1.05);
+      }
+
+      /* ============================================
+           INFORMATION BOX
+           ============================================
+        */
+
+      .info-box {
+        background-color: var(--border-color);
+        border-left: 4px solid var(--primary-color);
+        padding: var(--spacing-lg);
+        border-radius: var(--radius-md);
+        margin-top: var(--spacing-lg);
+      }
+
+      .info-box h3 {
+        margin-top: 0;
+      }
+
+      .info-box code {
+        background-color: var(--background-color);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: var(--font-family-mono);
+        font-size: 0.9em;
+      }
+
+      /* ============================================
+           RESPONSIVE DESIGN
+           ============================================
+        */
+
+      @media (max-width: 768px) {
+        .container {
+          padding: var(--spacing-lg) var(--spacing-md);
+        }
+
+        .header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .theme-toggle {
+          align-self: flex-start;
+        }
+
+        .content {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          font-size: var(--font-size-xl);
+        }
+
+        .keyboard-layout {
+          grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: var(--spacing-sm);
+        }
+
+        .container {
+          padding: var(--spacing-lg) var(--spacing-sm);
+        }
+
+        .card {
+          padding: var(--spacing-md);
+        }
+
+        .properties-table {
+          font-size: var(--font-size-xs);
+        }
+
+        .properties-table th,
+        .properties-table td {
+          padding: var(--spacing-sm);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ============================================
+         SEMANTIC HTML STRUCTURE
+         ============================================
+         
+         Using semantic HTML5 elements improves:
+         - SEO and search engine understanding
+         - Accessibility for screen readers
+         - Code maintainability and readability
+         - Native browser form handling
+         
+         Key semantic elements used:
+         - <header> for top navigation/title area
+         - <main> for primary content
+         - <article> for self-contained content
+         - <section> for thematic groupings
+         - <aside> for supplementary content
+         - Proper heading hierarchy (h1, h2, h3)
+    -->
+
+    <div class="container">
+      <!-- Header with Title and Theme Toggle -->
+      <header class="header">
+        <div class="header-content">
+          <h1>⌨️ Keyboard Key Detector</h1>
+          <p class="subtitle">
+            Real-time keyboard event analyzer with modern Web APIs
+          </p>
+        </div>
+        <!-- 
+                 Theme toggle button with aria-label for screen readers.
+                 aria-pressed indicates the current state (true/false)
+            -->
+        <button
+          class="theme-toggle"
+          id="themeToggle"
+          aria-label="Toggle dark mode"
+          title="Toggle dark/light theme (or press Ctrl+Shift+T)"
+        >
+          <span id="themeIcon">🌙</span>
+          <span id="themeName">Dark</span>
+        </button>
+      </header>
+
+      <main>
+        <!-- Main Content Grid -->
+        <div class="content">
+          <!-- ============================================
+                     PRIMARY CARD: KEY INFORMATION DISPLAY
+                     ============================================
+                     
+                     This section displays real-time keyboard event data
+                     as the user presses keys. The data shown includes:
+                     
+                     1. key - The string value of the key (modern property)
+                     2. code - The physical code of the key (modern property)
+                     3. keyCode - Deprecated but shown for reference
+                     4. charCode - Only for keypress (rarely used now)
+                     5. Which - Deprecated universal key identifier
+                     6. Location - Which side (left/right) on keyboards with duplicates
+                -->
+          <article class="card">
+            <h2>Last Key Pressed</h2>
+            <p
+              style="
+                color: var(--text-secondary);
+                margin-bottom: var(--spacing-lg);
+                font-style: italic;
+              "
+            >
+              Press any key on your keyboard to see its details...
+            </p>
+
+            <div class="key-info">
+              <div class="key-property">
+                <span class="key-property-label">Key Value</span>
+                <span class="key-property-value" id="keyValue">-</span>
+              </div>
+              <div class="key-property">
+                <span class="key-property-label">Code</span>
+                <span class="key-property-value" id="keyCode">-</span>
+              </div>
+              <div class="key-property">
+                <span class="key-property-label">Key Code</span>
+                <span class="key-property-value" id="keyKeyCode">-</span>
+              </div>
+              <div class="key-property">
+                <span class="key-property-label">Location</span>
+                <span class="key-property-value" id="keyLocation">-</span>
+              </div>
+            </div>
+
+            <!-- Information Box explaining key properties -->
+            <div class="info-box">
+              <h3>📚 Modern vs. Deprecated Properties</h3>
+              <ul style="margin: 0; padding-left: var(--spacing-lg)">
+                <li>
+                  <strong>key</strong> (Modern): Returns the actual character
+                  value. This is the preferred property.
+                </li>
+                <li>
+                  <strong>code</strong> (Modern): Returns the physical key
+                  location code. Always consistent regardless of keyboard
+                  layout.
+                </li>
+                <li>
+                  <strong>keyCode</strong> (Deprecated): ⚠️ Don't use in new
+                  code. Returns numeric code, unreliable across browsers.
+                </li>
+                <li>
+                  <strong>charCode</strong> (Deprecated): ⚠️ Only in keypress
+                  event (rarely used). Use key property instead.
+                </li>
+                <li>
+                  <strong>which</strong> (Deprecated): ⚠️ Use code or keyCode
+                  instead.
+                </li>
+                <li>
+                  <strong>location</strong> (Modern): Distinguishes between
+                  left/right modifier keys (0=standard, 1=left, 2=right,
+                  3=numpad).
+                </li>
+              </ul>
+            </div>
+          </article>
+
+          <!-- ============================================
+                     SECONDARY CARD: EVENT PROPERTIES TABLE
+                     ============================================
+                     
+                     Displays all KeyboardEvent properties in a table format
+                     for detailed inspection of the keyboard event object.
+                -->
+          <article class="card">
+            <h2>Event Properties</h2>
+            <table class="properties-table">
+              <thead>
+                <tr>
+                  <th>Property</th>
+                  <th>Value</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="propertiesTableBody">
+                <tr>
+                  <td
+                    colspan="3"
+                    style="text-align: center; color: var(--text-secondary)"
+                  >
+                    Press a key to populate this table
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="info-box" style="margin-top: var(--spacing-lg)">
+              <h3>🎯 Key Event Types</h3>
+              <ul style="margin: 0; padding-left: var(--spacing-lg)">
+                <li>
+                  <strong>keydown</strong>: Fires when a key is initially
+                  pressed (repeats if held)
+                </li>
+                <li><strong>keyup</strong>: Fires when a key is released</li>
+                <li>
+                  <strong>keypress</strong> (Deprecated): ⚠️ Avoid using. Use
+                  keydown/keyup instead.
+                </li>
+              </ul>
+            </div>
+          </article>
+        </div>
+
+        <!-- ============================================
+                 EVENT LOG SECTION
+                 ============================================
+                 
+                 Displays a history of keyboard events in reverse
+                 chronological order (newest first).
+            -->
+        <article class="card" style="margin-bottom: var(--spacing-xl)">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: var(--spacing-md);
+            "
+          >
+            <h2 style="margin: 0">Event Log</h2>
+            <button
+              class="btn-secondary"
+              id="clearLogBtn"
+              title="Clear all logged events"
+            >
+              Clear Log
+            </button>
+          </div>
+          <p
+            style="color: var(--text-secondary); margin-top: var(--spacing-md)"
+          >
+            Last 20 keyboard events in reverse chronological order
+          </p>
+          <div class="event-log" id="eventLog">
+            <p
+              style="
+                color: var(--text-secondary);
+                text-align: center;
+                margin: var(--spacing-lg) 0;
+              "
+            >
+              No events logged yet
+            </p>
+          </div>
+        </article>
+
+        <!-- ============================================
+                 KEYBOARD VISUALIZATION SECTION
+                 ============================================
+                 
+                 Shows a visual representation of which keys are
+                 currently pressed. The visualization updates in
+                 real-time as keys are pressed and released.
+            -->
+        <article class="card" style="margin-bottom: var(--spacing-xl)">
+          <h2>Keyboard Layout Visualization</h2>
+          <p style="color: var(--text-secondary)">
+            Keys that are currently pressed are highlighted in blue
+          </p>
+          <div class="keyboard-layout" id="keyboardVisualization"></div>
+        </article>
+
+        <!-- ============================================
+                 EDUCATIONAL INFORMATION SECTION
+                 ============================================
+            -->
+        <article class="card">
+          <h2>🎓 Web API Best Practices & Accessibility</h2>
+
+          <h3>Keyboard Event Handling</h3>
+          <ul>
+            <li>
+              <strong>Use keydown/keyup</strong> for detecting keys. keypress is
+              deprecated and unreliable for non-printable keys.
+            </li>
+            <li>
+              <strong>Check event.code</strong> when you need physical key
+              position (e.g., game controls)
+            </li>
+            <li>
+              <strong>Check event.key</strong> when you need the actual
+              character value (e.g., form input)
+            </li>
+            <li>
+              <strong>Avoid keyCode</strong>: It's deprecated, inconsistent
+              across browsers, and doesn't work well with non-ASCII characters
+            </li>
+          </ul>
+
+          <h3>Accessibility Considerations</h3>
+          <ul>
+            <li>
+              <strong>Always provide keyboard alternatives</strong>: Don't rely
+              on mouse-only interactions
+            </li>
+            <li>
+              <strong>Support modifier keys</strong>: Use
+              <code>event.ctrlKey</code>, <code>event.shiftKey</code>,
+              <code>event.altKey</code>, <code>event.metaKey</code>
+            </li>
+            <li>
+              <strong>Manage focus</strong>: Ensure keyboard focus is visible
+              and logical throughout your application
+            </li>
+            <li>
+              <strong>Implement skip links</strong>: Help keyboard users
+              navigate to main content quickly
+            </li>
+            <li>
+              <strong>Test with screen readers</strong>: Ensure your keyboard
+              interactions work with assistive technologies
+            </li>
+            <li>
+              <strong>Consider IME events</strong>: For international text
+              input, use composition events alongside keyboard events
+            </li>
+          </ul>
+
+          <h3>Modern Web APIs Used in This Application</h3>
+          <ul>
+            <li>
+              <strong>KeyboardEvent API</strong>: Provides key and code
+              properties (modern standard)
+            </li>
+            <li>
+              <strong>CSS Custom Properties (Variables)</strong>: Enable dynamic
+              theming without JavaScript complexity
+            </li>
+            <li>
+              <strong>prefers-color-scheme</strong>: Respects user's system dark
+              mode preference
+            </li>
+            <li>
+              <strong>prefers-reduced-motion</strong>: Respects user's motion
+              sensitivity preferences
+            </li>
+            <li>
+              <strong>Flexbox & CSS Grid</strong>: Modern layout techniques
+              replacing floats and tables
+            </li>
+            <li>
+              <strong>localStorage API</strong>: Persists user theme preference
+              across sessions
+            </li>
+          </ul>
+
+          <h3>Performance Optimization</h3>
+          <ul>
+            <li>
+              <strong>Event delegation</strong>: Not needed for keyboard events,
+              but important for other event types
+            </li>
+            <li>
+              <strong>Throttling/Debouncing</strong>: For high-frequency events,
+              consider limiting handler execution
+            </li>
+            <li>
+              <strong>Remove unused listeners</strong>: Clean up event listeners
+              when elements are removed
+            </li>
+            <li>
+              <strong>Use passive listeners</strong> when appropriate: Improves
+              scroll performance
+            </li>
+          </ul>
+        </article>
+      </main>
+    </div>
+
+    <!-- ============================================
+         JAVASCRIPT APPLICATION
+         ============================================
+         
+         This script demonstrates:
+         - Modern keyboard event handling
+         - DOM manipulation best practices
+         - Theme persistence with localStorage
+         - Real-time UI updates
+         - Proper event listener management
+    -->
+    <script>
+      /**
+       * KEYBOARD KEY DETECTOR APPLICATION
+       *
+       * This application provides real-time detection and visualization of
+       * keyboard events using modern Web APIs and best practices.
+       *
+       * Architecture:
+       * - Event listeners attached to the document (captures all key events)
+       * - State management for theme and key press tracking
+       * - UI update functions for live data display
+       * - Keyboard visualization showing which keys are currently pressed
+       */
+
+      // ============================================
+      // STATE MANAGEMENT
+      // ============================================
+
+      /**
+       * Application state object
+       *
+       * Keeps track of:
+       * - Currently pressed keys (for visualization)
+       * - Dark mode state (synchronized with localStorage)
+       * - Event log history (limited to 20 entries)
+       */
+      const appState = {
+        pressedKeys: new Map(), // Stores currently pressed keys
+        isDarkMode: isDarkModePreferred(),
+        eventLog: [], // Array of recent events
+        maxLogEntries: 20,
+        preferences: {
+          themeKey: "keyboard-detector-theme", // localStorage key
+        },
+      };
+
+      // ============================================
+      // DOM ELEMENTS (Cached for performance)
+      // ============================================
+
+      const domElements = {
+        // Key display elements
+        keyValue: document.getElementById("keyValue"),
+        keyCode: document.getElementById("keyCode"),
+        keyKeyCode: document.getElementById("keyKeyCode"),
+        keyLocation: document.getElementById("keyLocation"),
+
+        // Table and log elements
+        propertiesTableBody: document.getElementById("propertiesTableBody"),
+        eventLog: document.getElementById("eventLog"),
+        clearLogBtn: document.getElementById("clearLogBtn"),
+
+        // Theme toggle
+        themeToggle: document.getElementById("themeToggle"),
+        themeIcon: document.getElementById("themeIcon"),
+        themeName: document.getElementById("themeName"),
+
+        // Keyboard visualization
+        keyboardVisualization: document.getElementById("keyboardVisualization"),
+      };
+
+      // ============================================
+      // UTILITY FUNCTIONS
+      // ============================================
+
+      /**
+       * Determines if dark mode is preferred by the user
+       *
+       * Priority:
+       * 1. User's localStorage preference (if saved)
+       * 2. System preference via prefers-color-scheme
+       * 3. Default to light mode
+       *
+       * @returns {boolean} True if dark mode is preferred
+       */
+      function isDarkModePreferred() {
+        const saved = localStorage.getItem("keyboard-detector-theme");
+        if (saved !== null) {
+          return saved === "dark";
+        }
+
+        // Check system preference using prefers-color-scheme media query
+        // This is the modern way to detect dark mode preference
+        if (
+          window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+        ) {
+          return true;
+        }
+
+        return false;
+      }
+
+      /**
+       * Updates the application theme
+       *
+       * Modern approach using CSS custom properties (variables) allows
+       * for easy, efficient theme switching without repainting the entire page
+       *
+       * @param {boolean} isDark - True to enable dark mode, false for light mode
+       */
+      function updateTheme(isDark) {
+        appState.isDarkMode = isDark;
+
+        // Update localStorage
+        localStorage.setItem(
+          appState.preferences.themeKey,
+          isDark ? "dark" : "light"
+        );
+
+        // Update HTML element attribute
+        // This is just for reference; CSS custom properties handle the actual theme
+        document.documentElement.setAttribute(
+          "data-theme",
+          isDark ? "dark" : "light"
+        );
+
+        // Update UI controls
+        updateThemeToggleUI();
+      }
+
+      /**
+       * Updates the theme toggle button UI
+       */
+      function updateThemeToggleUI() {
+        if (appState.isDarkMode) {
+          domElements.themeIcon.textContent = "☀️";
+          domElements.themeName.textContent = "Light";
+          // The CSS variables defined in @media (prefers-color-scheme: dark)
+          // automatically apply the dark theme
+        } else {
+          domElements.themeIcon.textContent = "🌙";
+          domElements.themeName.textContent = "Dark";
+        }
+      }
+
+      /**
+       * Escapes HTML special characters to prevent XSS attacks
+       * Important when displaying user-controlled content
+       *
+       * @param {string} text - Text to escape
+       * @returns {string} Escaped text safe for HTML
+       */
+      function escapeHtml(text) {
+        const map = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;",
+        };
+        return text.replace(/[&<>"']/g, (char) => map[char]);
+      }
+
+      /**
+       * Converts the DOM location value to human-readable text
+       *
+       * @param {number} location - The location value from KeyboardEvent
+       * @returns {string} Human-readable location description
+       */
+      function getLocationName(location) {
+        const locationMap = {
+          0: "Standard",
+          1: "Left",
+          2: "Right",
+          3: "Numpad",
+        };
+        return locationMap[location] || `Unknown (${location})`;
+      }
+
+      /**
+       * Formats a timestamp for display in the event log
+       *
+       * @returns {string} Formatted timestamp
+       */
+      function getFormattedTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+        const ms = String(now.getMilliseconds()).padStart(3, "0");
+        return `${hours}:${minutes}:${seconds}.${ms}`;
+      }
+
+      // ============================================
+      // KEYBOARD VISUALIZATION
+      // ============================================
+
+      /**
+       * List of common keys to visualize in the keyboard layout
+       * This creates a simplified keyboard representation
+       */
+      const visualizationKeys = [
+        // Row 1: Numbers
+        ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+        // Row 2: QWERTY
+        ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+        // Row 3: ASDF
+        ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+        // Row 4: ZXCV
+        ["Z", "X", "C", "V", "B", "N", "M"],
+        // Row 5: Modifiers
+        ["Shift", "Space", "Ctrl", "Alt", "Meta"],
+        // Row 6: Navigation
+        ["↑", "←", "↓", "→"],
+        // Row 7: Function keys
+        ["F1", "F2", "F3", "F4", "F5", "F6"],
+      ];
+
+      /**
+       * Initializes the keyboard visualization grid
+       * Creates buttons for all keys to be visualized
+       */
+      function initializeKeyboardVisualization() {
+        const container = domElements.keyboardVisualization;
+
+        visualizationKeys.forEach((row) => {
+          row.forEach((keyLabel) => {
+            const button = document.createElement("button");
+            button.className = "key-button";
+            button.textContent = keyLabel;
+            button.disabled = true; // Prevent interaction
+            button.setAttribute("data-key-label", keyLabel);
+            container.appendChild(button);
+          });
+        });
+      }
+
+      /**
+       * Updates keyboard visualization based on currently pressed keys
+       *
+       * Uses requestAnimationFrame for smooth updates without blocking
+       */
+      function updateKeyboardVisualization() {
+        // Clear active states
+        document.querySelectorAll(".key-button").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+
+        // Activate currently pressed keys
+        appState.pressedKeys.forEach((pressed, code) => {
+          if (pressed) {
+            const button = document.querySelector(`[data-key-label="${code}"]`);
+            if (button) {
+              button.classList.add("active");
+            }
+          }
+        });
+      }
+
+      // ============================================
+      // EVENT LOG MANAGEMENT
+      // ============================================
+
+      /**
+       * Adds an event to the log history
+       * Maintains a maximum of maxLogEntries items
+       *
+       * @param {string} eventType - Type of event (keydown, keyup)
+       * @param {KeyboardEvent} event - The keyboard event object
+       */
+      function addEventToLog(eventType, event) {
+        const timestamp = getFormattedTime();
+        const logEntry = {
+          timestamp,
+          type: eventType,
+          key: event.key,
+          code: event.code,
+        };
+
+        appState.eventLog.unshift(logEntry); // Add to beginning (for reverse chronological)
+
+        // Limit log size
+        if (appState.eventLog.length > appState.maxLogEntries) {
+          appState.eventLog.pop(); // Remove oldest entry
+        }
+
+        renderEventLog();
+      }
+
+      /**
+       * Renders the event log in the DOM
+       * Creates readable log entries with timestamps and event details
+       */
+      function renderEventLog() {
+        const logContainer = domElements.eventLog;
+
+        if (appState.eventLog.length === 0) {
+          logContainer.innerHTML =
+            '<p style="color: var(--text-secondary); text-align: center; margin: var(--spacing-lg) 0;">No events logged yet</p>';
+          return;
+        }
+
+        logContainer.innerHTML = appState.eventLog
+          .map(
+            (entry) => `
+                <div class="log-entry ${entry.type}">
+                    <span class="log-entry-timestamp">${entry.timestamp}</span>
+                    <strong>${entry.type.toUpperCase()}</strong>
+                    <code>${escapeHtml(entry.key)}</code>
+                    (${escapeHtml(entry.code)})
+                </div>
+            `
+          )
+          .join("");
+      }
+
+      // ============================================
+      // KEYBOARD EVENT HANDLERS
+      // ============================================
+
+      /**
+       * Handles the keydown event
+       *
+       * KeyboardEvent properties explained:
+       * - key: The string value of the key (modern, preferred)
+       * - code: The physical location code of the key
+       * - keyCode: Numeric value (deprecated)
+       * - charCode: Only set in keypress event
+       * - repeat: True if the key is being held and repeating
+       * - shiftKey, ctrlKey, altKey, metaKey: Modifier keys
+       *
+       * Modern practice:
+       * - Use 'key' for input validation (what the user typed)
+       * - Use 'code' for game controls (physical key position)
+       * - Avoid 'keyCode' (deprecated, unreliable)
+       *
+       * @param {KeyboardEvent} event - The keyboard event
+       */
+      function handleKeyDown(event) {
+        // Mark key as pressed in our tracking map
+        // Use 'code' for reliable physical key identification
+        appState.pressedKeys.set(event.code, true);
+
+        // Update UI with the latest key information
+        updateKeyDisplay(event);
+        updatePropertiesTable(event);
+
+        // Add to event log
+        addEventToLog("keydown", event);
+
+        // Update visualization
+        updateKeyboardVisualization();
+      }
+
+      /**
+       * Handles the keyup event
+       * Called when a key is released
+       *
+       * @param {KeyboardEvent} event - The keyboard event
+       */
+      function handleKeyUp(event) {
+        // Mark key as released
+        appState.pressedKeys.set(event.code, false);
+
+        // Update UI
+        updateKeyDisplay(event);
+        updatePropertiesTable(event);
+
+        // Add to event log
+        addEventToLog("keyup", event);
+
+        // Update visualization
+        updateKeyboardVisualization();
+      }
+
+      /**
+       * Updates the main key display area with current keyboard event data
+       *
+       * @param {KeyboardEvent} event - The keyboard event
+       */
+      function updateKeyDisplay(event) {
+        // Modern properties (recommended)
+        domElements.keyValue.textContent = escapeHtml(event.key);
+        domElements.keyCode.textContent = escapeHtml(event.code);
+
+        // Deprecated but showing for reference
+        domElements.keyKeyCode.textContent = event.keyCode;
+        domElements.keyLocation.textContent = getLocationName(event.location);
+      }
+
+      /**
+       * Updates the properties table with all keyboard event details
+       * This shows users the complete structure of the KeyboardEvent object
+       *
+       * @param {KeyboardEvent} event - The keyboard event
+       */
+      function updatePropertiesTable(event) {
+        // Define properties to display in the table
+        // Include both modern and deprecated properties for educational purposes
+        const properties = [
+          { name: "key", value: event.key, deprecated: false },
+          { name: "code", value: event.code, deprecated: false },
+          { name: "keyCode", value: event.keyCode, deprecated: true },
+          { name: "charCode", value: event.charCode, deprecated: true },
+          { name: "which", value: event.which, deprecated: true },
+          {
+            name: "location",
+            value: getLocationName(event.location),
+            deprecated: false,
+          },
+          { name: "repeat", value: event.repeat, deprecated: false },
+          { name: "isComposing", value: event.isComposing, deprecated: false },
+          { name: "ctrlKey", value: event.ctrlKey, deprecated: false },
+          { name: "shiftKey", value: event.shiftKey, deprecated: false },
+          { name: "altKey", value: event.altKey, deprecated: false },
+          { name: "metaKey", value: event.metaKey, deprecated: false },
+          {
+            name: "timeStamp",
+            value: event.timeStamp.toFixed(2),
+            deprecated: false,
+          },
+          { name: "type", value: event.type, deprecated: false },
+        ];
+
+        // Generate table HTML
+        const html = properties
+          .map(
+            (prop) => `
+                <tr>
+                    <td>
+                        <strong>${escapeHtml(prop.name)}</strong>
+                        ${
+                          prop.deprecated
+                            ? '<span style="color: var(--error-color);">⚠️</span>'
+                            : ""
+                        }
+                    </td>
+                    <td>${
+                      typeof prop.value === "boolean"
+                        ? prop.value
+                          ? "✓ true"
+                          : "✗ false"
+                        : escapeHtml(String(prop.value))
+                    }</td>
+                    <td>${prop.deprecated ? "Deprecated" : "Modern"}</td>
+                </tr>
+            `
+          )
+          .join("");
+
+        domElements.propertiesTableBody.innerHTML = html;
+      }
+
+      // ============================================
+      // UI EVENT HANDLERS
+      // ============================================
+
+      /**
+       * Handles theme toggle button click
+       */
+      function handleThemeToggle() {
+        updateTheme(!appState.isDarkMode);
+      }
+
+      /**
+       * Handles clear log button click
+       */
+      function handleClearLog() {
+        appState.eventLog = [];
+        renderEventLog();
+      }
+
+      // ============================================
+      // KEYBOARD SHORTCUT HANDLING
+      // ============================================
+
+      /**
+       * Implements keyboard shortcuts
+       * Ctrl+Shift+T toggles dark mode
+       * This demonstrates advanced keyboard event handling
+       *
+       * @param {KeyboardEvent} event - The keyboard event
+       */
+      function handleKeyboardShortcuts(event) {
+        // Check for Ctrl+Shift+T (or Cmd+Shift+T on Mac)
+        const isToggleTheme =
+          (event.ctrlKey || event.metaKey) &&
+          event.shiftKey &&
+          event.code === "KeyT";
+
+        if (isToggleTheme) {
+          event.preventDefault(); // Prevent browser default behavior
+          handleThemeToggle();
+        }
+      }
+
+      // ============================================
+      // INITIALIZATION
+      // ============================================
+
+      /**
+       * Main initialization function
+       * Sets up all event listeners and initial UI state
+       */
+      function initialize() {
+        // Initialize keyboard visualization
+        initializeKeyboardVisualization();
+
+        // Set initial theme
+        updateThemeToggleUI();
+
+        // Attach event listeners for keyboard events
+        // Use 'document' to capture all keyboard events globally
+        // This is more efficient than attaching to individual elements
+        document.addEventListener("keydown", handleKeyDown);
+        document.addEventListener("keyup", handleKeyUp);
+
+        // Keyboard shortcut handler
+        document.addEventListener("keydown", handleKeyboardShortcuts);
+
+        // UI event listeners
+        domElements.themeToggle.addEventListener("click", handleThemeToggle);
+        domElements.clearLogBtn.addEventListener("click", handleClearLog);
+
+        // Listen for system theme preference changes
+        // Modern browsers notify when user changes their OS dark mode setting
+        if (window.matchMedia) {
+          const darkModeQuery = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+          );
+          darkModeQuery.addEventListener("change", (e) => {
+            // Only update if user hasn't manually set a preference
+            if (localStorage.getItem(appState.preferences.themeKey) === null) {
+              appState.isDarkMode = e.matches;
+              updateThemeToggleUI();
+            }
+          });
+        }
+
+        console.log("✅ Keyboard Key Detector initialized successfully");
+        console.log(
+          "💡 Tip: Press Ctrl+Shift+T (or Cmd+Shift+T on Mac) to toggle dark mode"
+        );
+      }
+
+      /**
+       * Run initialization when DOM is ready
+       * Using a simple check since the script is at the end of the document,
+       * but this pattern is good for understanding document lifecycle
+       */
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initialize);
+      } else {
+        // DOM is already loaded (script is deferred or at end of body)
+        initialize();
+      }
+
+      // ============================================
+      // CLEANUP & BEST PRACTICES
+      // ============================================
+
+      /**
+       * Cleanup function for removing event listeners
+       *
+       * Best Practice: Always remove event listeners when they're no longer needed
+       * to prevent memory leaks. This is especially important for:
+       * - Single-page applications (when navigating away)
+       * - Event handlers attached to large lists
+       * - Timers and intervals
+       *
+       * Note: For this demo, we don't explicitly call this, but it demonstrates
+       * the proper way to clean up resources in real applications.
+       */
+      function cleanup() {
+        document.removeEventListener("keydown", handleKeyDown);
+        document.removeEventListener("keyup", handleKeyUp);
+        document.removeEventListener("keydown", handleKeyboardShortcuts);
+        domElements.themeToggle.removeEventListener("click", handleThemeToggle);
+        domElements.clearLogBtn.removeEventListener("click", handleClearLog);
+      }
+
+      // Uncomment for single-page applications that navigate:
+      // window.addEventListener('beforeunload', cleanup);
+    </script>
+  </body>
+</html>
