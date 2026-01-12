@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Character encoding and viewport for proper rendering -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Page title for browser tab -->
+    <title>Random Background Color Generator</title>
+
+    <!-- Link to external CSS stylesheet -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Main container for the app -->
+    <main class="container">
+      <!-- Header section with title -->
+      <header>
+        <h1>Random Background Color Generator</h1>
+        <p class="subtitle">Click the button to generate a new color</p>
+      </header>
+
+      <!-- Color display and controls section -->
+      <section class="color-display">
+        <!-- Display current color in HEX format -->
+        <div class="color-info">
+          <div class="color-value-wrapper">
+            <p class="color-label">HEX Color</p>
+            <p id="colorHex" class="color-value">#000000</p>
+            <button
+              id="copyHexBtn"
+              class="copy-btn"
+              aria-label="Copy HEX color code to clipboard"
+              title="Copy to clipboard"
+            >
+              Copy HEX
+            </button>
+          </div>
+
+          <!-- Display current color in RGB format -->
+          <div class="color-value-wrapper">
+            <p class="color-label">RGB Color</p>
+            <p id="colorRgb" class="color-value">rgb(0, 0, 0)</p>
+            <button
+              id="copyRgbBtn"
+              class="copy-btn"
+              aria-label="Copy RGB color code to clipboard"
+              title="Copy to clipboard"
+            >
+              Copy RGB
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Button to generate new random color -->
+      <section class="button-section">
+        <button
+          id="generateBtn"
+          class="generate-btn"
+          aria-label="Generate a new random background color"
+        >
+          Generate Color
+        </button>
+      </section>
+
+      <!-- Feedback message for copy action -->
+      <div
+        id="copyNotification"
+        class="copy-notification"
+        role="status"
+        aria-live="polite"
+      >
+        Copied to clipboard!
+      </div>
+    </main>
+
+    <!-- Link to external JavaScript file -->
+    <script src="script.js"></script>
+  </body>
+</html>
