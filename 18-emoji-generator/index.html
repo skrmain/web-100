@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Character encoding and viewport for responsive design -->
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A fun random emoji generator with emoji name display and copy-to-clipboard functionality"
+    />
+    <meta name="theme-color" content="#667eea" />
+    <title>Random Emoji Generator 🎉</title>
+
+    <style>
+      /* ============================================
+         CSS Variables for Theming & Accessibility
+         ============================================ */
+      :root {
+        /* Colors - Light Mode */
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8f9fa;
+        --text-primary: #1a1a1a;
+        --text-secondary: #666666;
+        --border-color: #e0e0e0;
+        --accent-color: #667eea;
+        --accent-hover: #5568d3;
+        --success-color: #10b981;
+
+        /* Typography */
+        --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+          "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+          "Helvetica Neue", sans-serif;
+        --font-size-base: 16px;
+        --font-size-large: 1.25rem;
+        --font-size-xlarge: 1.5rem;
+
+        /* Spacing */
+        --spacing-xs: 0.5rem;
+        --spacing-sm: 1rem;
+        --spacing-md: 1.5rem;
+        --spacing-lg: 2rem;
+        --spacing-xl: 3rem;
+
+        /* Border & Shadow */
+        --border-radius: 12px;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+
+        /* Animation */
+        --transition: all 0.3s ease;
+      }
+
+      /* Dark Mode Support */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #1a1a1a;
+          --bg-secondary: #2d2d2d;
+          --text-primary: #ffffff;
+          --text-secondary: #b0b0b0;
+          --border-color: #404040;
+        }
+      }
+
+      /* ============================================
+         Global Styles
+         ============================================ */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--font-family);
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        transition: var(--transition);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--spacing-md);
+      }
+
+      /* ============================================
+         Main Container Layout (Flexbox)
+         ============================================ */
+      .container {
+        width: 100%;
+        max-width: 600px;
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-lg);
+        padding: var(--spacing-lg);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+        animation: slideIn 0.6s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ============================================
+         Header Section
+         ============================================ */
+      header {
+        text-align: center;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: var(--spacing-md);
+      }
+
+      h1 {
+        font-size: var(--font-size-xlarge);
+        margin-bottom: var(--spacing-xs);
+      }
+
+      .subtitle {
+        font-size: var(--font-size-base);
+        color: var(--text-secondary);
+      }
+
+      /* ============================================
+         Emoji Display Section
+         ============================================ */
+      .emoji-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-lg);
+        background: var(--bg-primary);
+        border-radius: var(--border-radius);
+        border: 2px solid var(--border-color);
+      }
+
+      .emoji-display {
+        font-size: 120px;
+        line-height: 1;
+        display: block;
+        min-height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: emojiPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      }
+
+      @keyframes emojiPop {
+        0% {
+          transform: scale(0.5);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .emoji-name {
+        font-size: var(--font-size-large);
+        color: var(--text-primary);
+        font-weight: 600;
+        text-align: center;
+        word-break: break-word;
+      }
+
+      .emoji-fallback {
+        color: var(--text-secondary);
+        font-size: var(--font-size-base);
+        font-style: italic;
+      }
+
+      /* ============================================
+         Button Styles
+         ============================================ */
+      .button-group {
+        display: flex;
+        gap: var(--spacing-sm);
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      button {
+        font-family: inherit;
+        font-size: var(--font-size-base);
+        font-weight: 600;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: none;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        min-height: 44px;
+        min-width: 44px;
+        justify-content: center;
+      }
+
+      /* Primary Button - Generate New Emoji */
+      .btn-primary {
+        background-color: var(--accent-color);
+        color: white;
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--accent-hover);
+        box-shadow: var(--shadow);
+        transform: translateY(-2px);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+        box-shadow: none;
+      }
+
+      .btn-primary:focus-visible {
+        outline: 3px solid var(--accent-color);
+        outline-offset: 2px;
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Secondary Button - Copy Emoji */
+      .btn-secondary {
+        background-color: var(--bg-primary);
+        color: var(--accent-color);
+        border: 2px solid var(--accent-color);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--accent-color);
+        color: white;
+        box-shadow: var(--shadow);
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary:active {
+        transform: translateY(0);
+        box-shadow: none;
+      }
+
+      .btn-secondary:focus-visible {
+        outline: 3px solid var(--accent-color);
+        outline-offset: 2px;
+      }
+
+      /* Feedback Message */
+      .feedback-message {
+        min-height: 24px;
+        font-size: 0.9rem;
+        color: var(--success-color);
+        font-weight: 500;
+        text-align: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .feedback-message .show {
+        opacity: 1;
+      }
+
+      /* ============================================
+         Footer / Info Section
+         ============================================ */
+      footer {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-align: center;
+        padding-top: var(--spacing-sm);
+        border-top: 1px solid var(--border-color);
+      }
+
+      /* ============================================
+         Accessibility & Keyboard Navigation
+         ============================================ */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+
+      /* Focus visible for keyboard navigation */
+      *:focus-visible {
+        outline: 3px solid var(--accent-color);
+        outline-offset: 2px;
+      }
+
+      /* ============================================
+         Responsive Design (Mobile-First)
+         ============================================ */
+      @media (max-width: 480px) {
+        .container {
+          padding: var(--spacing-md);
+          gap: var(--spacing-md);
+        }
+
+        .emoji-display {
+          font-size: 90px;
+          min-height: 110px;
+        }
+
+        h1 {
+          font-size: 1.25rem;
+        }
+
+        .emoji-name {
+          font-size: var(--font-size-base);
+        }
+
+        button {
+          min-height: 48px;
+          font-size: 0.95rem;
+        }
+
+        .btn-primary {
+          min-width: 100%;
+        }
+
+        .button-group {
+          flex-direction: column;
+          width: 100%;
+        }
+
+        .btn-secondary {
+          width: 100%;
+        }
+      }
+
+      @media (min-width: 481px) and (max-width: 768px) {
+        .emoji-display {
+          font-size: 100px;
+          min-height: 120px;
+        }
+      }
+
+      /* Tablet and above */
+      @media (min-width: 769px) {
+        .button-group {
+          gap: var(--spacing-md);
+        }
+
+        .btn-primary {
+          flex: 0 1 auto;
+          min-width: 220px;
+        }
+      }
+
+      /* ============================================
+         Print Styles
+         ============================================ */
+      @media print {
+        button,
+        .button-group {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main Container -->
+    <div class="container">
+      <!-- Header -->
+      <header>
+        <h1>Random Emoji Generator 🎉</h1>
+        <p class="subtitle">Discover fun emojis one click at a time</p>
+      </header>
+
+      <!-- Main Emoji Section -->
+      <section class="emoji-section" aria-label="Emoji Display">
+        <!-- Large Emoji Display -->
+        <div
+          class="emoji-display"
+          id="emojiDisplay"
+          role="img"
+          aria-label="Current emoji"
+          aria-live="polite"
+        >
+          😀
+        </div>
+
+        <!-- Emoji Name/Description -->
+        <p class="emoji-name" id="emojiName" aria-label="Emoji name">
+          Grinning Face
+        </p>
+      </section>
+
+      <!-- Action Buttons -->
+      <div class="button-group" role="toolbar" aria-label="Emoji controls">
+        <!-- Generate New Emoji Button -->
+        <button
+          class="btn-primary"
+          id="generateBtn"
+          aria-label="Generate a new random emoji"
+          type="button"
+        >
+          🎲 Generate New
+        </button>
+
+        <!-- Copy Emoji to Clipboard Button -->
+        <button
+          class="btn-secondary"
+          id="copyBtn"
+          aria-label="Copy current emoji to clipboard"
+          type="button"
+        >
+          📋 Copy
+        </button>
+      </div>
+
+      <!-- Feedback Message for Copy Action -->
+      <div
+        class="feedback-message"
+        id="feedbackMessage"
+        role="status"
+        aria-live="polite"
+      >
+        ✓ Emoji copied to clipboard!
+      </div>
+
+      <!-- Footer -->
+      <footer>
+        <p>
+          Keyboard tip: Press <kbd>Space</kbd> or <kbd>Enter</kbd> to generate a
+          new emoji
+        </p>
+      </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      // ============================================
+      // Emoji Database
+      // ============================================
+      // A curated collection of emojis with names and categories
+      // Format: { emoji: string, name: string }
+      const EMOJI_DATABASE = [
+        // Smileys & Emotions
+        { emoji: "😀", name: "Grinning Face" },
+        { emoji: "😃", name: "Grinning Face with Big Eyes" },
+        { emoji: "😄", name: "Grinning Face with Smiling Eyes" },
+        { emoji: "😁", name: "Beaming Face with Smiling Eyes" },
+        { emoji: "😆", name: "Grinning Squinting Face" },
+        { emoji: "😅", name: "Grinning Face with Sweat" },
+        { emoji: "🤣", name: "Rolling on Floor Laughing" },
+        { emoji: "😂", name: "Face with Tears of Joy" },
+        { emoji: "🙂", name: "Slightly Smiling Face" },
+        { emoji: "🙃", name: "Upside Down Face" },
+        { emoji: "😉", name: "Winking Face" },
+        { emoji: "😊", name: "Smiling Face with Smiling Eyes" },
+        { emoji: "😇", name: "Smiling Face with Halo" },
+        { emoji: "🥰", name: "Smiling Face with Hearts" },
+        { emoji: "😍", name: "Smiling Face with Heart Eyes" },
+        { emoji: "🤩", name: "Star Struck" },
+        { emoji: "😘", name: "Kissing Face" },
+        { emoji: "😗", name: "Kissing Face" },
+        { emoji: "😚", name: "Kissing Face with Closed Eyes" },
+        { emoji: "😙", name: "Kissing Face with Smiling Eyes" },
+        { emoji: "🥲", name: "Smiling Face with Tear" },
+        { emoji: "😋", name: "Face Savoring Food" },
+        { emoji: "😛", name: "Grinning Face with Tongue" },
+        { emoji: "😜", name: "Winking Face with Tongue" },
+        { emoji: "🤪", name: "Zany Face" },
+        { emoji: "😌", name: "Relieved Face" },
+        { emoji: "😔", name: "Pensive Face" },
+        { emoji: "😑", name: "Expressionless Face" },
+        { emoji: "😐", name: "Neutral Face" },
+        { emoji: "😶", name: "Face with Mouth Covered" },
+        { emoji: "🙁", name: "Slightly Frowning Face" },
+        { emoji: "☹️", name: "Frowning Face" },
+        { emoji: "🥱", name: "Yawning Face" },
+        { emoji: "😏", name: "Smirking Face" },
+        { emoji: "😣", name: "Persevering Face" },
+        { emoji: "😖", name: "Confounded Face" },
+        { emoji: "😫", name: "Tired Face" },
+        { emoji: "😞", name: "Disappointed Face" },
+        { emoji: "😤", name: "Face with Steam from Nose" },
+        { emoji: "🤑", name: "Money Face" },
+        { emoji: "😈", name: "Smiling Face with Horns" },
+        { emoji: "😎", name: "Smiling Face with Sunglasses" },
+        { emoji: "🤓", name: "Nerd Face" },
+        { emoji: "🤡", name: "Clown Face" },
+
+        // Hand Gestures
+        { emoji: "👋", name: "Waving Hand" },
+        { emoji: "🤚", name: "Raised Back of Hand" },
+        { emoji: "🖐️", name: "Hand with Fingers Splayed" },
+        { emoji: "✋", name: "Raised Hand" },
+        { emoji: "🖖", name: "Vulcan Salute" },
+        { emoji: "👌", name: "OK Hand" },
+        { emoji: "🤌", name: "Pinched Fingers" },
+        { emoji: "🤏", name: "Pinching Hand" },
+        { emoji: "✌️", name: "Victory Hand" },
+        { emoji: "🤞", name: "Crossed Fingers" },
+        { emoji: "🫰", name: "Hand with Index and Middle Fingers Crossed" },
+        { emoji: "🤟", name: "Love You Gesture" },
+        { emoji: "🤘", name: "Sign of the Horns" },
+        { emoji: "🤙", name: "Call Me Hand" },
+        { emoji: "👍", name: "Thumbs Up" },
+        { emoji: "👎", name: "Thumbs Down" },
+        { emoji: "✊", name: "Raised Fist" },
+        { emoji: "👊", name: "Oncoming Fist" },
+        { emoji: "🤛", name: "Left Facing Fist" },
+        { emoji: "🤜", name: "Right Facing Fist" },
+
+        // Nature & Animals
+        { emoji: "🐶", name: "Dog Face" },
+        { emoji: "🐱", name: "Cat Face" },
+        { emoji: "🐭", name: "Mouse Face" },
+        { emoji: "🐹", name: "Hamster" },
+        { emoji: "🐰", name: "Rabbit Face" },
+        { emoji: "🦊", name: "Fox" },
+        { emoji: "🐻", name: "Bear" },
+        { emoji: "🐼", name: "Panda" },
+        { emoji: "🐨", name: "Koala" },
+        { emoji: "🐯", name: "Tiger Face" },
+        { emoji: "🦁", name: "Lion" },
+        { emoji: "🐮", name: "Cow Face" },
+        { emoji: "🐷", name: "Pig Face" },
+        { emoji: "🐸", name: "Frog" },
+        { emoji: "🐵", name: "Monkey Face" },
+        { emoji: "🙈", name: "See No Evil Monkey" },
+        { emoji: "🙉", name: "Hear No Evil Monkey" },
+        { emoji: "🙊", name: "Speak No Evil Monkey" },
+        { emoji: "🐒", name: "Monkey" },
+        { emoji: "🐔", name: "Chicken" },
+        { emoji: "🐧", name: "Penguin" },
+        { emoji: "🐦", name: "Bird" },
+        { emoji: "🐤", name: "Baby Chick" },
+        { emoji: "🦆", name: "Duck" },
+        { emoji: "🦅", name: "Eagle" },
+        { emoji: "🦉", name: "Owl" },
+        { emoji: "🦇", name: "Bat" },
+        { emoji: "🐺", name: "Wolf" },
+        { emoji: "🐗", name: "Boar" },
+        { emoji: "🐴", name: "Horse Face" },
+        { emoji: "🦄", name: "Unicorn" },
+        { emoji: "🐝", name: "Honeybee" },
+        { emoji: "🪱", name: "Nest" },
+        { emoji: "🦋", name: "Butterfly" },
+        { emoji: "🌺", name: "Hibiscus" },
+        { emoji: "🌸", name: "Cherry Blossom" },
+        { emoji: "🌼", name: "Blossom" },
+        { emoji: "🌻", name: "Sunflower" },
+        { emoji: "🌞", name: "Sun with Face" },
+        { emoji: "⭐", name: "Star" },
+        { emoji: "🌟", name: "Glowing Star" },
+        { emoji: "✨", name: "Sparkles" },
+        { emoji: "⚡", name: "Lightning Bolt" },
+        { emoji: "☄️", name: "Comet" },
+
+        // Food & Drink
+        { emoji: "🍎", name: "Red Apple" },
+        { emoji: "🍊", name: "Orange" },
+        { emoji: "🍋", name: "Lemon" },
+        { emoji: "🍌", name: "Banana" },
+        { emoji: "🍉", name: "Watermelon" },
+        { emoji: "🍇", name: "Grapes" },
+        { emoji: "🍓", name: "Strawberry" },
+        { emoji: "🍈", name: "Melon" },
+        { emoji: "🍒", name: "Cherries" },
+        { emoji: "🍑", name: "Peach" },
+        { emoji: "🥭", name: "Mango" },
+        { emoji: "🍍", name: "Pineapple" },
+        { emoji: "🥥", name: "Coconut" },
+        { emoji: "🥑", name: "Avocado" },
+        { emoji: "🍆", name: "Eggplant" },
+        { emoji: "🍅", name: "Tomato" },
+        { emoji: "🍄", name: "Mushroom" },
+        { emoji: "🥔", name: "Potato" },
+        { emoji: "🥐", name: "Croissant" },
+        { emoji: "🥯", name: "Bagel" },
+        { emoji: "🍞", name: "Bread" },
+        { emoji: "🥖", name: "Baguette Bread" },
+        { emoji: "🥨", name: "Pretzel" },
+        { emoji: "🧀", name: "Cheese Wedge" },
+        { emoji: "🥚", name: "Egg" },
+        { emoji: "🍳", name: "Cooking" },
+        { emoji: "🧈", name: "Butter" },
+        { emoji: "🥞", name: "Pancakes" },
+        { emoji: "🥓", name: "Bacon" },
+        { emoji: "🥩", name: "Cut of Meat" },
+        { emoji: "🍗", name: "Poultry Leg" },
+        { emoji: "🍖", name: "Meat on Bone" },
+        { emoji: "🌭", name: "Hot Dog" },
+        { emoji: "🍔", name: "Hamburger" },
+        { emoji: "🍟", name: "French Fries" },
+        { emoji: "🍕", name: "Pizza" },
+        { emoji: "🥪", name: "Sandwich" },
+        { emoji: "🥙", name: "Stuffed Flatbread" },
+        { emoji: "🧆", name: "Falafel" },
+        { emoji: "🌮", name: "Taco" },
+        { emoji: "🌯", name: "Burrito" },
+        { emoji: "🥗", name: "Green Salad" },
+        { emoji: "🥘", name: "Shallow Pan of Food" },
+        { emoji: "🍝", name: "Spaghetti" },
+        { emoji: "🍜", name: "Steaming Bowl" },
+        { emoji: "🍲", name: "Pot of Food" },
+        { emoji: "🍛", name: "Curry Rice" },
+        { emoji: "🍣", name: "Sushi" },
+        { emoji: "🍱", name: "Bento Box" },
+        { emoji: "🥟", name: "Dumpling" },
+        { emoji: "🦪", name: "Oyster" },
+        { emoji: "🍤", name: "Fried Shrimp" },
+        { emoji: "🍙", name: "Rice Ball" },
+        { emoji: "🍚", name: "Cooked Rice" },
+        { emoji: "🍰", name: "Cake" },
+        { emoji: "🎂", name: "Birthday Cake" },
+        { emoji: "🍮", name: "Custard" },
+        { emoji: "🍭", name: "Lollipop" },
+        { emoji: "🍬", name: "Candy" },
+        { emoji: "🍫", name: "Chocolate Bar" },
+        { emoji: "🍿", name: "Popcorn" },
+        { emoji: "🍩", name: "Doughnut" },
+        { emoji: "🍪", name: "Cookie" },
+        { emoji: "🌰", name: "Chestnut" },
+        { emoji: "🍯", name: "Honey Pot" },
+        { emoji: "🥐", name: "Croissant" },
+        { emoji: "🥛", name: "Glass of Milk" },
+        { emoji: "🍵", name: "Teacup without Handle" },
+        { emoji: "🍶", name: "Sake" },
+        { emoji: "🍾", name: "Bottle with Popping Cork" },
+        { emoji: "🍷", name: "Wine Glass" },
+        { emoji: "🍸", name: "Cocktail Glass" },
+        { emoji: "🍹", name: "Tropical Drink" },
+        { emoji: "🍺", name: "Beer Mug" },
+        { emoji: "🍻", name: "Clinking Beer Mugs" },
+        { emoji: "����", name: "Clinking Glasses" },
+        { emoji: "🥃", name: "Beverage Box" },
+
+        // Activity & Sports
+        { emoji: "⚽", name: "Soccer Ball" },
+        { emoji: "🏀", name: "Basketball" },
+        { emoji: "🏈", name: "American Football" },
+        { emoji: "⚾", name: "Baseball" },
+        { emoji: "🥎", name: "Softball" },
+        { emoji: "🎾", name: "Tennis" },
+        { emoji: "🏐", name: "Volleyball" },
+        { emoji: "🏉", name: "Rugby Football" },
+        { emoji: "🥏", name: "Cricket Game" },
+        { emoji: "🎳", name: "Bowling" },
+        { emoji: "🎯", name: "Direct Hit" },
+        { emoji: "🎪", name: "Circus Tent" },
+        { emoji: "🎨", name: "Artist Palette" },
+        { emoji: "🎬", name: "Clapper Board" },
+        { emoji: "🎤", name: "Microphone" },
+        { emoji: "🎧", name: "Headphone" },
+        { emoji: "🎼", name: "Musical Score" },
+        { emoji: "🎹", name: "Musical Keyboard" },
+        { emoji: "🥁", name: "Drum" },
+        { emoji: "🎷", name: "Saxophone" },
+        { emoji: "🎺", name: "Trumpet" },
+        { emoji: "🎸", name: "Guitar" },
+        { emoji: "🪕", name: "Banjo" },
+        { emoji: "🎻", name: "Violin" },
+        { emoji: "🎲", name: "Game Die" },
+        { emoji: "♟️", name: "Chess Pawn" },
+
+        // Travel & Places
+        { emoji: "🚀", name: "Rocket" },
+        { emoji: "🛸", name: "Flying Saucer" },
+        { emoji: "🛰️", name: "Satellite" },
+        { emoji: "🚁", name: "Helicopter" },
+        { emoji: "🚂", name: "Locomotive" },
+        { emoji: "🚃", name: "Railway Car" },
+        { emoji: "🚄", name: "High Speed Train" },
+        { emoji: "🚅", name: "Bullet Train" },
+        { emoji: "🚆", name: "Train" },
+        { emoji: "🚇", name: "Metro" },
+        { emoji: "🚈", name: "Light Rail" },
+        { emoji: "🚉", name: "Station" },
+        { emoji: "🚊", name: "Tram" },
+        { emoji: "🚝", name: "Mountain Cableway" },
+        { emoji: "🚞", name: "Mountain Railway" },
+        { emoji: "🚋", name: "Tram Car" },
+        { emoji: "🚌", name: "Bus" },
+        { emoji: "🚍", name: "Oncoming Bus" },
+        { emoji: "🚎", name: "Trolleybus" },
+        { emoji: "🚐", name: "Minibus" },
+        { emoji: "🚑", name: "Ambulance" },
+        { emoji: "🚒", name: "Fire Engine" },
+        { emoji: "🚓", name: "Police Car" },
+        { emoji: "🚔", name: "Oncoming Police Car" },
+        { emoji: "🚕", name: "Taxi" },
+        { emoji: "🚖", name: "Oncoming Taxi" },
+        { emoji: "🚗", name: "Automobile" },
+        { emoji: "🚘", name: "Oncoming Automobile" },
+        { emoji: "🚙", name: "Sport Utility Vehicle" },
+        { emoji: "🚚", name: "Delivery Truck" },
+        { emoji: "🚛", name: "Articulated Lorry" },
+        { emoji: "🚜", name: "Tractor" },
+        { emoji: "🏎️", name: "Racing Car" },
+        { emoji: "🏍️", name: "Motorcycle" },
+        { emoji: "🛵", name: "Motor Scooter" },
+        { emoji: "🚲", name: "Bicycle" },
+        { emoji: "🛴", name: "Kick Scooter" },
+        { emoji: "🛹", name: "Skateboard" },
+        { emoji: "🛼", name: "Roller Skate" },
+        { emoji: "🛺", name: "Auto Rickshaw" },
+        { emoji: "🏎️", name: "Racing Car" },
+        { emoji: "🏍️", name: "Motorcycle" },
+        { emoji: "⛵", name: "Sailboat" },
+        { emoji: "🚤", name: "Speedboat" },
+        { emoji: "🛳️", name: "Passenger Ship" },
+        { emoji: "⛴️", name: "Ferry" },
+        { emoji: "🛥️", name: "Motor Boat" },
+        { emoji: "🚢", name: "Ship" },
+        { emoji: "🎡", name: "Ferris Wheel" },
+        { emoji: "🎢", name: "Roller Coaster" },
+        { emoji: "🎠", name: "Carousel Horse" },
+        { emoji: "⛲", name: "Fountain" },
+        { emoji: "⛺", name: "Tent" },
+        { emoji: "🏰", name: "Castle" },
+        { emoji: "🎪", name: "Circus Tent" },
+        { emoji: "🚂", name: "Locomotive" },
+        { emoji: "⛩️", name: "Japanese Temple" },
+        { emoji: "💈", name: "Barber Pole" },
+        { emoji: "🎨", name: "Artist Palette" },
+        { emoji: "🎭", name: "Performing Arts" },
+
+        // Objects
+        { emoji: "⌚", name: "Watch" },
+        { emoji: "📱", name: "Mobile Phone" },
+        { emoji: "📲", name: "Mobile Phone with Arrow" },
+        { emoji: "💻", name: "Laptop" },
+        { emoji: "⌨️", name: "Keyboard" },
+        { emoji: "🖥️", name: "Desktop Computer" },
+        { emoji: "🖨️", name: "Printer" },
+        { emoji: "🖱️", name: "Computer Mouse" },
+        { emoji: "🖲️", name: "Trackball" },
+        { emoji: "🕹️", name: "Joystick" },
+        { emoji: "🗜️", name: "Clamp" },
+        { emoji: "💽", name: "Computer Disk" },
+        { emoji: "💾", name: "Floppy Disk" },
+        { emoji: "💿", name: "Optical Disk" },
+        { emoji: "📀", name: "DVD" },
+        { emoji: "🧮", name: "Abacus" },
+        { emoji: "🎥", name: "Movie Camera" },
+        { emoji: "🎬", name: "Clapper Board" },
+        { emoji: "📷", name: "Camera" },
+        { emoji: "📸", name: "Camera with Flash" },
+        { emoji: "📹", name: "Video Camera" },
+        { emoji: "🎞️", name: "Film Frames" },
+        { emoji: "🎦", name: "Cinema" },
+        { emoji: "📽️", name: "Film Projector" },
+        { emoji: "🔍", name: "Magnifying Glass Tilted Left" },
+        { emoji: "🔎", name: "Magnifying Glass Tilted Right" },
+        { emoji: "🔏", name: "Locked with Pen" },
+        { emoji: "🔐", name: "Locked with Key" },
+        { emoji: "🔒", name: "Locked" },
+        { emoji: "🔓", name: "Unlocked" },
+        { emoji: "🪑", name: "Chair" },
+        { emoji: "🚪", name: "Door" },
+        { emoji: "🛗", name: "Elevator" },
+        { emoji: "🪒", name: "Razor" },
+        { emoji: "🛏️", name: "Bed" },
+        { emoji: "🛋️", name: "Couch and Lamp" },
+        { emoji: "🛪", name: "Toilet" },
+        { emoji: "🚽", name: "Toilet" },
+        { emoji: "🚿", name: "Shower" },
+        { emoji: "🛁", name: "Bathtub" },
+        { emoji: "🛒", name: "Shopping Cart" },
+        { emoji: "🚬", name: "Cigarette" },
+        { emoji: "⚰️", name: "Coffin" },
+        { emoji: "⚱️", name: "Funeral Urn" },
+        { emoji: "🏺", name: "Amphora" },
+        { emoji: "🔮", name: "Crystal Ball" },
+        { emoji: "📃", name: "Page with Curl" },
+        { emoji: "📜", name: "Scroll" },
+        { emoji: "📄", name: "Page Facing Up" },
+        { emoji: "📎", name: "Paperclip" },
+        { emoji: "🖇️", name: "Linked Paperclips" },
+        { emoji: "📐", name: "Triangular Ruler" },
+        { emoji: "📌", name: "Pushpin" },
+        { emoji: "📍", name: "Round Pushpin" },
+        { emoji: "✂️", name: "Scissors" },
+        { emoji: "🖊️", name: "Pen" },
+        { emoji: "🖋️", name: "Fountain Pen" },
+        { emoji: "✒️", name: "Black Nib" },
+        { emoji: "🖌️", name: "Paintbrush" },
+        { emoji: "🖍️", name: "Crayon" },
+        { emoji: "📝", name: "Memo" },
+        { emoji: "📁", name: "File Folder" },
+        { emoji: "📂", name: "Open File Folder" },
+        { emoji: "📅", name: "Calendar" },
+        { emoji: "🗂️", name: "Card Index Dividers" },
+        { emoji: "🗃️", name: "Card File Box" },
+        { emoji: "🗳️", name: "Ballot Box with Ballot" },
+        { emoji: "🗄️", name: "File Cabinet" },
+        { emoji: "📋", name: "Clipboard" },
+        { emoji: "📆", name: "Tear Off Calendar" },
+        { emoji: "📇", name: "Card Index" },
+        { emoji: "📈", name: "Chart Increasing" },
+        { emoji: "📉", name: "Chart Decreasing" },
+        { emoji: "📊", name: "Bar Chart" },
+        { emoji: "📌", name: "Pushpin" },
+        { emoji: "📎", name: "Paperclip" },
+        { emoji: "🔒", name: "Locked" },
+        { emoji: "🔓", name: "Unlocked" },
+        { emoji: "🔏", name: "Locked with Pen" },
+        { emoji: "🔐", name: "Locked with Key" },
+        { emoji: "🔑", name: "Key" },
+        { emoji: "🗝️", name: "Old Key" },
+        { emoji: "🔨", name: "Hammer" },
+        { emoji: "⛏️", name: "Pickaxe" },
+        { emoji: "⚒️", name: "Hammer and Pickaxe" },
+        { emoji: "🛠️", name: "Hammer and Wrench" },
+        { emoji: "🗡️", name: "Dagger" },
+        { emoji: "⚔️", name: "Crossed Swords" },
+        { emoji: "🔫", name: "Pistol" },
+        { emoji: "🪃", name: "Boomerang" },
+        { emoji: "🛡️", name: "Shield" },
+        { emoji: "🚬", name: "Cigarette" },
+        { emoji: "⚙️", name: "Gear" },
+        { emoji: "🔧", name: "Wrench" },
+        { emoji: "🔩", name: "Nut and Bolt" },
+        { emoji: "⚖️", name: "Balance Scale" },
+        { emoji: "🧱", name: "Brick" },
+        { emoji: "⛓️", name: "Chains" },
+        { emoji: "🧲", name: "Magnet" },
+        { emoji: "🔗", name: "Link" },
+        { emoji: "⚗️", name: "Alembic" },
+        { emoji: "🔭", name: "Telescope" },
+        { emoji: "🔬", name: "Microscope" },
+        { emoji: "🕯️", name: "Candle" },
+        { emoji: "💡", name: "Light Bulb" },
+        { emoji: "🔦", name: "Flashlight" },
+        { emoji: "🏮", name: "Red Paper Lantern" },
+        { emoji: "📔", name: "Notebook with Decorative Cover" },
+        { emoji: "📕", name: "Closed Book" },
+        { emoji: "📖", name: "Open Book" },
+        { emoji: "📗", name: "Green Book" },
+        { emoji: "📘", name: "Blue Book" },
+        { emoji: "📙", name: "Orange Book" },
+        { emoji: "📚", name: "Stack of Books" },
+        { emoji: "📓", name: "Notebook" },
+        { emoji: "📒", name: "Ledger" },
+        { emoji: "📎", name: "Paperclip" },
+        { emoji: "🏷️", name: "Label" },
+        { emoji: "🎗️", name: "Reminder Ribbon" },
+        { emoji: "🖨️", name: "Printer" },
+        { emoji: "🖇️", name: "Linked Paperclips" },
+        { emoji: "🌐", name: "Globe with Meridians" },
+        { emoji: "📡", name: "Satellite Antenna" },
+        { emoji: "📢", name: "Megaphone" },
+        { emoji: "📣", name: "Loudspeaker" },
+        { emoji: "📯", name: "Postal Horn" },
+        { emoji: "📰", name: "Newspaper" },
+        { emoji: "🗞️", name: "Rolled Up Newspaper" },
+        { emoji: "📧", name: "Email" },
+        { emoji: "📨", name: "Incoming Envelope" },
+        { emoji: "📩", name: "Envelope with Arrow" },
+        { emoji: "📤", name: "Outbox Tray" },
+        { emoji: "📥", name: "Inbox Tray" },
+        { emoji: "📦", name: "Package" },
+        { emoji: "🏷️", name: "Label" },
+        { emoji: "🧧", name: "Red Envelope" },
+        { emoji: "✉️", name: "Envelope" },
+        { emoji: "📩", name: "Envelope with Arrow" },
+        { emoji: "📨", name: "Incoming Envelope" },
+        { emoji: "📦", name: "Package" },
+        { emoji: "🏮", name: "Red Paper Lantern" },
+        { emoji: "✏️", name: "Pencil" },
+        { emoji: "✒️", name: "Black Nib" },
+        { emoji: "🖋️", name: "Fountain Pen" },
+        { emoji: "🖊️", name: "Pen" },
+        { emoji: "🖌️", name: "Paintbrush" },
+        { emoji: "🖍️", name: "Crayon" },
+        { emoji: "📝", name: "Memo" },
+      ];
+
+      // ============================================
+      // DOM Elements (Cache for performance)
+      // ============================================
+      // These are the key elements we'll interact with
+      const emojiDisplay = document.getElementById("emojiDisplay");
+      const emojiName = document.getElementById("emojiName");
+      const generateBtn = document.getElementById("generateBtn");
+      const copyBtn = document.getElementById("copyBtn");
+      const feedbackMessage = document.getElementById("feedbackMessage");
+
+      // Track the last displayed emoji to prevent consecutive repeats
+      let lastEmoji = null;
+
+      // ============================================
+      // Core Function:  Generate Random Emoji
+      // ============================================
+      /**
+       * Generates a random emoji from the database
+       * Ensures the same emoji doesn't appear consecutively
+       * @returns {object} An emoji object with { emoji, name }
+       */
+      function getRandomEmoji() {
+        let randomEmoji;
+
+        // Keep looping until we get a different emoji than the last one
+        do {
+          const randomIndex = Math.floor(Math.random() * EMOJI_DATABASE.length);
+          randomEmoji = EMOJI_DATABASE[randomIndex];
+        } while (randomEmoji.emoji === lastEmoji && EMOJI_DATABASE.length > 1);
+
+        // Update the last emoji tracker
+        lastEmoji = randomEmoji.emoji;
+
+        return randomEmoji;
+      }
+
+      // ============================================
+      // Display Function: Update UI with New Emoji
+      // ============================================
+      /**
+       * Updates the display with a new emoji and its name
+       * Includes animation and accessibility updates
+       */
+      function displayNewEmoji() {
+        // Get a random emoji
+        const emojiData = getRandomEmoji();
+
+        // Update emoji display
+        emojiDisplay.textContent = emojiData.emoji;
+        emojiDisplay.setAttribute(
+          "aria-label",
+          `Current emoji: ${emojiData.name}`
+        );
+
+        // Update emoji name
+        emojiName.textContent = emojiData.name;
+
+        // Clear any feedback message when new emoji is generated
+        hideFeedbackMessage();
+      }
+
+      // ============================================
+      // Copy to Clipboard Function
+      // ============================================
+      /**
+       * Copies the current emoji to the user's clipboard
+       * Uses the modern Clipboard API with fallback
+       */
+      async function copyEmojiToClipboard() {
+        const emoji = emojiDisplay.textContent;
+
+        try {
+          // Try to use the modern Clipboard API
+          await navigator.clipboard.writeText(emoji);
+          showFeedbackMessage("✓ Emoji copied to clipboard! ");
+        } catch (err) {
+          // Fallback for older browsers
+          console.warn("Clipboard API not available, using fallback method");
+          fallbackCopyToClipboard(emoji);
+        }
+      }
+
+      // ============================================
+      // Fallback Copy Function (for older browsers)
+      // ============================================
+      /**
+       * Fallback method for copying to clipboard in older browsers
+       * Creates a temporary text area and uses execCommand
+       * @param {string} text - Text to copy
+       */
+      function fallbackCopyToClipboard(text) {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+
+        try {
+          textarea.select();
+          document.execCommand("copy");
+          showFeedbackMessage("✓ Emoji copied to clipboard!");
+        } catch (err) {
+          console.error("Failed to copy emoji:", err);
+          showFeedbackMessage("✗ Failed to copy emoji");
+        } finally {
+          document.body.removeChild(textarea);
+        }
+      }
+
+      // ============================================
+      // Feedback Message Management
+      // ============================================
+      /**
+       * Shows the feedback message when emoji is copied
+       */
+      function showFeedbackMessage(message) {
+        feedbackMessage.textContent = message;
+        feedbackMessage.classList.add("show");
+
+        // Hide after 2 seconds
+        setTimeout(hideFeedbackMessage, 2000);
+      }
+
+      /**
+       * Hides the feedback message
+       */
+      function hideFeedbackMessage() {
+        feedbackMessage.classList.remove("show");
+      }
+
+      // ============================================
+      // Event Listeners
+      // ============================================
+      // Generate new emoji on button click
+      generateBtn.addEventListener("click", displayNewEmoji);
+
+      // Copy emoji on button click
+      copyBtn.addEventListener("click", copyEmojiToClipboard);
+
+      // Keyboard accessibility:  Space or Enter to generate new emoji
+      document.addEventListener("keydown", function (event) {
+        // Check if the event target is not a button or input (to avoid double-triggering)
+        if (
+          (event.code === "Space" || event.code === "Enter") &&
+          event.target === document.body
+        ) {
+          event.preventDefault(); // Prevent page scroll on Space
+          displayNewEmoji();
+        }
+      });
+
+      // ============================================
+      // Initialization
+      // ============================================
+      // Display an initial random emoji on page load
+      window.addEventListener("DOMContentLoaded", function () {
+        displayNewEmoji();
+      });
+
+      // Fallback:  if DOMContentLoaded has already fired
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", displayNewEmoji);
+      } else {
+        displayNewEmoji();
+      }
+    </script>
+  </body>
+</html>
