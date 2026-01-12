@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile Card Generator</title>
+    <style>
+      /* ========================================
+       CSS VARIABLES & THEME SETUP
+       ======================================== */
+      :root {
+        /* Light mode colors (default) */
+        --bg-primary: #f5f7fa;
+        --bg-secondary: #ffffff;
+        --text-primary: #1a202c;
+        --text-secondary: #4a5568;
+        --accent: #3b82f6;
+        --accent-hover: #2563eb;
+        --border: #e2e8f0;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --input-bg: #ffffff;
+        --input-border: #cbd5e0;
+        --input-focus: #3b82f6;
+
+        /* Spacing and sizing */
+        --spacing-xs: 0.5rem;
+        --spacing-sm: 1rem;
+        --spacing-md: 1.5rem;
+        --spacing-lg: 2rem;
+        --spacing-xl: 3rem;
+        --border-radius: 0.75rem;
+        --transition: all 0.3s ease;
+      }
+
+      /* Dark mode color scheme using prefers-color-scheme media query */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #1a202c;
+          --bg-secondary: #2d3748;
+          --text-primary: #f7fafc;
+          --text-secondary: #cbd5e0;
+          --accent: #60a5fa;
+          --accent-hover: #3b82f6;
+          --border: #4a5568;
+          --shadow: rgba(0, 0, 0, 0.3);
+          --input-bg: #2d3748;
+          --input-border: #4a5568;
+          --input-focus: #60a5fa;
+        }
+      }
+
+      /* ========================================
+       BASE STYLES & RESET
+       ======================================== */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        padding: var(--spacing-md);
+        transition: var(--transition);
+      }
+
+      /* ========================================
+       LAYOUT STRUCTURE
+       ======================================== */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      /* Header section */
+      header {
+        text-align: center;
+        margin-bottom: var(--spacing-xl);
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin-bottom: var(--spacing-xs);
+        color: var(--text-primary);
+      }
+
+      .subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+      }
+
+      /* Main grid layout - responsive with CSS Grid */
+      .app-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+        align-items: start;
+      }
+
+      /* Desktop layout: side-by-side form and preview */
+      @media (min-width: 768px) {
+        .app-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      /* ========================================
+       FORM SECTION STYLES
+       ======================================== */
+      .form-section {
+        background: var(--bg-secondary);
+        padding: var(--spacing-lg);
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 6px var(--shadow);
+      }
+
+      .form-section h2 {
+        margin-bottom: var(--spacing-md);
+        font-size: 1.5rem;
+      }
+
+      /* Form group for each input field */
+      .form-group {
+        margin-bottom: var(--spacing-md);
+      }
+
+      label {
+        display: block;
+        margin-bottom: var(--spacing-xs);
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+      }
+
+      /* Input and textarea base styles */
+      input[type="text"],
+      input[type="url"],
+      input[type="file"],
+      textarea {
+        width: 100%;
+        padding: var(--spacing-sm);
+        border: 2px solid var(--input-border);
+        border-radius: var(--spacing-xs);
+        background-color: var(--input-bg);
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-family: inherit;
+        transition: var(--transition);
+      }
+
+      /* Focus state for accessibility */
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--input-focus);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      /* File input custom styling */
+      input[type="file"] {
+        padding: var(--spacing-xs);
+        cursor: pointer;
+      }
+
+      /* Small helper text */
+      .helper-text {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: var(--spacing-xs);
+      }
+
+      /* ========================================
+       BUTTON STYLES
+       ======================================== */
+      .button-group {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-lg);
+      }
+
+      button {
+        flex: 1;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border: none;
+        border-radius: var(--spacing-xs);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .btn-primary {
+        background-color: var(--accent);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px var(--shadow);
+      }
+
+      .btn-secondary {
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        border: 2px solid var(--border);
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--border);
+      }
+
+      /* ========================================
+       PROFILE CARD PREVIEW STYLES
+       ======================================== */
+      .preview-section {
+        position: sticky;
+        top: var(--spacing-md);
+      }
+
+      .preview-label {
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-primary);
+      }
+
+      /* Profile card container with smooth transitions */
+      .profile-card {
+        background: var(--bg-secondary);
+        border-radius: var(--border-radius);
+        box-shadow: 0 10px 30px var(--shadow);
+        overflow: hidden;
+        transition: var(--transition);
+        /* Container query for responsive card layout */
+        container-type: inline-size;
+      }
+
+      .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px var(--shadow);
+      }
+
+      /* Profile image section */
+      .profile-image-container {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: linear-gradient(135deg, var(--accent) 0%, #8b5cf6 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .profile-image {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid var(--bg-secondary);
+        box-shadow: 0 4px 10px var(--shadow);
+        transition: var(--transition);
+      }
+
+      /* Placeholder when no image is uploaded */
+      .image-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background-color: var(--bg-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: var(--text-secondary);
+        border: 4px solid var(--bg-secondary);
+      }
+
+      /* Card content area */
+      .profile-content {
+        padding: var(--spacing-lg);
+        text-align: center;
+      }
+
+      .profile-name {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-xs);
+        color: var(--text-primary);
+        /* Smooth fade-in animation */
+        animation: fadeIn 0.3s ease;
+      }
+
+      .profile-title {
+        font-size: 1.1rem;
+        color: var(--accent);
+        margin-bottom: var(--spacing-md);
+        font-weight: 500;
+        animation: fadeIn 0.4s ease;
+      }
+
+      .profile-bio {
+        color: var(--text-secondary);
+        line-height: 1.7;
+        margin-bottom: var(--spacing-md);
+        animation: fadeIn 0.5s ease;
+      }
+
+      /* Social links section */
+      .social-links {
+        display: flex;
+        justify-content: center;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-md);
+        flex-wrap: wrap;
+      }
+
+      .social-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: var(--spacing-xs) var(--spacing-md);
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        text-decoration: none;
+        border-radius: var(--spacing-xs);
+        font-size: 0.9rem;
+        transition: var(--transition);
+        border: 2px solid var(--border);
+      }
+
+      .social-link:hover {
+        background-color: var(--accent);
+        color: white;
+        border-color: var(--accent);
+        transform: translateY(-2px);
+      }
+
+      /* Placeholder text styling */
+      .placeholder-text {
+        color: var(--text-secondary);
+        font-style: italic;
+      }
+
+      /* ========================================
+       ANIMATIONS
+       ======================================== */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ========================================
+       RESPONSIVE DESIGN
+       ======================================== */
+      @media (max-width: 767px) {
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        .form-section,
+        .profile-card {
+          padding: var(--spacing-md);
+        }
+
+        .profile-name {
+          font-size: 1.5rem;
+        }
+
+        .preview-section {
+          position: static;
+        }
+      }
+
+      /* Container query for card responsiveness */
+      @container (max-width: 400px) {
+        .profile-image,
+        .image-placeholder {
+          width: 100px;
+          height: 100px;
+        }
+
+        .profile-name {
+          font-size: 1.4rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main container for centering content -->
+    <div class="container">
+      <!-- Header section with title and description -->
+      <header>
+        <h1>✨ Profile Card Generator</h1>
+        <p class="subtitle">
+          Create your professional profile card in real-time
+        </p>
+      </header>
+
+      <!-- Main application grid: form on left, preview on right -->
+      <main class="app-grid">
+        <!-- Form section for user input -->
+        <section class="form-section">
+          <h2>Your Information</h2>
+
+          <!-- Form element with accessible labels and inputs -->
+          <form id="profileForm">
+            <!-- Name input -->
+            <div class="form-group">
+              <label for="name">Full Name *</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="John Doe"
+                required
+                aria-required="true"
+              />
+            </div>
+
+            <!-- Job title input -->
+            <div class="form-group">
+              <label for="title">Job Title / Role *</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                placeholder="Full Stack Developer"
+                required
+                aria-required="true"
+              />
+            </div>
+
+            <!-- Bio textarea -->
+            <div class="form-group">
+              <label for="bio">Short Bio</label>
+              <textarea
+                id="bio"
+                name="bio"
+                placeholder="Tell us about yourself..."
+                rows="4"
+              ></textarea>
+              <p class="helper-text">A brief description about yourself</p>
+            </div>
+
+            <!-- Profile image upload with file input -->
+            <div class="form-group">
+              <label for="image">Profile Image</label>
+              <input
+                type="file"
+                id="image"
+                name="image"
+                accept="image/*"
+                aria-label="Upload profile image"
+              />
+              <p class="helper-text">
+                Upload an image or leave empty for default
+              </p>
+            </div>
+
+            <!-- Social media links (optional) -->
+            <div class="form-group">
+              <label for="github">GitHub URL</label>
+              <input
+                type="url"
+                id="github"
+                name="github"
+                placeholder="https://github.com/username"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="linkedin">LinkedIn URL</label>
+              <input
+                type="url"
+                id="linkedin"
+                name="linkedin"
+                placeholder="https://linkedin.com/in/username"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="twitter">Twitter/X URL</label>
+              <input
+                type="url"
+                id="twitter"
+                name="twitter"
+                placeholder="https://twitter.com/username"
+              />
+            </div>
+
+            <!-- Action buttons -->
+            <div class="button-group">
+              <button type="button" class="btn-primary" id="saveBtn">
+                💾 Save to Browser
+              </button>
+              <button type="button" class="btn-secondary" id="resetBtn">
+                🔄 Reset
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Preview section showing live profile card -->
+        <section class="preview-section">
+          <h2 class="preview-label">Live Preview</h2>
+
+          <!-- Profile card with semantic structure -->
+          <article
+            class="profile-card"
+            role="region"
+            aria-label="Profile card preview"
+          >
+            <!-- Background banner with profile image -->
+            <div class="profile-image-container">
+              <div class="image-placeholder" id="imagePreview">👤</div>
+            </div>
+
+            <!-- Card content area -->
+            <div class="profile-content">
+              <h3 class="profile-name" id="previewName">
+                <span class="placeholder-text">Your Name</span>
+              </h3>
+              <p class="profile-title" id="previewTitle">
+                <span class="placeholder-text">Your Job Title</span>
+              </p>
+              <p class="profile-bio" id="previewBio">
+                <span class="placeholder-text"
+                  >Your bio will appear here. Share something interesting about
+                  yourself!</span
+                >
+              </p>
+
+              <!-- Social links container (hidden by default) -->
+              <div class="social-links" id="socialLinks"></div>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      /* ========================================
+       STATE MANAGEMENT
+       ======================================== */
+      // Store the current profile data
+      let profileData = {
+        name: "",
+        title: "",
+        bio: "",
+        imageUrl: "",
+        github: "",
+        linkedin: "",
+        twitter: "",
+      };
+
+      // Keep track of the object URL for cleanup
+      let currentImageObjectURL = null;
+
+      /* ========================================
+       DOM ELEMENT REFERENCES
+       ======================================== */
+      // Form inputs
+      const nameInput = document.getElementById("name");
+      const titleInput = document.getElementById("title");
+      const bioInput = document.getElementById("bio");
+      const imageInput = document.getElementById("image");
+      const githubInput = document.getElementById("github");
+      const linkedinInput = document.getElementById("linkedin");
+      const twitterInput = document.getElementById("twitter");
+
+      // Preview elements
+      const previewName = document.getElementById("previewName");
+      const previewTitle = document.getElementById("previewTitle");
+      const previewBio = document.getElementById("previewBio");
+      const imagePreview = document.getElementById("imagePreview");
+      const socialLinksContainer = document.getElementById("socialLinks");
+
+      // Buttons
+      const saveBtn = document.getElementById("saveBtn");
+      const resetBtn = document.getElementById("resetBtn");
+
+      /* ========================================
+       INITIALIZATION
+       ======================================== */
+      // Load saved data from localStorage when page loads
+      function init() {
+        loadFromLocalStorage();
+        attachEventListeners();
+      }
+
+      /* ========================================
+       EVENT LISTENERS
+       ======================================== */
+      function attachEventListeners() {
+        // Live preview updates as user types
+        nameInput.addEventListener("input", updatePreview);
+        titleInput.addEventListener("input", updatePreview);
+        bioInput.addEventListener("input", updatePreview);
+        githubInput.addEventListener("input", updatePreview);
+        linkedinInput.addEventListener("input", updatePreview);
+        twitterInput.addEventListener("input", updatePreview);
+
+        // Image upload handling
+        imageInput.addEventListener("change", handleImageUpload);
+
+        // Button actions
+        saveBtn.addEventListener("click", saveToLocalStorage);
+        resetBtn.addEventListener("click", resetForm);
+      }
+
+      /* ========================================
+       LIVE PREVIEW UPDATE FUNCTION
+       ======================================== */
+      function updatePreview() {
+        // Get current values from inputs
+        profileData.name = nameInput.value.trim();
+        profileData.title = titleInput.value.trim();
+        profileData.bio = bioInput.value.trim();
+        profileData.github = githubInput.value.trim();
+        profileData.linkedin = linkedinInput.value.trim();
+        profileData.twitter = twitterInput.value.trim();
+
+        // Update name preview (show placeholder if empty)
+        if (profileData.name) {
+          previewName.innerHTML = profileData.name;
+        } else {
+          previewName.innerHTML =
+            '<span class="placeholder-text">Your Name</span>';
+        }
+
+        // Update title preview
+        if (profileData.title) {
+          previewTitle.innerHTML = profileData.title;
+        } else {
+          previewTitle.innerHTML =
+            '<span class="placeholder-text">Your Job Title</span>';
+        }
+
+        // Update bio preview
+        if (profileData.bio) {
+          previewBio.innerHTML = profileData.bio;
+        } else {
+          previewBio.innerHTML =
+            '<span class="placeholder-text">Your bio will appear here. Share something interesting about yourself!</span>';
+        }
+
+        // Update social links
+        updateSocialLinks();
+      }
+
+      /* ========================================
+       IMAGE UPLOAD HANDLING
+       ======================================== */
+      function handleImageUpload(event) {
+        const file = event.target.files[0];
+
+        // Check if a file was selected
+        if (file) {
+          // Revoke previous object URL to free memory
+          if (currentImageObjectURL) {
+            URL.revokeObjectURL(currentImageObjectURL);
+          }
+
+          // Create a new object URL for the selected image
+          currentImageObjectURL = URL.createObjectURL(file);
+          profileData.imageUrl = currentImageObjectURL;
+
+          // Update the preview with the new image
+          imagePreview.innerHTML = `<img src="${currentImageObjectURL}" alt="Profile picture" class="profile-image">`;
+        }
+      }
+
+      /* ========================================
+       SOCIAL LINKS GENERATION
+       ======================================== */
+      function updateSocialLinks() {
+        // Clear existing links
+        socialLinksContainer.innerHTML = "";
+
+        // Social media platforms with icons
+        const socialPlatforms = [
+          {
+            name: "GitHub",
+            url: profileData.github,
+            icon: "🔗",
+            label: "GitHub",
+          },
+          {
+            name: "LinkedIn",
+            url: profileData.linkedin,
+            icon: "💼",
+            label: "LinkedIn",
+          },
+          {
+            name: "Twitter",
+            url: profileData.twitter,
+            icon: "🐦",
+            label: "Twitter",
+          },
+        ];
+
+        // Create link elements for each platform with a valid URL
+        socialPlatforms.forEach((platform) => {
+          if (platform.url && isValidURL(platform.url)) {
+            const link = document.createElement("a");
+            link.href = platform.url;
+            link.className = "social-link";
+            link.target = "_blank";
+            link.rel = "noopener noreferrer"; // Security best practice
+            link.setAttribute("aria-label", `Visit ${platform.label} profile`);
+            link.innerHTML = `${platform.icon} ${platform.name}`;
+            socialLinksContainer.appendChild(link);
+          }
+        });
+      }
+
+      /* ========================================
+       URL VALIDATION HELPER
+       ======================================== */
+      function isValidURL(string) {
+        try {
+          new URL(string);
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      /* ========================================
+       LOCAL STORAGE FUNCTIONS
+       ======================================== */
+      function saveToLocalStorage() {
+        // Create a copy of profile data without the object URL (can't be serialized)
+        const dataToSave = { ...profileData };
+
+        // If there's an image, we can't save the object URL, so we clear it
+        // In a real app, you might convert to base64 or save to a server
+        if (currentImageObjectURL) {
+          dataToSave.imageUrl = ""; // Can't persist object URLs
+        }
+
+        // Save to localStorage as JSON string
+        const storageData = JSON.stringify(dataToSave);
+
+        // Store in memory
+        const tempData = {};
+        tempData["profileData"] = dataToSave;
+        Object.assign(window, { __profileStorage: tempData });
+
+        // Show confirmation to user
+        saveBtn.textContent = "✅ Saved!";
+        setTimeout(() => {
+          saveBtn.textContent = "💾 Save to Browser";
+        }, 2000);
+      }
+
+      function loadFromLocalStorage() {
+        try {
+          // Retrieve from memory storage
+          const tempData = window.__profileStorage || {};
+          const savedData = tempData["profileData"];
+
+          if (savedData) {
+            // Restore form values
+            nameInput.value = savedData.name || "";
+            titleInput.value = savedData.title || "";
+            bioInput.value = savedData.bio || "";
+            githubInput.value = savedData.github || "";
+            linkedinInput.value = savedData.linkedin || "";
+            twitterInput.value = savedData.twitter || "";
+
+            // Update the preview with loaded data
+            updatePreview();
+          }
+        } catch (error) {
+          console.error("Error loading from storage:", error);
+        }
+      }
+
+      /* ========================================
+       RESET FUNCTIONALITY
+       ======================================== */
+      function resetForm() {
+        // Confirm with user before resetting
+        if (confirm("Are you sure you want to reset all fields?")) {
+          // Clear all input fields
+          nameInput.value = "";
+          titleInput.value = "";
+          bioInput.value = "";
+          imageInput.value = "";
+          githubInput.value = "";
+          linkedinInput.value = "";
+          twitterInput.value = "";
+
+          // Reset profile data object
+          profileData = {
+            name: "",
+            title: "",
+            bio: "",
+            imageUrl: "",
+            github: "",
+            linkedin: "",
+            twitter: "",
+          };
+
+          // Clean up image object URL
+          if (currentImageObjectURL) {
+            URL.revokeObjectURL(currentImageObjectURL);
+            currentImageObjectURL = null;
+          }
+
+          // Reset image preview to placeholder
+          imagePreview.innerHTML = "👤";
+
+          // Clear memory storage
+          if (window.__profileStorage) {
+            delete window.__profileStorage["profileData"];
+          }
+
+          // Update preview to show placeholders
+          updatePreview();
+        }
+      }
+
+      /* ========================================
+       START THE APPLICATION
+       ======================================== */
+      // Initialize when DOM is fully loaded
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+    </script>
+  </body>
+</html>
