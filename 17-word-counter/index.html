@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Word Counter</title>
+    <style>
+      /* ===================================
+           CSS VARIABLES & ROOT STYLES
+           =================================== */
+      :root {
+        /* Light mode colors */
+        --bg-primary: #ffffff;
+        --bg-secondary: #f8f9fa;
+        --text-primary: #212529;
+        --text-secondary: #6c757d;
+        --border-color: #dee2e6;
+        --accent-color: #0d6efd;
+        --shadow: rgba(0, 0, 0, 0.1);
+
+        /* Spacing system */
+        --spacing-xs: 0.5rem;
+        --spacing-sm: 1rem;
+        --spacing-md: 1.5rem;
+        --spacing-lg: 2rem;
+        --spacing-xl: 3rem;
+
+        /* Typography */
+        --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        --font-size-base: 16px;
+        --font-size-lg: 1.125rem;
+        --font-size-xl: 1.5rem;
+        --font-size-2xl: 2rem;
+
+        /* Border radius */
+        --radius-sm: 0.375rem;
+        --radius-md: 0.5rem;
+      }
+
+      /* Dark mode color overrides using prefers-color-scheme */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #1a1a1a;
+          --bg-secondary: #2d2d2d;
+          --text-primary: #e9ecef;
+          --text-secondary: #adb5bd;
+          --border-color: #495057;
+          --accent-color: #3d8bfd;
+          --shadow: rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      /* ===================================
+           BASE STYLES
+           =================================== */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-family);
+        font-size: var(--font-size-base);
+        line-height: 1.6;
+        color: var(--text-primary);
+        background-color: var(--bg-primary);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ===================================
+           LAYOUT - Using Flexbox
+           =================================== */
+      .container {
+        max-width: 900px;
+        width: 100%;
+        margin: 0 auto;
+        padding: var(--spacing-lg);
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Header section */
+      header {
+        text-align: center;
+        margin-bottom: var(--spacing-lg);
+      }
+
+      h1 {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--spacing-xs);
+      }
+
+      .subtitle {
+        font-size: var(--font-size-base);
+        color: var(--text-secondary);
+      }
+
+      /* Main content area */
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+      }
+
+      /* ===================================
+           TEXT AREA STYLES
+           =================================== */
+      .input-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      label {
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+        color: var(--text-primary);
+      }
+
+      /* Textarea with focus styles for accessibility */
+      textarea {
+        width: 100%;
+        min-height: 250px;
+        padding: var(--spacing-sm);
+        font-family: var(--font-family);
+        font-size: var(--font-size-base);
+        line-height: 1.6;
+        color: var(--text-primary);
+        background-color: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-md);
+        resize: vertical;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+      }
+
+      /* ===================================
+           STATISTICS DISPLAY - Using CSS Grid
+           =================================== */
+      .stats-section {
+        background-color: var(--bg-secondary);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-md);
+      }
+
+      /* Grid layout for statistics cards */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-sm);
+      }
+
+      /* Individual stat card */
+      .stat-card {
+        background-color: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: var(--spacing-sm);
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--shadow);
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-bottom: var(--spacing-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* Output element for screen readers (live region) */
+      .stat-value {
+        font-size: var(--font-size-xl);
+        font-weight: 700;
+        color: var(--accent-color);
+      }
+
+      /* ===================================
+           RESPONSIVE DESIGN
+           =================================== */
+      @media (max-width: 768px) {
+        .container {
+          padding: var(--spacing-sm);
+        }
+
+        h1 {
+          font-size: var(--font-size-xl);
+        }
+
+        textarea {
+          min-height: 200px;
+        }
+
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 480px) {
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ===================================
+           ACCESSIBILITY
+           =================================== */
+      /* Skip link for keyboard navigation */
+      .skip-link {
+        position: absolute;
+        top: -40px;
+        left: 0;
+        background: var(--accent-color);
+        color: white;
+        padding: var(--spacing-xs);
+        text-decoration: none;
+        z-index: 100;
+      }
+
+      .skip-link:focus {
+        top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="container">
+      <!-- ===================================
+             HEADER SECTION
+             =================================== -->
+      <header>
+        <h1>Word Counter</h1>
+        <p class="subtitle">Type or paste your text to analyze</p>
+      </header>
+
+      <!-- ===================================
+             MAIN CONTENT
+             =================================== -->
+      <main id="main-content">
+        <!-- Text Input Section -->
+        <section class="input-section">
+          <label for="text-input">Enter your text:</label>
+          <!-- 
+                    Textarea with aria-describedby pointing to live stats
+                    This helps screen readers understand the purpose
+                -->
+          <textarea
+            id="text-input"
+            placeholder="Start typing or paste your text here..."
+            aria-describedby="stats-live"
+            spellcheck="true"
+          ></textarea>
+        </section>
+
+        <!-- Statistics Display Section -->
+        <section class="stats-section" aria-labelledby="stats-heading">
+          <h2 id="stats-heading" class="visually-hidden">Text Statistics</h2>
+
+          <!-- 
+                    aria-live="polite" creates a live region
+                    Screen readers will announce changes without interrupting
+                -->
+          <div
+            class="stats-grid"
+            id="stats-live"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <!-- Word Count -->
+            <div class="stat-card">
+              <div class="stat-label">Words</div>
+              <output class="stat-value" id="word-count" for="text-input"
+                >0</output
+              >
+            </div>
+
+            <!-- Character Count (with spaces) -->
+            <div class="stat-card">
+              <div class="stat-label">Characters</div>
+              <output class="stat-value" id="char-count" for="text-input"
+                >0</output
+              >
+            </div>
+
+            <!-- Character Count (without spaces) -->
+            <div class="stat-card">
+              <div class="stat-label">Characters (no spaces)</div>
+              <output
+                class="stat-value"
+                id="char-count-no-spaces"
+                for="text-input"
+                >0</output
+              >
+            </div>
+
+            <!-- Sentence Count -->
+            <div class="stat-card">
+              <div class="stat-label">Sentences</div>
+              <output class="stat-value" id="sentence-count" for="text-input"
+                >0</output
+              >
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      /* ===================================
+           WORD COUNTER APPLICATION
+           =================================== */
+
+      // ===================================
+      // DOM ELEMENT REFERENCES
+      // ===================================
+      const textInput = document.getElementById("text-input");
+      const wordCountEl = document.getElementById("word-count");
+      const charCountEl = document.getElementById("char-count");
+      const charCountNoSpacesEl = document.getElementById(
+        "char-count-no-spaces"
+      );
+      const sentenceCountEl = document.getElementById("sentence-count");
+
+      // ===================================
+      // DEBOUNCE UTILITY FUNCTION
+      // ===================================
+      /**
+       * Debounce function to limit how often a function is called
+       * Improves performance by reducing unnecessary calculations
+       *
+       * @param {Function} func - The function to debounce
+       * @param {number} wait - Time to wait in milliseconds
+       * @returns {Function} - Debounced function
+       */
+      function debounce(func, wait = 100) {
+        let timeout;
+        return function executedFunction(...args) {
+          const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+          };
+          clearTimeout(timeout);
+          timeout = setTimeout(later, wait);
+        };
+      }
+
+      // ===================================
+      // COUNTING FUNCTIONS
+      // ===================================
+
+      /**
+       * Count words in text using multiple approaches for accuracy
+       * Handles edge cases: multiple spaces, newlines, punctuation
+       *
+       * @param {string} text - Input text to analyze
+       * @returns {number} - Number of words
+       */
+      function countWords(text) {
+        // Return 0 for empty or whitespace-only strings
+        if (!text || text.trim() === "") {
+          return 0;
+        }
+
+        // Check if Intl.Segmenter is available (modern browsers)
+        // This provides more accurate word counting for various languages
+        if (typeof Intl !== "undefined" && Intl.Segmenter) {
+          try {
+            const segmenter = new Intl.Segmenter("en", { granularity: "word" });
+            const segments = segmenter.segment(text);
+
+            // Count only word segments (not spaces or punctuation)
+            let wordCount = 0;
+            for (const segment of segments) {
+              if (segment.isWordLike) {
+                wordCount++;
+              }
+            }
+            return wordCount;
+          } catch (e) {
+            // Fall back to regex if Intl.Segmenter fails
+            console.warn("Intl.Segmenter failed, using fallback method");
+          }
+        }
+
+        // Fallback method using regex
+        // Split by whitespace and filter out empty strings
+        const words = text
+          .trim() // Remove leading/trailing whitespace
+          .split(/\s+/) // Split by one or more whitespace chars
+          .filter((word) => word.length > 0); // Remove empty strings
+
+        return words.length;
+      }
+
+      /**
+       * Count total characters including spaces
+       *
+       * @param {string} text - Input text
+       * @returns {number} - Character count
+       */
+      function countCharacters(text) {
+        return text.length;
+      }
+
+      /**
+       * Count characters excluding spaces
+       * Removes all whitespace characters (spaces, tabs, newlines)
+       *
+       * @param {string} text - Input text
+       * @returns {number} - Character count without spaces
+       */
+      function countCharactersNoSpaces(text) {
+        // Replace all whitespace characters with empty string
+        return text.replace(/\s/g, "").length;
+      }
+
+      /**
+       * Count sentences in text
+       * Handles edge cases: multiple punctuation, abbreviations
+       *
+       * @param {string} text - Input text
+       * @returns {number} - Number of sentences
+       */
+      function countSentences(text) {
+        // Return 0 for empty or whitespace-only strings
+        if (!text || text.trim() === "") {
+          return 0;
+        }
+
+        // Match sentence-ending punctuation: . ! ?
+        // Handles multiple punctuation like "!!!" or "..."
+        // Look for sentence endings followed by space or end of string
+        const sentences = text
+          .trim()
+          .split(/[.!?]+/) // Split on sentence-ending punctuation
+          .filter((sentence) => sentence.trim().length > 0); // Remove empty sentences
+
+        return sentences.length;
+      }
+
+      // ===================================
+      // UPDATE DISPLAY FUNCTION
+      // ===================================
+      /**
+       * Update all statistics in the UI
+       * Called whenever the text input changes
+       *
+       * @param {string} text - Current text from textarea
+       */
+      function updateStats(text) {
+        // Calculate all statistics
+        const words = countWords(text);
+        const chars = countCharacters(text);
+        const charsNoSpaces = countCharactersNoSpaces(text);
+        const sentences = countSentences(text);
+
+        // Update DOM elements with new values
+        wordCountEl.textContent = words.toLocaleString();
+        charCountEl.textContent = chars.toLocaleString();
+        charCountNoSpacesEl.textContent = charsNoSpaces.toLocaleString();
+        sentenceCountEl.textContent = sentences.toLocaleString();
+      }
+
+      // ===================================
+      // EVENT LISTENERS
+      // ===================================
+
+      /**
+       * Create debounced version of updateStats
+       * This prevents excessive updates during rapid typing
+       * Waits 150ms after user stops typing before updating
+       */
+      const debouncedUpdate = debounce((text) => {
+        updateStats(text);
+      }, 150);
+
+      /**
+       * Listen for input events on textarea
+       * 'input' event fires on every change (typing, pasting, etc.)
+       */
+      textInput.addEventListener("input", (e) => {
+        // Use debounced function for performance
+        debouncedUpdate(e.target.value);
+      });
+
+      /**
+       * Immediate update on paste for better UX
+       * Users expect instant feedback when pasting
+       */
+      textInput.addEventListener("paste", (e) => {
+        // Use setTimeout to ensure pasted content is in DOM
+        setTimeout(() => {
+          updateStats(e.target.value);
+        }, 0);
+      });
+
+      // ===================================
+      // INITIALIZATION
+      // ===================================
+      // Update stats immediately in case there's default text
+      updateStats(textInput.value);
+
+      // Optional: Focus the textarea when page loads for better UX
+      textInput.focus();
+    </script>
+  </body>
+</html>
