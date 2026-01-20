@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Just Kidding | Random Joke Generator</title>
+    <style>
+      /* * CSS VARIABLES (:root)
+         * We define colors here to make them easy to change and 
+         * to support Dark Mode easily.
+         */
+      :root {
+        --bg-color: #f0f2f5;
+        --card-bg: #ffffff;
+        --text-primary: #1a1a1a;
+        --text-secondary: #666666;
+        --accent-color: #6c5ce7;
+        --accent-hover: #5b4cc4;
+        --error-color: #e74c3c;
+        --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        --radius: 16px;
+        --font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+
+      /* * PREFERS-COLOR-SCHEME
+         * Automatically detects if the user's device is in Dark Mode 
+         * and updates the variables.
+         */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-color: #121212;
+          --card-bg: #1e1e1e;
+          --text-primary: #ffffff;
+          --text-secondary: #a0a0a0;
+          --shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+      }
+
+      /* RESET & BASE STYLES */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-family);
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        /* Flexbox used to center the card vertically and horizontally */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        transition: background-color 0.3s ease;
+      }
+
+      /* CARD COMPONENT */
+      .joke-card {
+        background-color: var(--card-bg);
+        padding: 2.5rem;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+        transition: transform 0.3s ease;
+      }
+
+      /* HEADER & EMOJI */
+      .header-emoji {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+        animation: bounce 2s infinite;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      /* JOKE CONTENT AREA */
+      .joke-content {
+        min-height: 120px; /* Prevents layout jump when loading short/long jokes */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        margin-bottom: 2rem;
+      }
+
+      .joke-setup {
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+      }
+
+      .joke-punchline {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--accent-color);
+        line-height: 1.4;
+      }
+
+      /* UTILITY CLASSES */
+      .hidden {
+        display: none;
+      }
+
+      .fade-in {
+        animation: fadeIn 0.5s ease-in forwards;
+        opacity: 0; /* Start hidden for animation */
+      }
+
+      /* BUTTON STYLES */
+      .btn-new-joke {
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+      }
+
+      .btn-new-joke:hover {
+        background-color: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+      }
+
+      .btn-new-joke:active {
+        transform: translateY(0);
+      }
+
+      .btn-new-joke:disabled {
+        background-color: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* LOADING & ERROR STATES */
+      .error-message {
+        color: var(--error-color);
+        font-weight: bold;
+      }
+
+      /* ANIMATIONS */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="joke-card">
+      <span class="header-emoji" role="img" aria-label="laughing face">😂</span>
+      <h1>Daily Giggle</h1>
+
+      <div class="joke-content" id="joke-container" aria-live="polite">
+        <p id="setup" class="joke-setup">Are you ready to laugh?</p>
+        <p id="punchline" class="joke-punchline">Click the button below!</p>
+      </div>
+
+      <button id="get-joke-btn" class="btn-new-joke">Get New Joke</button>
+    </main>
+
+    <script>
+      // DOM ELEMENTS
+      // We select elements once to avoid querying the DOM repeatedly (Performance)
+      const setupEl = document.getElementById("setup");
+      const punchlineEl = document.getElementById("punchline");
+      const jokeBtn = document.getElementById("get-joke-btn");
+      const jokeContainer = document.getElementById("joke-container");
+
+      // API URL
+      const API_URL = "https://official-joke-api.appspot.com/jokes/random";
+
+      /**
+       * FETCH JOKE FUNCTION
+       * Uses async/await for cleaner asynchronous code compared to .then() chains.
+       */
+      async function fetchJoke() {
+        // 1. Set Loading State
+        jokeBtn.disabled = true;
+        jokeBtn.textContent = "Fetching...";
+        setupEl.textContent = "";
+        punchlineEl.textContent = "";
+
+        // Remove animation class to reset it for the next joke
+        setupEl.classList.remove("fade-in");
+        punchlineEl.classList.remove("fade-in");
+
+        try {
+          // 2. Fetch Data
+          const response = await fetch(API_URL);
+
+          // Check if response is OK (status 200-299)
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+
+          const data = await response.json();
+
+          // 3. Update DOM with new joke
+          renderJoke(data.setup, data.punchline);
+        } catch (error) {
+          // 4. Handle Errors Gracefully
+          console.error("Error fetching joke:", error);
+          setupEl.textContent = "Oops! Something went wrong.";
+          punchlineEl.innerHTML =
+            '<span class="error-message">Please try again later.</span>';
+
+          // Add fade-in for the error message too
+          setupEl.classList.add("fade-in");
+          punchlineEl.classList.add("fade-in");
+        } finally {
+          // 5. Reset Button (Always runs, success or fail)
+          jokeBtn.disabled = false;
+          jokeBtn.textContent = "Get New Joke";
+        }
+      }
+
+      /**
+       * RENDER HELPER
+       * Separates logic (fetching) from view updates (DOM manipulation).
+       */
+      function renderJoke(setup, punchline) {
+        setupEl.textContent = setup;
+        punchlineEl.textContent = punchline;
+
+        // Trigger Reflow to restart CSS animation
+        // This is a trick to restart the 'fade-in' animation
+        void setupEl.offsetWidth;
+
+        // Add animation classes
+        setupEl.classList.add("fade-in");
+
+        // Optional: Delay the punchline slightly for comedic timing
+        setTimeout(() => {
+          punchlineEl.classList.add("fade-in");
+        }, 600);
+      }
+
+      // EVENT LISTENERS
+      jokeBtn.addEventListener("click", fetchJoke);
+
+      // Load a joke automatically when the page opens
+      document.addEventListener("DOMContentLoaded", fetchJoke);
+    </script>
+  </body>
+</html>
