@@ -1,0 +1,162 @@
+/* --- CSS Variables for Theme Control --- */
+:root {
+  --primary-color: #6c5ce7;
+  --primary-hover: #5649c0;
+  --bg-color: #f0f2f5;
+  --card-bg: #ffffff;
+  --text-main: #2d3436;
+  --text-secondary: #636e72;
+  --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  --radius: 12px;
+}
+
+/* --- Dark Mode Support (prefers-color-scheme) --- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #18191a;
+    --card-bg: #242526;
+    --text-main: #e4e6eb;
+    --text-secondary: #b0b3b8;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* --- Global Reset & Flex Layout --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  display: flex; /* Flexbox for centering */
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
+}
+
+/* --- Meme Card Styling --- */
+.meme-card {
+  background-color: var(--card-bg);
+  width: 100%;
+  max-width: 450px; /* Mobile-first limit */
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.meme-header h1 {
+  font-size: 1.5rem;
+  text-align: center;
+  padding: 15px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* --- Image Container & States --- */
+.meme-display {
+  width: 100%;
+  min-height: 300px; /* Prevent layout shift */
+  background-color: rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+#meme-img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  opacity: 0; /* Hidden initially for fade-in effect */
+  transition: opacity 0.3s ease-in;
+}
+
+/* Class to show image once loaded */
+#meme-img.active {
+  opacity: 1;
+}
+
+/* Loading Spinner */
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--text-secondary);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  position: absolute;
+  display: none; /* Hidden by default */
+}
+
+/* Show loader when class is active */
+.meme-display.loading .loader {
+  display: block;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error Message */
+.error-msg {
+  color: #d63031;
+  font-weight: 600;
+  display: none;
+  text-align: center;
+  padding: 20px;
+}
+
+.meme-display.error .error-msg {
+  display: block;
+}
+
+/* --- Content & Button --- */
+.meme-content {
+  padding: 15px 20px;
+}
+
+#meme-title {
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.meme-author {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 15px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s;
+}
+
+.btn:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

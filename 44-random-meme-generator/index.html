@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Random Meme Generator</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main class="container">
+      <article class="meme-card">
+        <header class="meme-header">
+          <h1>Random Meme Gen</h1>
+        </header>
+
+        <div class="meme-display" id="meme-display">
+          <div class="loader" id="loader"></div>
+
+          <img
+            id="meme-img"
+            src=""
+            alt="Meme will appear here"
+            loading="lazy"
+          />
+
+          <div class="error-msg" id="error-msg">
+            Failed to load meme. Try again!
+          </div>
+        </div>
+
+        <div class="meme-content">
+          <h2 id="meme-title">Ready for a laugh?</h2>
+          <p class="meme-author">
+            Source: <span id="meme-author">The Internet</span>
+          </p>
+        </div>
+
+        <button id="generate-btn" class="btn">Get New Meme 🚀</button>
+      </article>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
