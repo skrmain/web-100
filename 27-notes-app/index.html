@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Notes App</title>
+    <style>
+      /* * CSS VARIABLES & THEMING
+         * Using :root for global variables makes theming easy.
+         * We support automatic Dark Mode using @media (prefers-color-scheme).
+         */
+      :root {
+        --bg-body: #f4f4f9;
+        --bg-card: #ffffff;
+        --text-main: #333333;
+        --text-secondary: #666666;
+        --primary-color: #6200ea; /* Deep Purple */
+        --primary-hover: #3700b3;
+        --danger-color: #d32f2f;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --radius: 12px;
+        --transition: all 0.3s ease;
+      }
+
+      /* Dark Mode Override */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-body: #121212;
+          --bg-card: #1e1e1e;
+          --text-main: #e0e0e0;
+          --text-secondary: #aaaaaa;
+          --primary-color: #bb86fc;
+          --primary-hover: #9965f4;
+          --shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+        }
+      }
+
+      /* GLOBAL RESET & LAYOUT */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        padding: 2rem;
+        transition: background-color 0.3s;
+      }
+
+      /* HEADER & INPUT SECTION */
+      header {
+        text-align: center;
+        margin-bottom: 2rem;
+        width: 100%;
+        max-width: 600px;
+      }
+
+      h1 {
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+      }
+
+      .note-input-container {
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      textarea {
+        width: 100%;
+        height: 80px;
+        padding: 1rem;
+        border: 2px solid transparent;
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        border-radius: 8px;
+        resize: vertical; /* Allow user to resize height */
+        font-size: 1rem;
+        transition: var(--transition);
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background-color: var(--bg-card);
+      }
+
+      button#add-btn {
+        background-color: var(--primary-color);
+        color: #fff;
+        border: none;
+        padding: 0.8rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      button#add-btn:hover {
+        background-color: var(--primary-hover);
+        transform: translateY(-2px);
+      }
+
+      /* NOTES GRID LAYOUT */
+      .notes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        width: 100%;
+        max-width: 1200px;
+      }
+
+      /* NOTE CARD STYLING */
+      .note-card {
+        background-color: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: var(--transition);
+        animation: fadeIn 0.4s ease-out; /* Entry animation */
+      }
+
+      .note-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .note-content {
+        white-space: pre-wrap; /* Preserves line breaks */
+        margin-bottom: 1rem;
+        line-height: 1.5;
+        flex-grow: 1;
+      }
+
+      /* Edit Mode Styling */
+      .note-edit-textarea {
+        width: 100%;
+        min-height: 100px;
+        margin-bottom: 1rem;
+        background: var(--bg-body);
+        color: var(--text-main);
+        border: 1px solid var(--primary-color);
+        padding: 0.5rem;
+        border-radius: 4px;
+      }
+
+      .note-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        border-top: 1px solid var(--bg-body);
+        padding-top: 1rem;
+      }
+
+      .note-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .btn-action {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+
+      .btn-edit {
+        color: var(--primary-color);
+      }
+      .btn-edit:hover {
+        background-color: rgba(98, 0, 234, 0.1);
+      }
+
+      .btn-delete {
+        color: var(--danger-color);
+      }
+      .btn-delete:hover {
+        background-color: rgba(211, 47, 47, 0.1);
+      }
+
+      /* KEYFRAMES */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Empty State */
+      .empty-state {
+        text-align: center;
+        grid-column: 1 / -1;
+        color: var(--text-secondary);
+        margin-top: 2rem;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>My Notes</h1>
+      <div class="note-input-container">
+        <label for="new-note-text" class="sr-only" style="display: none"
+          >Write a new note</label
+        >
+        <textarea
+          id="new-note-text"
+          placeholder="Type your note here..."
+        ></textarea>
+        <button id="add-btn">Add Note</button>
+      </div>
+    </header>
+
+    <main class="notes-grid" id="notes-container"></main>
+
+    <script>
+      /**
+       * STATE MANAGEMENT
+       * We use an array of objects to store notes.
+       * Structure: { id: Date.now(), text: "string", date: "string" }
+       */
+      let notes = [];
+
+      // DOM Elements
+      const noteInput = document.getElementById("new-note-text");
+      const addBtn = document.getElementById("add-btn");
+      const notesContainer = document.getElementById("notes-container");
+
+      /**
+       * INITIALIZATION
+       * Load notes from localStorage when the DOM is fully loaded.
+       */
+      document.addEventListener("DOMContentLoaded", () => {
+        const storedNotes = localStorage.getItem("notes-app-data");
+        if (storedNotes) {
+          notes = JSON.parse(storedNotes);
+        }
+        renderNotes();
+      });
+
+      /**
+       * ADD NOTE FUNCTION
+       * Creates a new note object and updates state.
+       */
+      function addNote() {
+        const text = noteInput.value.trim();
+        if (text === "") {
+          alert("Please enter some text!");
+          return;
+        }
+
+        const newNote = {
+          id: Date.now(), // Unique ID using timestamp
+          text: text,
+          date: new Date().toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
+        };
+
+        notes.unshift(newNote); // Add to the beginning of the array
+        saveAndRender();
+        noteInput.value = ""; // Clear input
+        noteInput.focus(); // Refocus for next note
+      }
+
+      /**
+       * DELETE NOTE FUNCTION
+       * Filters out the note by ID.
+       */
+      function deleteNote(id) {
+        const confirmDelete = confirm(
+          "Are you sure you want to delete this note?",
+        );
+        if (!confirmDelete) return;
+
+        notes = notes.filter((note) => note.id !== id);
+        saveAndRender();
+      }
+
+      /**
+       * TOGGLE EDIT MODE
+       * Replaces text with a textarea for in-place editing.
+       */
+      function toggleEdit(id) {
+        const noteCard = document.querySelector(`[data-id="${id}"]`);
+        const contentDiv = noteCard.querySelector(".note-content");
+        const editBtn = noteCard.querySelector(".btn-edit");
+
+        // Check if we are already editing (look for textarea)
+        const isEditing = contentDiv.querySelector("textarea");
+
+        if (isEditing) {
+          // SAVE CHANGES
+          const newText = isEditing.value.trim();
+          if (newText) {
+            // Update state
+            const noteIndex = notes.findIndex((n) => n.id === id);
+            notes[noteIndex].text = newText;
+            saveAndRender();
+          }
+        } else {
+          // ENTER EDIT MODE
+          const currentText = notes.find((n) => n.id === id).text;
+          contentDiv.innerHTML = `<textarea class="note-edit-textarea">${currentText}</textarea>`;
+
+          // Auto-focus the textarea
+          const textarea = contentDiv.querySelector("textarea");
+          textarea.focus();
+
+          // Change button text
+          editBtn.textContent = "Save";
+        }
+      }
+
+      /**
+       * RENDER FUNCTION
+       * Clears the DOM and rebuilds the list based on the 'notes' array.
+       */
+      function renderNotes() {
+        notesContainer.innerHTML = "";
+
+        if (notes.length === 0) {
+          notesContainer.innerHTML =
+            '<p class="empty-state">No notes yet. Add one above!</p>';
+          return;
+        }
+
+        notes.forEach((note) => {
+          const noteElement = document.createElement("article");
+          noteElement.classList.add("note-card");
+          noteElement.setAttribute("data-id", note.id);
+
+          noteElement.innerHTML = `
+                    <div class="note-content">${escapeHtml(note.text)}</div>
+                    <div class="note-footer">
+                        <span class="note-date">${note.date}</span>
+                        <div class="note-actions">
+                            <button class="btn-action btn-edit" onclick="toggleEdit(${note.id})">Edit</button>
+                            <button class="btn-action btn-delete" onclick="deleteNote(${note.id})">Delete</button>
+                        </div>
+                    </div>
+                `;
+          notesContainer.appendChild(noteElement);
+        });
+      }
+
+      /**
+       * UTILITIES
+       */
+
+      // Save to localStorage and update UI
+      function saveAndRender() {
+        localStorage.setItem("notes-app-data", JSON.stringify(notes));
+        renderNotes();
+      }
+
+      // Security: Prevent XSS by escaping HTML characters
+      function escapeHtml(text) {
+        return text
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      // Event Listeners
+      addBtn.addEventListener("click", addNote);
+
+      // Allow submitting with Ctrl+Enter
+      noteInput.addEventListener("keydown", (e) => {
+        if (e.ctrlKey && e.key === "Enter") {
+          addNote();
+        }
+      });
+    </script>
+  </body>
+</html>
