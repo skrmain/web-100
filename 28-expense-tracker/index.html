@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Expense Tracker</title>
+
+    <style>
+      /* =========================================
+           CSS: Variables & Theming
+           ========================================= */
+      :root {
+        /* Light Theme Variables */
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --accent-color: #4f46e5; /* Indigo */
+        --accent-hover: #4338ca;
+        --danger-color: #ef4444; /* Red */
+        --border-color: #e5e7eb;
+        --shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --radius: 12px;
+        --font-family: "Inter", system-ui, -apple-system, sans-serif;
+      }
+
+      /* Dark Theme Support (Automatic) */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-color: #111827;
+          --card-bg: #1f2937;
+          --text-primary: #f9fafb;
+          --text-secondary: #9ca3af;
+          --border-color: #374151;
+        }
+      }
+
+      /* =========================================
+           CSS: Global Reset & Typography
+           ========================================= */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-family);
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        line-height: 1.5;
+        padding: 2rem 1rem;
+        transition:
+          background-color 0.3s ease,
+          color 0.3s ease;
+      }
+
+      /* =========================================
+           CSS: Layout & Components
+           ========================================= */
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      /* Header Section */
+      header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+
+      .total-display {
+        background: var(--accent-color);
+        color: white;
+        padding: 1rem;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        display: inline-block;
+        min-width: 200px;
+      }
+
+      .total-label {
+        font-size: 0.875rem;
+        opacity: 0.9;
+      }
+      .total-amount {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      /* Form Section */
+      .expense-form {
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+        display: grid;
+        gap: 1rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+      }
+
+      input,
+      select {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--bg-color);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: border-color 0.2s;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 2px var(--accent-color);
+      }
+
+      /* Grid layout for form on larger screens */
+      @media (min-width: 480px) {
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+        }
+      }
+
+      button.add-btn {
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 0.5rem;
+      }
+
+      button.add-btn:hover {
+        background-color: var(--accent-hover);
+      }
+
+      /* Expense List Section */
+      .expense-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .expense-item {
+        background: var(--card-bg);
+        padding: 1rem;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        /* Animation for adding new items */
+        animation: slideIn 0.3s ease-out forwards;
+        border-left: 4px solid var(--accent-color);
+      }
+
+      .item-info {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .item-title {
+        font-weight: 600;
+        font-size: 1rem;
+      }
+
+      .item-meta {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+      }
+
+      /* Category Badges */
+      .badge {
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      /* Category specific colors (Dynamic Classes) */
+      .badge.grocery {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .badge.travel {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+      .badge.bills {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .badge.other {
+        background: #f3f4f6;
+        color: #374151;
+      }
+
+      /* Dark mode adjustments for badges */
+      @media (prefers-color-scheme: dark) {
+        .badge.grocery {
+          background: #064e3b;
+          color: #d1fae5;
+        }
+        .badge.travel {
+          background: #1e3a8a;
+          color: #dbeafe;
+        }
+        .badge.bills {
+          background: #7f1d1d;
+          color: #fee2e2;
+        }
+        .badge.other {
+          background: #374151;
+          color: #f3f4f6;
+        }
+      }
+
+      .item-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .item-amount {
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+
+      .delete-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition:
+          color 0.2s,
+          background 0.2s;
+        font-size: 1.2rem;
+        line-height: 1;
+      }
+
+      .delete-btn:hover {
+        color: var(--danger-color);
+        background: rgba(239, 68, 68, 0.1);
+      }
+
+      .empty-state {
+        text-align: center;
+        color: var(--text-secondary);
+        margin-top: 2rem;
+        font-style: italic;
+      }
+
+      /* Animations */
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Expense Tracker</h1>
+        <div class="total-display">
+          <div class="total-label">Total Balance</div>
+          <div class="total-amount" id="total-amount">$0.00</div>
+        </div>
+      </header>
+
+      <form class="expense-form" id="expense-form">
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input
+            type="text"
+            id="title"
+            placeholder="e.g. Weekly Groceries"
+            required
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="amount">Amount</label>
+            <input
+              type="number"
+              id="amount"
+              placeholder="0.00"
+              step="0.01"
+              min="0.01"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="date">Date</label>
+            <input type="date" id="date" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" required>
+            <option value="" disabled selected>Select Category</option>
+            <option value="grocery">Grocery</option>
+            <option value="travel">Travel</option>
+            <option value="bills">Bills</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <button type="submit" class="add-btn">Add Expense</button>
+      </form>
+
+      <ul class="expense-list" id="expense-list"></ul>
+      <div id="empty-state" class="empty-state" style="display: none">
+        No expenses found. Add one above!
+      </div>
+    </div>
+
+    <script>
+      /* =========================================
+           JavaScript: Logic & State Management
+           ========================================= */
+
+      // 1. Select DOM Elements
+      const form = document.getElementById("expense-form");
+      const list = document.getElementById("expense-list");
+      const totalDisplay = document.getElementById("total-amount");
+      const emptyState = document.getElementById("empty-state");
+
+      // 2. State Management
+      // Load from localStorage or initialize empty array
+      let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
+
+      // 3. Formatter for Currency (Intl API)
+      const currencyFormatter = new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+      });
+
+      // 4. Function to save to LocalStorage
+      function saveToStorage() {
+        localStorage.setItem("expenses", JSON.stringify(expenses));
+        updateTotal();
+        renderList();
+      }
+
+      // 5. Add Expense Handler
+      form.addEventListener("submit", (e) => {
+        e.preventDefault(); // Stop page reload
+
+        // Get values from inputs
+        const title = document.getElementById("title").value;
+        const amount = parseFloat(document.getElementById("amount").value);
+        const date = document.getElementById("date").value;
+        const category = document.getElementById("category").value;
+
+        // Create expense object
+        const expense = {
+          id: Date.now(), // Unique ID based on timestamp
+          title,
+          amount,
+          date,
+          category,
+        };
+
+        // Update state
+        expenses.push(expense);
+
+        // Save & Update UI
+        saveToStorage();
+
+        // Reset form
+        form.reset();
+        // Reset date to today (optional UX improvement)
+        document.getElementById("date").valueAsDate = new Date();
+      });
+
+      // 6. Delete Expense Handler
+      function deleteExpense(id) {
+        // Filter out the item with the matching ID
+        expenses = expenses.filter((expense) => expense.id !== id);
+        saveToStorage();
+      }
+
+      // 7. Update Total Balance
+      function updateTotal() {
+        // Reduce array to calculate sum
+        const total = expenses.reduce(
+          (sum, expense) => sum + expense.amount,
+          0,
+        );
+        totalDisplay.textContent = currencyFormatter.format(total);
+      }
+
+      // 8. Render List
+      function renderList() {
+        list.innerHTML = ""; // Clear current list
+
+        if (expenses.length === 0) {
+          emptyState.style.display = "block";
+          return;
+        } else {
+          emptyState.style.display = "none";
+        }
+
+        // Loop through expenses and create HTML
+        expenses.forEach((expense) => {
+          const li = document.createElement("li");
+          li.className = "expense-item";
+
+          // Format date for display
+          const dateObj = new Date(expense.date);
+          const dateStr = dateObj.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          });
+
+          li.innerHTML = `
+                    <div class="item-info">
+                        <span class="item-title">${escapeHtml(expense.title)}</span>
+                        <div class="item-meta">
+                            <span class="badge ${expense.category}">${expense.category}</span>
+                            <span>${dateStr}</span>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <span class="item-amount">${currencyFormatter.format(expense.amount)}</span>
+                        <button class="delete-btn" onclick="deleteExpense(${expense.id})" aria-label="Delete expense">
+                            &times;
+                        </button>
+                    </div>
+                `;
+
+          list.appendChild(li);
+        });
+      }
+
+      // 9. Security Helper (Prevent XSS)
+      function escapeHtml(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // 10. Initialization
+      // Set default date to today
+      document.getElementById("date").valueAsDate = new Date();
+      // Initial Render
+      updateTotal();
+      renderList();
+    </script>
+  </body>
+</html>
