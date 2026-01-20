@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="A simple vanilla JS weather dashboard" />
+    <title>Minimal Weather</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-container">
+      <header class="search-header">
+        <h1>Weather<span class="highlight">.js</span></h1>
+        <form id="search-form" role="search">
+          <input
+            type="search"
+            id="city-input"
+            placeholder="Enter city (e.g., London)"
+            aria-label="Search city"
+            autocomplete="off"
+            required
+          />
+          <button type="submit" aria-label="Search">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </button>
+          <button
+            type="button"
+            id="geo-btn"
+            aria-label="Use current location"
+            title="Use current location"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+          </button>
+        </form>
+      </header>
+
+      <div id="loading-state" class="state hidden" aria-live="polite">
+        <div class="spinner"></div>
+        <p>Fetching forecast...</p>
+      </div>
+
+      <div id="error-state" class="state hidden" aria-live="assertive">
+        <div class="error-icon">⚠️</div>
+        <p id="error-message">Something went wrong.</p>
+      </div>
+
+      <article id="weather-card" class="weather-card hidden">
+        <header class="card-header">
+          <h2 id="city-name">City Name</h2>
+          <span id="country-code" class="badge">--</span>
+        </header>
+
+        <div class="current-weather">
+          <div class="weather-icon" id="weather-icon">☀️</div>
+          <div class="temp-container">
+            <span id="temperature">--</span>
+            <span class="unit">°C</span>
+          </div>
+          <p id="condition-text" class="condition">Clear Sky</p>
+        </div>
+
+        <footer class="card-details">
+          <div class="detail-item">
+            <span class="label">Humidity</span>
+            <span class="value" id="humidity">--%</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Wind</span>
+            <span class="value" id="wind-speed">-- km/h</span>
+          </div>
+        </footer>
+      </article>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
