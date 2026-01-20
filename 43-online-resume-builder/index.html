@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Resume Builder</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1><span>⚡</span> Resume Builder</h1>
+      <div class="actions">
+        <button id="reset-btn" class="btn secondary">Reset</button>
+        <button onclick="window.print()" class="btn primary">
+          Download PDF
+        </button>
+      </div>
+    </header>
+
+    <div class="app-container">
+      <aside class="editor">
+        <form id="resume-form">
+          <fieldset>
+            <legend>Personal Details</legend>
+            <div class="input-group">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" name="name" placeholder="John Doe" />
+            </div>
+            <div class="input-group">
+              <label for="title">Job Title</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                placeholder="Software Engineer"
+              />
+            </div>
+            <div class="input-group">
+              <label for="summary">Professional Summary</label>
+              <textarea
+                id="summary"
+                name="summary"
+                rows="3"
+                placeholder="Brief bio..."
+              ></textarea>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Contact Info</legend>
+            <div class="input-group">
+              <label for="email">Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="john@example.com"
+              />
+            </div>
+            <div class="input-group">
+              <label for="phone">Phone</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                placeholder="+1 234 567 890"
+              />
+            </div>
+            <div class="input-group">
+              <label for="website">Website / LinkedIn</label>
+              <input
+                type="url"
+                id="website"
+                name="website"
+                placeholder="linkedin.com/in/john"
+              />
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Latest Experience</legend>
+            <div class="input-group">
+              <label for="company">Company</label>
+              <input
+                type="text"
+                id="company"
+                name="company"
+                placeholder="Tech Corp"
+              />
+            </div>
+            <div class="input-group">
+              <label for="job_role">Role</label>
+              <input
+                type="text"
+                id="job_role"
+                name="job_role"
+                placeholder="Senior Developer"
+              />
+            </div>
+            <div class="input-group">
+              <label for="years">Years</label>
+              <input
+                type="text"
+                id="years"
+                name="years"
+                placeholder="2020 - Present"
+              />
+            </div>
+            <div class="input-group">
+              <label for="exp_desc">Description</label>
+              <textarea
+                id="exp_desc"
+                name="exp_desc"
+                rows="3"
+                placeholder="Achievements..."
+              ></textarea>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Skills</legend>
+            <div class="input-group">
+              <label for="skills">List (comma separated)</label>
+              <input
+                type="text"
+                id="skills"
+                name="skills"
+                placeholder="HTML, CSS, JavaScript..."
+              />
+            </div>
+          </fieldset>
+        </form>
+      </aside>
+
+      <main class="preview-container">
+        <article id="resume-preview" class="resume-paper">
+          <header class="resume-header">
+            <h1 id="p-name">Your Name</h1>
+            <p id="p-title" class="job-title">Job Title</p>
+          </header>
+
+          <div class="resume-grid">
+            <aside class="resume-sidebar">
+              <section>
+                <h3>Contact</h3>
+                <p id="p-email">email@example.com</p>
+                <p id="p-phone">123-456-7890</p>
+                <p id="p-website">website.com</p>
+              </section>
+              <section>
+                <h3>Skills</h3>
+                <ul id="p-skills-list"></ul>
+              </section>
+            </aside>
+
+            <section class="resume-content">
+              <div class="section-block">
+                <h3>Profile</h3>
+                <p id="p-summary">Your professional summary goes here.</p>
+              </div>
+
+              <div class="section-block">
+                <h3>Experience</h3>
+                <div class="job-block">
+                  <h4 id="p-job-role">Role</h4>
+                  <span id="p-company" class="company">Company</span>
+                  <span class="divider">|</span>
+                  <span id="p-years" class="date">Years</span>
+                  <p id="p-exp-desc">Description of your work...</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </article>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
