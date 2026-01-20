@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Vanilla JS Music Player</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <main class="player-container">
+      <header class="player-header">
+        <span>Now Playing</span>
+      </header>
+
+      <section class="img-area">
+        <img src="" alt="Album Art" id="track-art" />
+      </section>
+
+      <section class="track-details">
+        <h2 id="track-name">Track Name</h2>
+        <h3 id="track-artist">Artist Name</h3>
+      </section>
+
+      <div class="progress-area">
+        <div class="timer">
+          <span id="current-time">00:00</span>
+          <span id="total-duration">00:00</span>
+        </div>
+        <input
+          type="range"
+          min="1"
+          max="100"
+          value="0"
+          class="seek_slider"
+          id="seek-slider"
+        />
+      </div>
+
+      <div class="controls">
+        <button class="btn-control" id="prev-btn" aria-label="Previous Track">
+          <i class="fas fa-step-backward"></i>
+        </button>
+
+        <button
+          class="btn-control play-pause"
+          id="playpause-btn"
+          aria-label="Play or Pause"
+        >
+          <i class="fas fa-play-circle fa-4x"></i>
+        </button>
+
+        <button class="btn-control" id="next-btn" aria-label="Next Track">
+          <i class="fas fa-step-forward"></i>
+        </button>
+      </div>
+
+      <div class="volume-container">
+        <i class="fas fa-volume-down"></i>
+        <input
+          type="range"
+          min="1"
+          max="100"
+          value="99"
+          class="volume_slider"
+          id="volume-slider"
+        />
+        <i class="fas fa-volume-up"></i>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,189 @@
+/* --- CSS Variables & Reset --- */
+:root {
+  --bg-color: #eef3f7;
+  --player-bg: #ffffff;
+  --text-primary: #333;
+  --text-secondary: #777;
+  --accent-color: #5d5dff;
+  --accent-hover: #4a4aff;
+  --shadow-light: 6px 6px 12px #c5c5c5, -6px -6px 12px #ffffff;
+  --shadow-inset: inset 6px 6px 12px #c5c5c5, inset -6px -6px 12px #ffffff;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #121212;
+    --player-bg: #1e1e1e;
+    --text-primary: #e0e0e0;
+    --text-secondary: #aaaaaa;
+    --shadow-light: 5px 5px 10px #151515, -5px -5px 10px #272727;
+    --shadow-inset: inset 5px 5px 10px #151515, inset -5px -5px 10px #272727;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  transition: background-color 0.3s;
+}
+
+/* --- Player Container --- */
+.player-container {
+  background-color: var(--player-bg);
+  width: 350px;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: var(--shadow-light);
+  text-align: center;
+}
+
+.player-header {
+  margin-bottom: 20px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+/* --- Album Art --- */
+.img-area {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+  border: 5px solid var(--player-bg);
+}
+
+.img-area img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Animation for rotation */
+.rotate {
+  animation: rotation 10s infinite linear;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+/* --- Track Details --- */
+.track-details {
+  margin: 25px 0;
+}
+
+.track-details h2 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 5px;
+}
+
+.track-details h3 {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* --- Sliders (Seek & Volume) --- */
+/* Resetting default appearance to create custom sliders */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 5px;
+  background: #d3d3d3;
+  border-radius: 5px;
+  cursor: pointer;
+  outline: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+input[type="range"]:hover {
+  opacity: 1;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  cursor: pointer;
+}
+
+/* --- Progress Area --- */
+.progress-area {
+  margin-bottom: 20px;
+}
+
+.timer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+
+/* --- Controls --- */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-bottom: 25px;
+}
+
+.btn-control {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    color 0.2s;
+}
+
+.btn-control:hover {
+  color: var(--accent-color);
+  transform: scale(1.1);
+}
+
+.play-pause {
+  color: var(--accent-color);
+}
+
+.play-pause:hover {
+  color: var(--accent-hover);
+}
+
+/* --- Volume Area --- */
+.volume-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-secondary);
+}
+
+.volume_slider {
+  width: 60%;
+}
