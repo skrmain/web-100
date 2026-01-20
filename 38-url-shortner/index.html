@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Shortener</title>
+    <style>
+      /* ========================================
+       CSS VARIABLES - Theme Control
+       ======================================== */
+      :root {
+        /* Light mode colors */
+        --bg-primary: #f5f7fa;
+        --bg-secondary: #ffffff;
+        --text-primary: #2d3748;
+        --text-secondary: #718096;
+        --accent-primary: #4299e1;
+        --accent-hover: #3182ce;
+        --success: #48bb78;
+        --error: #f56565;
+        --border: #e2e8f0;
+        --shadow: rgba(0, 0, 0, 0.1);
+
+        /* Spacing and sizing */
+        --radius: 12px;
+        --spacing: 1.5rem;
+      }
+
+      /* Dark mode colors using prefers-color-scheme */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #1a202c;
+          --bg-secondary: #2d3748;
+          --text-primary: #f7fafc;
+          --text-secondary: #cbd5e0;
+          --accent-primary: #63b3ed;
+          --accent-hover: #4299e1;
+          --border: #4a5568;
+          --shadow: rgba(0, 0, 0, 0.3);
+        }
+      }
+
+      /* ========================================
+       BASE STYLES
+       ======================================== */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        transition: background 0.3s ease;
+      }
+
+      /* ========================================
+       LAYOUT - Flexbox Container
+       ======================================== */
+      .container {
+        max-width: 600px;
+        width: 100%;
+        margin: auto;
+        padding: var(--spacing);
+      }
+
+      /* ========================================
+       HEADER SECTION
+       ======================================== */
+      header {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, var(--accent-primary), #9f7aea);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+      }
+
+      /* ========================================
+       CARD COMPONENTS
+       ======================================== */
+      .card {
+        background: var(--bg-secondary);
+        border-radius: var(--radius);
+        padding: var(--spacing);
+        box-shadow: 0 4px 6px var(--shadow);
+        margin-bottom: 1.5rem;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      /* ========================================
+       MODE TOGGLE - API vs Mock
+       ======================================== */
+      .mode-toggle {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .mode-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid var(--border);
+        background: transparent;
+        color: var(--text-primary);
+        border-radius: var(--radius);
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
+
+      .mode-btn.active {
+        background: var(--accent-primary);
+        color: white;
+        border-color: var(--accent-primary);
+      }
+
+      .mode-btn:hover:not(.active) {
+        border-color: var(--accent-primary);
+      }
+
+      /* ========================================
+       FORM ELEMENTS
+       ======================================== */
+      .input-group {
+        margin-bottom: 1rem;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      input[type="text"],
+      input[type="url"] {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius);
+        font-size: 1rem;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        transition: border-color 0.3s ease;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: var(--accent-primary);
+      }
+
+      /* Input validation states */
+      input.valid {
+        border-color: var(--success);
+      }
+
+      input.invalid {
+        border-color: var(--error);
+      }
+
+      /* ========================================
+       ERROR MESSAGE DISPLAY
+       ======================================== */
+      .error-message {
+        color: var(--error);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: none; /* Hidden by default */
+      }
+
+      .error-message.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ========================================
+       BUTTONS
+       ======================================== */
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: var(--radius);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+      }
+
+      .btn-primary {
+        background: var(--accent-primary);
+        color: white;
+        width: 100%;
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--shadow);
+      }
+
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+
+      .btn-secondary {
+        background: transparent;
+        color: var(--text-secondary);
+        border: 2px solid var(--border);
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+
+      .btn-secondary:hover {
+        background: var(--bg-primary);
+      }
+
+      /* ========================================
+       RESULT DISPLAY SECTION
+       ======================================== */
+      .result-section {
+        display: none; /* Hidden until URL is shortened */
+      }
+
+      .result-section.show {
+        display: block;
+        animation: fadeIn 0.5s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .url-display {
+        background: var(--bg-primary);
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
+        border: 2px solid var(--border);
+      }
+
+      .url-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+      }
+
+      .url-value {
+        font-size: 1.1rem;
+        color: var(--accent-primary);
+        word-break: break-all;
+        font-weight: 600;
+      }
+
+      /* ========================================
+       ACTION BUTTONS - Copy and Clear
+       ======================================== */
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      /* ========================================
+       SUCCESS FEEDBACK
+       ======================================== */
+      .success-feedback {
+        background: var(--success);
+        color: white;
+        padding: 0.75rem;
+        border-radius: var(--radius);
+        text-align: center;
+        margin-top: 1rem;
+        display: none;
+      }
+
+      .success-feedback.show {
+        display: block;
+        animation: fadeIn 0.5s ease;
+      }
+
+      /* ========================================
+       HISTORY SECTION - Using localStorage
+       ======================================== */
+      .history-section {
+        margin-top: 2rem;
+      }
+
+      .history-title {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .history-item {
+        background: var(--bg-primary);
+        padding: 1rem;
+        border-radius: var(--radius);
+        margin-bottom: 0.75rem;
+        border: 1px solid var(--border);
+      }
+
+      .history-original {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.25rem;
+        word-break: break-all;
+      }
+
+      .history-short {
+        color: var(--accent-primary);
+        font-weight: 600;
+        word-break: break-all;
+      }
+
+      .empty-state {
+        text-align: center;
+        color: var(--text-secondary);
+        padding: 2rem;
+        font-style: italic;
+      }
+
+      /* ========================================
+       FOOTER
+       ======================================== */
+      footer {
+        text-align: center;
+        padding: 2rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      /* ========================================
+       RESPONSIVE DESIGN - Mobile Optimization
+       ======================================== */
+      @media (max-width: 640px) {
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        .container {
+          padding: 1rem;
+        }
+
+        .actions {
+          grid-template-columns: 1fr;
+        }
+
+        .mode-toggle {
+          flex-direction: column;
+        }
+
+        .mode-btn {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ========================================
+       HEADER - App Title and Description
+       ======================================== -->
+    <header>
+      <div class="container">
+        <h1>🔗 URL Shortener</h1>
+        <p class="subtitle">Transform long URLs into short, shareable links</p>
+      </div>
+    </header>
+
+    <!-- ========================================
+       MAIN CONTENT AREA
+       ======================================== -->
+    <main class="container">
+      <!-- Mode Selection: Mock vs Real API -->
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="mock">Mock Mode</button>
+        <button class="mode-btn" data-mode="api">API Mode (shrtco.de)</button>
+      </div>
+
+      <!-- Input Card -->
+      <div class="card">
+        <form id="url-form">
+          <div class="input-group">
+            <label for="long-url">Enter your long URL</label>
+            <input
+              type="url"
+              id="long-url"
+              placeholder="https://example.com/very/long/url/here"
+              required
+              aria-describedby="url-error"
+            />
+            <div id="url-error" class="error-message" role="alert"></div>
+          </div>
+          <button type="submit" class="btn btn-primary">Shorten URL</button>
+        </form>
+      </div>
+
+      <!-- Result Display Card (Hidden by default) -->
+      <div class="card result-section" id="result-section">
+        <div class="url-display">
+          <div class="url-label">Original URL:</div>
+          <div class="url-value" id="original-url"></div>
+        </div>
+
+        <div class="url-display">
+          <div class="url-label">Shortened URL:</div>
+          <div class="url-value" id="short-url"></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="copy-btn">📋 Copy Link</button>
+          <button class="btn btn-secondary" id="clear-btn">🔄 Clear</button>
+        </div>
+
+        <div class="success-feedback" id="success-feedback">
+          ✓ Copied to clipboard!
+        </div>
+      </div>
+
+      <!-- History Section -->
+      <div class="history-section" id="history-section">
+        <div class="history-title">
+          <span>Recent URLs</span>
+          <button
+            class="btn btn-secondary"
+            id="clear-history"
+            style="padding: 0.25rem 0.75rem; font-size: 0.85rem"
+          >
+            Clear History
+          </button>
+        </div>
+        <div id="history-list"></div>
+      </div>
+    </main>
+
+    <!-- ========================================
+       FOOTER
+       ======================================== -->
+    <footer>
+      <p>Built with HTML, CSS, and Vanilla JavaScript</p>
+    </footer>
+
+    <!-- ========================================
+       JAVASCRIPT - Application Logic
+       ======================================== -->
+    <script>
+      // ========================================
+      // STATE MANAGEMENT
+      // ========================================
+      let currentMode = "mock"; // 'mock' or 'api'
+      let urlHistory = []; // Store shortened URLs
+
+      // ========================================
+      // DOM ELEMENT REFERENCES
+      // ========================================
+      const urlForm = document.getElementById("url-form");
+      const longUrlInput = document.getElementById("long-url");
+      const urlError = document.getElementById("url-error");
+      const resultSection = document.getElementById("result-section");
+      const originalUrlDisplay = document.getElementById("original-url");
+      const shortUrlDisplay = document.getElementById("short-url");
+      const copyBtn = document.getElementById("copy-btn");
+      const clearBtn = document.getElementById("clear-btn");
+      const successFeedback = document.getElementById("success-feedback");
+      const modeButtons = document.querySelectorAll(".mode-btn");
+      const historyList = document.getElementById("history-list");
+      const clearHistoryBtn = document.getElementById("clear-history");
+
+      // ========================================
+      // INITIALIZE APP - Load history from localStorage
+      // ========================================
+      function init() {
+        loadHistory();
+        renderHistory();
+      }
+
+      // ========================================
+      // URL VALIDATION FUNCTION
+      // Validates if input is a proper URL format
+      // ========================================
+      function isValidURL(string) {
+        try {
+          const url = new URL(string);
+          // Check if protocol is http or https
+          return url.protocol === "http:" || url.protocol === "https:";
+        } catch (err) {
+          return false;
+        }
+      }
+
+      // ========================================
+      // VISUAL VALIDATION FEEDBACK
+      // Provides real-time feedback as user types
+      // ========================================
+      longUrlInput.addEventListener("input", function () {
+        const url = this.value.trim();
+
+        if (!url) {
+          // Reset state when empty
+          this.classList.remove("valid", "invalid");
+          hideError();
+          return;
+        }
+
+        if (isValidURL(url)) {
+          this.classList.remove("invalid");
+          this.classList.add("valid");
+          hideError();
+        } else {
+          this.classList.remove("valid");
+          this.classList.add("invalid");
+          showError(
+            "Please enter a valid URL (must start with http:// or https://)",
+          );
+        }
+      });
+
+      // ========================================
+      // ERROR MESSAGE DISPLAY
+      // ========================================
+      function showError(message) {
+        urlError.textContent = message;
+        urlError.classList.add("show");
+      }
+
+      function hideError() {
+        urlError.textContent = "";
+        urlError.classList.remove("show");
+      }
+
+      // ========================================
+      // MODE TOGGLE - Switch between Mock and API
+      // ========================================
+      modeButtons.forEach((btn) => {
+        btn.addEventListener("click", function () {
+          // Update active state
+          modeButtons.forEach((b) => b.classList.remove("active"));
+          this.classList.add("active");
+
+          // Update current mode
+          currentMode = this.dataset.mode;
+        });
+      });
+
+      // ========================================
+      // MOCK SHORTENING LOGIC
+      // Generates shortened URL using random token
+      // ========================================
+      function generateMockShortUrl(longUrl) {
+        // Generate random 6-character token using base36 encoding
+        const token = Math.random().toString(36).substring(2, 8);
+        return `https://short.link/${token}`;
+      }
+
+      // ========================================
+      // API SHORTENING LOGIC
+      // Uses shrtco.de free API for real shortening
+      // ========================================
+      async function generateApiShortUrl(longUrl) {
+        try {
+          const response = await fetch(
+            `https://api.shrtco.de/v2/shorten?url=${encodeURIComponent(longUrl)}`,
+          );
+          const data = await response.json();
+
+          if (data.ok) {
+            return data.result.full_short_link;
+          } else {
+            throw new Error(data.error || "API error");
+          }
+        } catch (error) {
+          console.error("API Error:", error);
+          throw new Error(
+            "Failed to shorten URL via API. Please try Mock Mode.",
+          );
+        }
+      }
+
+      // ========================================
+      // FORM SUBMISSION HANDLER
+      // Main logic for shortening URLs
+      // ========================================
+      urlForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const longUrl = longUrlInput.value.trim();
+
+        // Validate URL
+        if (!isValidURL(longUrl)) {
+          showError(
+            "Please enter a valid URL starting with http:// or https://",
+          );
+          longUrlInput.classList.add("invalid");
+          return;
+        }
+
+        try {
+          let shortUrl;
+
+          // Generate shortened URL based on current mode
+          if (currentMode === "mock") {
+            shortUrl = generateMockShortUrl(longUrl);
+          } else {
+            // Show loading state
+            const submitBtn = urlForm.querySelector(".btn-primary");
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = "Shortening...";
+            submitBtn.disabled = true;
+
+            try {
+              shortUrl = await generateApiShortUrl(longUrl);
+            } finally {
+              // Restore button state
+              submitBtn.textContent = originalText;
+              submitBtn.disabled = false;
+            }
+          }
+
+          // Display results
+          displayResults(longUrl, shortUrl);
+
+          // Save to history
+          saveToHistory(longUrl, shortUrl);
+        } catch (error) {
+          showError(error.message);
+        }
+      });
+
+      // ========================================
+      // DISPLAY RESULTS
+      // Shows the shortened URL in result card
+      // ========================================
+      function displayResults(longUrl, shortUrl) {
+        originalUrlDisplay.textContent = longUrl;
+        shortUrlDisplay.textContent = shortUrl;
+
+        // Show result section with animation
+        resultSection.classList.add("show");
+
+        // Scroll to results
+        resultSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      // ========================================
+      // COPY TO CLIPBOARD FUNCTIONALITY
+      // Uses modern Clipboard API
+      // ========================================
+      copyBtn.addEventListener("click", async function () {
+        const shortUrl = shortUrlDisplay.textContent;
+
+        try {
+          // Use Clipboard API for modern browsers
+          await navigator.clipboard.writeText(shortUrl);
+
+          // Show success feedback
+          successFeedback.classList.add("show");
+
+          // Hide feedback after 2 seconds
+          setTimeout(() => {
+            successFeedback.classList.remove("show");
+          }, 2000);
+        } catch (error) {
+          // Fallback for older browsers
+          const textarea = document.createElement("textarea");
+          textarea.value = shortUrl;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textarea);
+
+          successFeedback.classList.add("show");
+          setTimeout(() => {
+            successFeedback.classList.remove("show");
+          }, 2000);
+        }
+      });
+
+      // ========================================
+      // CLEAR/RESET FUNCTIONALITY
+      // Resets form and hides results
+      // ========================================
+      clearBtn.addEventListener("click", function () {
+        // Reset form
+        urlForm.reset();
+        longUrlInput.classList.remove("valid", "invalid");
+        hideError();
+
+        // Hide result section
+        resultSection.classList.remove("show");
+
+        // Focus back to input
+        longUrlInput.focus();
+      });
+
+      // ========================================
+      // HISTORY MANAGEMENT - Using localStorage
+      // ========================================
+      function saveToHistory(longUrl, shortUrl) {
+        const entry = {
+          id: Date.now(),
+          longUrl,
+          shortUrl,
+          timestamp: new Date().toISOString(),
+        };
+
+        // Add to beginning of array
+        urlHistory.unshift(entry);
+
+        // Keep only last 10 entries
+        if (urlHistory.length > 10) {
+          urlHistory = urlHistory.slice(0, 10);
+        }
+
+        // Save to localStorage
+        localStorage.setItem("urlHistory", JSON.stringify(urlHistory));
+
+        // Re-render history
+        renderHistory();
+      }
+
+      function loadHistory() {
+        const saved = localStorage.getItem("urlHistory");
+        if (saved) {
+          try {
+            urlHistory = JSON.parse(saved);
+          } catch (error) {
+            console.error("Error loading history:", error);
+            urlHistory = [];
+          }
+        }
+      }
+
+      function renderHistory() {
+        if (urlHistory.length === 0) {
+          historyList.innerHTML =
+            '<div class="empty-state">No shortened URLs yet. Create one to get started!</div>';
+          return;
+        }
+
+        historyList.innerHTML = urlHistory
+          .map(
+            (entry) => `
+        <div class="history-item">
+          <div class="history-original">${entry.longUrl}</div>
+          <div class="history-short">${entry.shortUrl}</div>
+        </div>
+      `,
+          )
+          .join("");
+      }
+
+      clearHistoryBtn.addEventListener("click", function () {
+        if (confirm("Are you sure you want to clear all history?")) {
+          urlHistory = [];
+          localStorage.removeItem("urlHistory");
+          renderHistory();
+        }
+      });
+
+      // ========================================
+      // START APPLICATION
+      // ========================================
+      init();
+    </script>
+  </body>
+</html>
