@@ -1,0 +1,187 @@
+/* --- 1. CSS Variables & Theme Setup --- */
+:root {
+  /* Color Palette */
+  --primary-color: #3b82f6;
+  --bg-color: #f3f4f6;
+  --card-bg: #ffffff;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --border-color: #d1d5db;
+
+  /* Strength Colors */
+  --strength-weak: #ef4444; /* Red */
+  --strength-medium: #eab308; /* Yellow/Orange */
+  --strength-strong: #22c55e; /* Green */
+
+  /* Layout */
+  --radius: 12px;
+  --transition: all 0.3s ease;
+}
+
+/* Auto Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #111827;
+    --card-bg: #1f2937;
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
+    --border-color: #374151;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* --- 2. Card Layout --- */
+.container {
+  width: 100%;
+  max-width: 450px;
+}
+
+.card {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+header p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+/* --- 3. Input Group --- */
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  transition: var(--transition);
+}
+
+.input-group:focus-within {
+  border-color: var(--primary-color);
+}
+
+input {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-main);
+  font-size: 1rem;
+}
+
+/* Buttons inside input */
+.input-group button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 12px;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.input-group button:hover {
+  color: var(--primary-color);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* --- 4. Strength Meter --- */
+.strength-meter-container {
+  margin-bottom: 1.5rem;
+}
+
+.strength-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.meter-bg {
+  height: 8px;
+  background: var(--border-color);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  width: 0%; /* JS will update this */
+  background: var(--strength-weak);
+  transition:
+    width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.4s;
+}
+
+/* --- 5. Validation List --- */
+.validation-list {
+  list-style: none;
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.validation-list li {
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.3s;
+}
+
+/* Validation States */
+.validation-list li.valid {
+  color: var(--strength-strong);
+}
+.validation-list li.valid i {
+  content: "\f058"; /* FontAwesome Check Circle code (optional if using pure CSS icons) */
+}
+
+/* --- 6. Action Button --- */
+.action-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.action-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.action-btn:active {
+  transform: translateY(0);
+}

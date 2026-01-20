@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Password Strength Checker</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <main class="container">
+      <div class="card">
+        <header>
+          <h1>Password Checker</h1>
+          <p>Check strength or generate a secure key.</p>
+        </header>
+
+        <div class="input-group">
+          <input
+            type="password"
+            id="passwordInput"
+            placeholder="Enter or generate password..."
+            aria-label="Password Input"
+            autocomplete="off"
+          />
+          <button id="toggleBtn" aria-label="Toggle Password Visibility">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+          <button id="copyBtn" aria-label="Copy to Clipboard">
+            <i class="fa-solid fa-copy"></i>
+          </button>
+        </div>
+
+        <div class="strength-meter-container">
+          <div class="strength-label">
+            <span>Strength:</span>
+            <span id="strengthText">N/A</span>
+          </div>
+          <div class="meter-bg">
+            <div id="strengthBar" class="meter-fill"></div>
+          </div>
+        </div>
+
+        <ul class="validation-list" id="validationList">
+          <li id="req-length" class="pending">
+            <i class="fa-solid fa-circle"></i> At least 8 characters
+          </li>
+          <li id="req-lower" class="pending">
+            <i class="fa-solid fa-circle"></i> Lowercase letter (a-z)
+          </li>
+          <li id="req-upper" class="pending">
+            <i class="fa-solid fa-circle"></i> Uppercase letter (A-Z)
+          </li>
+          <li id="req-num" class="pending">
+            <i class="fa-solid fa-circle"></i> Number (0-9)
+          </li>
+          <li id="req-special" class="pending">
+            <i class="fa-solid fa-circle"></i> Special character (!@#$)
+          </li>
+        </ul>
+
+        <button id="generateBtn" class="action-btn">
+          Generate Strong Password
+        </button>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
