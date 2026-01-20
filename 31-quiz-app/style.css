@@ -1,0 +1,169 @@
+/* --- 1. Variables & Reset --- */
+:root {
+  --primary-color: #6c5ce7;
+  --secondary-color: #a29bfe;
+  --background: #f8f9fa;
+  --text-color: #2d3436;
+  --white: #ffffff;
+  --success: #00b894;
+  --error: #d63031;
+  --radius: 8px;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* --- 2. Main Container --- */
+.app-container {
+  background: var(--white);
+  width: 100%;
+  max-width: 500px;
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+/* --- 3. Utilities --- */
+.hidden {
+  display: none !important;
+}
+
+.view {
+  /* Smooth fade in animation */
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- 4. Header & Progress --- */
+header h1 {
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+#progress-container {
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: #636e72;
+}
+
+#progress-bar {
+  height: 6px;
+  background-color: var(--primary-color);
+  width: 0%; /* JS will update this */
+  border-radius: 10px;
+  transition: width 0.3s ease;
+  margin-bottom: 5px;
+}
+
+/* --- 5. Quiz UI --- */
+#question-text {
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+}
+
+#options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-btn {
+  padding: 12px;
+  border: 2px solid #dfe6e9;
+  background: transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.option-btn:hover:not(:disabled) {
+  background-color: #f1f2f6;
+  border-color: var(--secondary-color);
+}
+
+/* Selected states */
+.option-btn.selected {
+  border-color: var(--primary-color);
+  background-color: #eef1ff;
+  font-weight: bold;
+}
+
+.option-btn.correct {
+  background-color: var(--success);
+  color: var(--white);
+  border-color: var(--success);
+}
+
+.option-btn.incorrect {
+  background-color: var(--error);
+  color: var(--white);
+  border-color: var(--error);
+}
+
+/* --- 6. Controls --- */
+.controls {
+  margin-top: 1.5rem;
+  min-height: 60px; /* Prevent jumping when feedback appears */
+}
+
+#feedback {
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn.primary {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+.btn.secondary {
+  background-color: var(--text-color);
+  color: var(--white);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
