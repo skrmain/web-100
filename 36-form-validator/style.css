@@ -1,0 +1,194 @@
+/* style.css */
+
+/* 1. VARIABLES & RESET */
+:root {
+  --primary-color: #6366f1;
+  --primary-hover: #4f46e5;
+  --bg-color: #f3f4f6;
+  --card-bg: #ffffff;
+  --text-color: #1f2937;
+  --text-muted: #6b7280;
+  --error-color: #ef4444;
+  --success-color: #10b981;
+  --border-color: #d1d5db;
+  --radius: 8px;
+  --transition: all 0.2s ease;
+}
+
+/* Dark Mode Overrides */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #111827;
+    --card-bg: #1f2937;
+    --text-color: #f9fafb;
+    --text-muted: #9ca3af;
+    --border-color: #374151;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+/* 2. LAYOUT */
+.container {
+  width: 100%;
+  max-width: 450px;
+}
+
+.form-wrapper {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+header h1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+header p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* 3. FORM ELEMENTS */
+.input-group {
+  margin-bottom: 1.25rem;
+  position: relative;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius);
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* Helper text styling */
+.helper-text {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+  display: block;
+}
+
+/* 4. VALIDATION STYLES */
+
+/* Success State (Applied via JS class) */
+input.success {
+  border-color: var(--success-color);
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="%2310b981"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 1.2rem;
+}
+
+/* Error State (Applied via JS class) */
+input.error {
+  border-color: var(--error-color);
+  animation: shake 0.3s ease-in-out;
+}
+
+.error-message {
+  color: var(--error-color);
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  display: block;
+  min-height: 1.2rem; /* Reserve space to prevent layout jump */
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: var(--transition);
+}
+
+/* Show error message when input has error class */
+input.error + .error-message,
+input.error + .helper-text + .error-message {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 5. BUTTON & MESSAGES */
+button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+button:hover {
+  background-color: var(--primary-hover);
+}
+
+.success-banner {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--success-color);
+  border: 1px solid var(--success-color);
+  border-radius: var(--radius);
+  text-align: center;
+  font-weight: 500;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Shake Animation for errors */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
