@@ -1,0 +1,180 @@
+/* --- CSS Variables & Theming --- */
+:root {
+  /* Color Palette */
+  --color-focus: #ff6b6b; /* Soft Red */
+  --color-short: #4ecdc4; /* Teal */
+  --color-long: #45b7d1; /* Blue */
+
+  --bg-color: #f7f9fc;
+  --card-bg: #ffffff;
+  --text-primary: #2d3436;
+  --text-secondary: #636e72;
+
+  /* Layout */
+  --radius-lg: 20px;
+  --radius-sm: 8px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #1e1e2e;
+    --card-bg: #2b2b3b;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Global Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  transition: background-color 0.4s ease;
+}
+
+/* --- App Container --- */
+.app-container {
+  background: var(--card-bg);
+  padding: 2.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  width: 90%;
+  max-width: 450px;
+  text-align: center;
+  /* Smooth transition when colors change */
+  transition:
+    transform 0.2s,
+    background-color 0.3s;
+}
+
+/* --- Mode Indicator --- */
+.mode-indicator {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+/* --- Timer Display --- */
+.timer-display {
+  font-size: 6rem;
+  font-weight: 700;
+  /* Keeps numbers same width to prevent jitter */
+  font-variant-numeric: tabular-nums;
+  margin: 1rem 0;
+  color: var(--color-focus); /* Default color */
+  transition: color 0.4s ease;
+}
+
+/* --- Mode Selectors (Tabs) --- */
+.mode-selector {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.5rem;
+  border-radius: 50px;
+}
+
+.mode-btn {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.mode-btn.active {
+  background: var(--card-bg);
+  color: var(--text-primary);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Controls --- */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.primary-btn,
+.secondary-btn {
+  padding: 0.8rem 2rem;
+  font-size: 1.2rem;
+  border-radius: var(--radius-sm);
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: transform 0.1s;
+}
+
+.primary-btn:active {
+  transform: scale(0.95);
+}
+
+.primary-btn {
+  background-color: var(--color-focus);
+  color: white;
+}
+
+.secondary-btn {
+  background-color: transparent;
+  border: 2px solid var(--text-secondary);
+  color: var(--text-primary);
+}
+
+.icon-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  padding: 0.5rem;
+  transition: color 0.2s;
+}
+.icon-btn:hover {
+  color: var(--text-primary);
+}
+
+/* Utility Classes */
+.hidden {
+  display: none;
+}
+
+/* Dynamic Theme Colors based on attribute */
+/* We will set [data-theme="short"] on the body via JS */
+body[data-theme="short"] .timer-display {
+  color: var(--color-short);
+}
+body[data-theme="short"] .primary-btn {
+  background-color: var(--color-short);
+}
+
+body[data-theme="long"] .timer-display {
+  color: var(--color-long);
+}
+body[data-theme="long"] .primary-btn {
+  background-color: var(--color-long);
+}

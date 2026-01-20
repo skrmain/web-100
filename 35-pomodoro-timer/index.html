@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Pomodoro Timer</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-container">
+      <header>
+        <h1 class="sr-only">Pomodoro Timer</h1>
+        <div id="mode-text" class="mode-indicator">Focus Time</div>
+      </header>
+
+      <section class="timer-display">
+        <time id="time-left" datetime="25:00">25:00</time>
+      </section>
+
+      <nav class="mode-selector" role="tablist">
+        <button
+          class="mode-btn active"
+          data-mode="focus"
+          role="tab"
+          aria-selected="true"
+        >
+          Focus
+        </button>
+        <button
+          class="mode-btn"
+          data-mode="short"
+          role="tab"
+          aria-selected="false"
+        >
+          Short Break
+        </button>
+        <button
+          class="mode-btn"
+          data-mode="long"
+          role="tab"
+          aria-selected="false"
+        >
+          Long Break
+        </button>
+      </nav>
+
+      <section class="controls">
+        <button id="start-btn" class="primary-btn">Start</button>
+        <button id="pause-btn" class="secondary-btn hidden">Pause</button>
+        <button id="reset-btn" class="icon-btn" aria-label="Reset Timer">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74-2.74L3 2.5" />
+            <path d="M3 8h6V2" />
+          </svg>
+        </button>
+      </section>
+    </main>
+
+    <audio
+      id="alarm-sound"
+      src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"
+    ></audio>
+
+    <script src="script.js"></script>
+  </body>
+</html>
