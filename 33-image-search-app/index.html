@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Image Search</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1>LensLoop 📷</h1>
+        <p>Search high-quality images powered by Unsplash</p>
+
+        <form id="search-form">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search for images (e.g., mountains, coffee)..."
+            autocomplete="off"
+            aria-label="Search images"
+          />
+          <button type="submit" aria-label="Search">Search</button>
+        </form>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div id="image-grid" class="image-grid"></div>
+
+        <div id="loader" class="loader hidden"></div>
+
+        <div id="error-msg" class="error-msg hidden"></div>
+
+        <button id="show-more-btn" class="show-more-btn hidden">
+          Show More
+        </button>
+      </div>
+    </main>
+
+    <footer>
+      <p>Built with ❤️ using Vanilla JS & Unsplash API</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
