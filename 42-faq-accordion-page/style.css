@@ -1,0 +1,191 @@
+/* --- 1. CSS Variables & Theming --- */
+:root {
+  /* Light Mode (Default) */
+  --bg-color: #f9fafb;
+  --container-bg: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --accent-color: #3b82f6;
+  --border-color: #e5e7eb;
+  --hover-bg: #f3f4f6;
+  --transition-speed: 0.3s;
+}
+
+/* Dark Mode Preference */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #111827;
+    --container-bg: #1f2937;
+    --text-primary: #f9fafb;
+    --text-secondary: #9ca3af;
+    --border-color: #374151;
+    --hover-bg: #374151;
+  }
+}
+
+/* --- 2. Global Reset & Layout --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  line-height: 1.6;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  transition: background-color var(--transition-speed);
+}
+
+/* --- 3. FAQ Container --- */
+.faq-container {
+  width: 100%;
+  max-width: 700px;
+  background: var(--container-bg);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.faq-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.faq-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.faq-header p {
+  color: var(--text-secondary);
+}
+
+/* --- 4. Toggle Switch Control --- */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 1.5rem;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--border-color);
+  transition: 0.4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: var(--accent-color);
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* --- 5. FAQ List Styles --- */
+.faq-item {
+  border-bottom: 1px solid var(--border-color);
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+}
+
+/* The Question Button */
+.faq-question {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 1.2rem 0;
+  text-align: left;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.faq-question:hover {
+  color: var(--accent-color);
+}
+
+.faq-question:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Chevron Icon styling */
+.icon {
+  width: 20px;
+  height: 20px;
+  transition: transform var(--transition-speed) ease;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+/* Rotate icon when active */
+.faq-question.active .icon {
+  transform: rotate(180deg);
+}
+
+/* The Answer Content (Hidden by default) */
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-speed) ease-out;
+}
+
+.faq-answer p {
+  padding-bottom: 1.2rem;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
