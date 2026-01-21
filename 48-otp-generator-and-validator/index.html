@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure OTP Validator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>Security Check</h1>
+        <p>Verify your identity to proceed.</p>
+      </header>
+
+      <section id="generator-section">
+        <button id="generate-btn" class="primary-btn">Send OTP Code</button>
+      </section>
+
+      <section id="validator-section" class="hidden" aria-hidden="true">
+        <div class="info-text">
+          <p>Enter the 4-digit code sent to your device.</p>
+          <p class="timer-text">Expires in: <span id="timer">30</span>s</p>
+        </div>
+
+        <form id="otp-form">
+          <div class="otp-inputs" id="inputs-container">
+            <input
+              type="text"
+              inputmode="numeric"
+              maxlength="1"
+              pattern="\d{1}"
+              aria-label="Digit 1"
+              autocomplete="one-time-code"
+            />
+            <input
+              type="text"
+              inputmode="numeric"
+              maxlength="1"
+              pattern="\d{1}"
+              aria-label="Digit 2"
+            />
+            <input
+              type="text"
+              inputmode="numeric"
+              maxlength="1"
+              pattern="\d{1}"
+              aria-label="Digit 3"
+            />
+            <input
+              type="text"
+              inputmode="numeric"
+              maxlength="1"
+              pattern="\d{1}"
+              aria-label="Digit 4"
+            />
+          </div>
+
+          <button type="submit" id="verify-btn" class="primary-btn">
+            Verify & Proceed
+          </button>
+        </form>
+
+        <div class="actions">
+          <button id="resend-btn" disabled>Resend Code</button>
+        </div>
+      </section>
+
+      <div id="message-box" class="message-box" aria-live="polite"></div>
+    </main>
+
+    <div id="mock-sms" class="mock-sms hidden">
+      <span class="sms-icon">💬</span>
+      <div>
+        <strong>New Message</strong>
+        <p>Your verification code is: <span id="sms-code"></span></p>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
