@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notification Center UI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main class="app-container">
+      <h1>Dashboard</h1>
+      <p>Click the bell icon to view notifications.</p>
+
+      <div class="debug-controls">
+        <button onclick="nc.addRandomNotification()">
+          + Simulate Notification
+        </button>
+      </div>
+    </main>
+
+    <div class="notification-widget">
+      <button id="bell-btn" class="bell-btn" aria-label="Notifications">
+        <span class="material-icons-round">notifications</span>
+        <span id="badge" class="badge hidden">0</span>
+      </button>
+
+      <aside
+        id="notification-tray"
+        class="notification-tray hidden"
+        aria-hidden="true"
+      >
+        <header class="tray-header">
+          <div class="header-left">
+            <h3>Notifications</h3>
+          </div>
+          <div class="header-right">
+            <button
+              id="mark-all-read"
+              class="text-btn"
+              title="Mark all as read"
+            >
+              <span class="material-icons-round">done_all</span>
+            </button>
+            <button id="clear-all" class="text-btn" title="Clear all">
+              <span class="material-icons-round">delete_sweep</span>
+            </button>
+          </div>
+        </header>
+
+        <div id="notification-list" class="notification-list"></div>
+
+        <footer class="tray-footer">
+          <a href="#">View Notification Settings</a>
+        </footer>
+      </aside>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

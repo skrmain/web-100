@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Modern Kanban Board</title>
+    <style>
+      /* --- CSS Variables & Theme Setup --- */
+      :root {
+        --color-bg-main: #1e2736; /* Deep slate blue background */
+        --color-bg-header: rgba(255, 255, 255, 0.05);
+        --color-bg-list: #2c3545; /* Slightly lighter slate for lists */
+        --color-bg-card: #3a4457; /* Lighter still for cards */
+        --color-bg-card-hover: #444f63;
+
+        --color-text-primary: #eef2f7;
+        --color-text-secondary: #8b9db3;
+
+        --color-accent: #4a90e2; /* Nice blue accent */
+        --color-danger: #e74c3c;
+
+        --shadow-sm:
+          0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1);
+        --shadow-lg:
+          0 10px 20px rgba(0, 0, 0, 0.4), 0 6px 6px rgba(0, 0, 0, 0.2);
+
+        --radius-md: 8px;
+        --radius-sm: 4px;
+
+        --transition-fast: 0.2s ease;
+      }
+
+      /* --- Global Reset & Typography --- */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        background-color: var(--color-bg-main);
+        color: var(--color-text-primary);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* Prevent body scroll, board handles it */
+      }
+
+      button {
+        font-family: inherit;
+        border: none;
+        background: none;
+        cursor: pointer;
+        color: inherit;
+      }
+
+      /* --- Header --- */
+      .app-header {
+        padding: 1rem 1.5rem;
+        background: var(--color-bg-header);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+      }
+
+      .brand {
+        font-weight: 700;
+        font-size: 1.25rem;
+        letter-spacing: -0.5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn-reset {
+        font-size: 0.875rem;
+        color: var(--color-text-secondary);
+        padding: 6px 12px;
+        border-radius: var(--radius-sm);
+        transition: var(--transition-fast);
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .btn-reset:hover {
+        background: rgba(231, 76, 60, 0.2);
+        color: var(--color-danger);
+      }
+
+      /* --- Main Board Area (Horizontal Scroll) --- */
+      .board-container {
+        flex-grow: 1;
+        display: flex;
+        overflow-x: auto;
+        padding: 1.5rem;
+        gap: 1rem;
+        align-items: flex-start; /* Aligns lists to top */
+      }
+      /* Custom scrollbar styling */
+      .board-container::-webkit-scrollbar {
+        height: 12px;
+      }
+      .board-container::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 6px;
+      }
+      .board-container::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 6px;
+      }
+
+      /* --- List Styles --- */
+      .list {
+        background-color: var(--color-bg-list);
+        min-width: 280px;
+        max-width: 280px;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        max-height: 100%; /* Ensure it doesn't overflow vertically */
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .list-header {
+        padding: 12px 16px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: grab;
+      }
+      .list-header-title {
+        outline: none;
+        border-radius: var(--radius-sm);
+        padding: 2px 4px;
+      }
+      .list-header-title:focus {
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .btn-icon {
+        color: var(--color-text-secondary);
+        padding: 4px;
+        border-radius: var(--radius-sm);
+        opacity: 0.7;
+        transition: var(--transition-fast);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .btn-icon:hover {
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .btn-icon.danger:hover {
+        background: var(--color-danger);
+        color: white;
+      }
+
+      /* --- Card Container (Vertical Scroll) --- */
+      .list-cards {
+        flex-grow: 1;
+        overflow-y: auto;
+        padding: 0 8px 8px 8px;
+        /* Important for drag and drop into empty lists */
+        min-height: 40px;
+      }
+      /* Subtle scrollbar for cards */
+      .list-cards::-webkit-scrollbar {
+        width: 6px;
+      }
+      .list-cards::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 3px;
+      }
+
+      /* --- Card Styles --- */
+      .card {
+        background-color: var(--color-bg-card);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-sm);
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        cursor: grab;
+        transition:
+          background var(--transition-fast),
+          box-shadow var(--transition-fast),
+          transform 0.1s;
+        border: 1px solid rgba(255, 255, 255, 0.03);
+      }
+
+      .card:hover {
+        background-color: var(--color-bg-card-hover);
+        box-shadow: var(--shadow-md);
+      }
+
+      .card:active {
+        cursor: grabbing;
+      }
+
+      .card-title {
+        font-size: 0.9375rem;
+        line-height: 1.4;
+        word-wrap: break-word;
+        /* Prevents text selection during drag start */
+        user-select: none;
+      }
+
+      .card-badges {
+        display: flex;
+        gap: 6px;
+        margin-top: 8px;
+      }
+
+      .badge {
+        font-size: 0.75rem;
+        color: var(--color-text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      /* --- Drag & Drop Visuals --- */
+      /* The element actively being dragged */
+      .card.dragging {
+        opacity: 0.4;
+        background: var(--color-accent);
+        border: 2px dashed rgba(255, 255, 255, 0.5);
+        box-shadow: none;
+        /* Crucial: lets mouse events pass through to the drop target below */
+        pointer-events: none;
+      }
+
+      /* Highlight the list when dragging over it */
+      .list.drag-over {
+        background-color: rgba(44, 53, 69, 0.8);
+        border: 1px dashed var(--color-accent);
+      }
+
+      /* --- Footer Buttons (Add Card/List) --- */
+      .list-footer {
+        padding: 8px;
+      }
+
+      .btn-add-card,
+      .btn-add-list {
+        width: 100%;
+        text-align: left;
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        color: var(--color-text-secondary);
+        font-size: 0.9rem;
+        transition: var(--transition-fast);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-add-card:hover,
+      .btn-add-list:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+        color: var(--color-text-primary);
+      }
+
+      .add-list-wrapper {
+        min-width: 280px;
+        /* Transparent background initially */
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: var(--radius-md);
+        padding: 8px;
+        height: fit-content;
+        border: 1px dashed rgba(255, 255, 255, 0.1);
+      }
+
+      /* --- Modal (Editing) --- */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(3px);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: 80px;
+        z-index: 100;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--transition-fast);
+      }
+      .modal-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .modal-content {
+        background: var(--color-bg-list);
+        width: 90%;
+        max-width: 550px;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        transform: translateY(-20px);
+        transition: transform var(--transition-fast);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .modal-overlay.active .modal-content {
+        transform: translateY(0);
+      }
+
+      .modal-header {
+        padding: 16px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .modal-title-input {
+        background: transparent;
+        color: var(--color-text-primary);
+        border: 2px solid transparent;
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 100%;
+        padding: 4px 8px;
+        border-radius: var(--radius-sm);
+      }
+      .modal-title-input:focus {
+        border-color: var(--color-accent);
+        outline: none;
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .modal-body {
+        padding: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        color: var(--color-text-secondary);
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .form-textarea {
+        width: 100%;
+        background: var(--color-bg-header);
+        border: 2px solid transparent;
+        color: var(--color-text-primary);
+        padding: 12px;
+        border-radius: var(--radius-sm);
+        resize: vertical;
+        font-family: inherit;
+      }
+      .form-textarea:focus {
+        border-color: var(--color-accent);
+        outline: none;
+      }
+
+      .modal-footer {
+        padding: 16px 20px;
+        background: rgba(0, 0, 0, 0.15);
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+      }
+
+      .btn-primary {
+        background: var(--color-accent);
+        color: white;
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        transition: var(--transition-fast);
+      }
+      .btn-primary:hover {
+        filter: brightness(1.1);
+        box-shadow: var(--shadow-md);
+      }
+      .btn-danger-solid {
+        background: var(--color-danger);
+        color: white;
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        transition: var(--transition-fast);
+      }
+      .btn-danger-solid:hover {
+        filter: brightness(1.1);
+        box-shadow: var(--shadow-md);
+      }
+
+      /* Utilities */
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="color: var(--color-accent)"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <rect x="7" y="7" width="3" height="9"></rect>
+          <rect x="14" y="7" width="3" height="5"></rect>
+        </svg>
+        NeoBoard
+      </div>
+      <button class="btn-reset" id="resetBtn">Reset Board</button>
+    </header>
+
+    <main class="board-container" id="board"></main>
+
+    <div class="modal-overlay" id="cardModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <input
+            type="text"
+            class="modal-title-input"
+            id="modalTitleInput"
+            spellcheck="false"
+          />
+          <button class="btn-icon" id="modalCloseBtn">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="modalDescInput">Description</label>
+            <textarea
+              id="modalDescInput"
+              class="form-textarea"
+              rows="5"
+              placeholder="Add a more detailed description..."
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-danger-solid" id="modalDeleteBtn">
+            Delete Card
+          </button>
+          <button class="btn-primary" id="modalSaveBtn">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /**
+       * ============================================================
+       * 1. STATE MANAGEMENT & UTILS
+       * ============================================================
+       */
+      const STORAGE_KEY = "neoboard_state_v1";
+
+      // Generate a unique ID based on timestamp and random string
+      const generateId = () =>
+        "id_" + Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+      const defaultState = {
+        lists: [
+          {
+            id: "l1",
+            title: "💡 Ideas",
+            cards: [
+              {
+                id: "c1",
+                title: "Welcome to NeoBoard!",
+                desc: "This is a beautiful Trello clone built with vanilla JS.",
+              },
+              {
+                id: "c2",
+                title: "Try dragging cards around",
+                desc: "The drag and drop is smooth and robust.",
+              },
+            ],
+          },
+          { id: "l2", title: "🛠 In Progress", cards: [] },
+          {
+            id: "l3",
+            title: "✅ Done",
+            cards: [
+              {
+                id: "c3",
+                title: "Implement beautiful UI",
+                desc: "Using CSS variables and modern flexbox/grid layouts.",
+                hasDesc: true,
+              },
+            ],
+          },
+        ],
+      };
+
+      // Load state or fallback to default
+      let appState =
+        JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultState;
+
+      // Save state to localStorage
+      const saveState = () => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      };
+
+      // Global variables for Drag & Drop tracks
+      let draggedCardEl = null;
+      let draggedCardId = null;
+      let sourceListId = null;
+
+      // Global variable for Modal editing tracks
+      let editingCardId = null;
+
+      /**
+       * ============================================================
+       * 2. DOM ELEMENT REFERENCES
+       * ============================================================
+       */
+      const boardEl = document.getElementById("board");
+      const modalEl = document.getElementById("cardModal");
+      const modalTitleInput = document.getElementById("modalTitleInput");
+      const modalDescInput = document.getElementById("modalDescInput");
+
+      /**
+       * ============================================================
+       * 3. RENDERING ENGINE
+       * ============================================================
+       * Clears the board and rebuilds it from the appState object.
+       */
+      function renderBoard() {
+        boardEl.innerHTML = ""; // Clear current view
+
+        // 1. Create List Elements
+        appState.lists.forEach((list) => {
+          const listEl = document.createElement("div");
+          listEl.className = "list";
+          // Important: Store ID on the element for D&D logic
+          listEl.dataset.listId = list.id;
+
+          // List Header
+          listEl.innerHTML = `
+                <div class="list-header">
+                    <div class="list-header-title" contenteditable="true" spellcheck="false" data-role="list-title">${list.title}</div>
+                    <button class="btn-icon danger" data-role="delete-list">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                </div>
+                <div class="list-cards"></div>
+                <div class="list-footer">
+                    <button class="btn-add-card" data-role="add-card">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Add a card
+                    </button>
+                </div>
+            `;
+
+          // 2. Create Card Elements inside the list
+          const cardsContainer = listEl.querySelector(".list-cards");
+          list.cards.forEach((card) => {
+            const cardEl = createCardElement(card);
+            cardsContainer.appendChild(cardEl);
+          });
+
+          // Setup Drag Events for the List (Drop Target)
+          setupListDragEvents(listEl);
+
+          boardEl.appendChild(listEl);
+        });
+
+        // Append the "Add List" button wrapper at the end
+        const addListWrapper = document.createElement("div");
+        addListWrapper.className = "add-list-wrapper";
+        addListWrapper.innerHTML = `
+             <button class="btn-add-list" id="addListBtn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add another list
+            </button>
+        `;
+        boardEl.appendChild(addListWrapper);
+      }
+
+      // Helper to create a card DOM element
+      function createCardElement(cardData) {
+        const el = document.createElement("div");
+        el.className = "card";
+        el.draggable = true; // Enable Native HTML5 Drag
+        el.dataset.cardId = cardData.id;
+
+        let badgesHtml = "";
+        // Show small icon if description exists
+        if (cardData.desc && cardData.desc.trim().length > 0) {
+          badgesHtml = `
+                <div class="card-badges">
+                    <div class="badge" title="This card has a description">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                    </div>
+                </div>
+            `;
+        }
+
+        el.innerHTML = `
+            <div class="card-title">${cardData.title}</div>
+            ${badgesHtml}
+        `;
+
+        setupCardDragEvents(el);
+        return el;
+      }
+
+      /**
+       * ============================================================
+       * 4. DRAG & DROP LOGIC (The robust implementation)
+       * ============================================================
+       */
+
+      // -> Events on the CARD being dragged
+      function setupCardDragEvents(cardEl) {
+        cardEl.addEventListener("dragstart", (e) => {
+          draggedCardEl = cardEl;
+          draggedCardId = cardEl.dataset.cardId;
+          // Find parent list ID for later state sync
+          sourceListId = cardEl.closest(".list").dataset.listId;
+
+          // Visual feedback: add class immediately
+          cardEl.classList.add("dragging");
+          // Firefox requires data to be set
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/plain", draggedCardId);
+        });
+
+        cardEl.addEventListener("dragend", () => {
+          // Cleanup visuals
+          cardEl.classList.remove("dragging");
+          document
+            .querySelectorAll(".list.drag-over")
+            .forEach((el) => el.classList.remove("drag-over"));
+
+          draggedCardEl = null;
+          draggedCardId = null;
+          sourceListId = null;
+        });
+      }
+
+      // -> Events on the LIST acting as a Drop Zone
+      function setupListDragEvents(listEl) {
+        listEl.addEventListener("dragover", (e) => {
+          // NATIVE D&D REQUIREMENT: preventDefault to allow dropping
+          e.preventDefault();
+          listEl.classList.add("drag-over");
+
+          const cardsContainer = listEl.querySelector(".list-cards");
+          // Calculate where the card should visually sit based on mouse Y position
+          const afterElement = getDragAfterElement(cardsContainer, e.clientY);
+
+          if (draggedCardEl) {
+            if (afterElement == null) {
+              // If no element after, append to end
+              cardsContainer.appendChild(draggedCardEl);
+            } else {
+              // Insert before the calculated element
+              cardsContainer.insertBefore(draggedCardEl, afterElement);
+            }
+          }
+        });
+
+        listEl.addEventListener("dragenter", (e) => e.preventDefault());
+        listEl.addEventListener("dragleave", () =>
+          listEl.classList.remove("drag-over"),
+        );
+
+        // THE DROP EVENT: Sync DOM changes to App State
+        listEl.addEventListener("drop", (e) => {
+          e.preventDefault();
+          listEl.classList.remove("drag-over");
+
+          if (!draggedCardId || !sourceListId) return;
+
+          const targetListId = listEl.dataset.listId;
+
+          // 1. Find and remove card data from source list
+          let cardData = null;
+          const sourceList = appState.lists.find((l) => l.id === sourceListId);
+          const cardIndex = sourceList.cards.findIndex(
+            (c) => c.id === draggedCardId,
+          );
+
+          if (cardIndex > -1) {
+            // Remove and hold the card data object
+            [cardData] = sourceList.cards.splice(cardIndex, 1);
+          }
+
+          // 2. Find new position in target list based on the DOM state *after* the visual drop
+          const targetListObj = appState.lists.find(
+            (l) => l.id === targetListId,
+          );
+          const cardsContainer = listEl.querySelector(".list-cards");
+          // Get all card elements currently in the DOM list
+          const currentCardEls = Array.from(cardsContainer.children);
+          // Find index of dropped card's ID in the new DOM order
+          const newIndex = currentCardEls.findIndex(
+            (el) => el.dataset.cardId === draggedCardId,
+          );
+
+          // 3. Insert card data into target list at new index
+          if (targetListObj && cardData) {
+            targetListObj.cards.splice(newIndex, 0, cardData);
+          }
+
+          // 4. Persist
+          saveState();
+          // Note: No need to renderBoard(), DOM is already updated visually by dragover.
+        });
+      }
+
+      /**
+       * Helper: Finds the element immediately after the mouse cursor's Y position.
+       * This is the secret sauce for smooth visual sorting.
+       */
+      function getDragAfterElement(container, y) {
+        // Get all cards in container that aren't the one being dragged
+        const draggableElements = [
+          ...container.querySelectorAll(".card:not(.dragging)"),
+        ];
+
+        // Find the one closest to the mouse cursor, but still below it
+        return draggableElements.reduce(
+          (closest, child) => {
+            const box = child.getBoundingClientRect();
+            // Calculate offset from the center of the card
+            const offset = y - box.top - box.height / 2;
+
+            // If offset is negative (mouse is above center) and greater than previous closest
+            if (offset < 0 && offset > closest.offset) {
+              return { offset: offset, element: child };
+            } else {
+              return closest;
+            }
+          },
+          { offset: Number.NEGATIVE_INFINITY },
+        ).element;
+      }
+
+      /**
+       * ============================================================
+       * 5. EVENT DELEGATION (Board Actions)
+       * ============================================================
+       * Handles clicks on the board area (Add card, Delete list, Edit card click)
+       */
+      boardEl.addEventListener("click", (e) => {
+        const target = e.target;
+        const listEl = target.closest(".list");
+
+        // A) Open Modal (Click on Card)
+        const cardEl = target.closest(".card");
+        if (cardEl && !target.closest("button")) {
+          openModal(cardEl.dataset.cardId);
+          return;
+        }
+
+        // B) Add Card Button Click
+        const addCardBtn = target.closest('[data-role="add-card"]');
+        if (addCardBtn && listEl) {
+          const listId = listEl.dataset.listId;
+          const title = prompt("Enter card title:");
+          if (title && title.trim()) {
+            const list = appState.lists.find((l) => l.id === listId);
+            list.cards.push({
+              id: generateId(),
+              title: title.trim(),
+              desc: "",
+            });
+            saveState();
+            renderBoard();
+          }
+          return;
+        }
+
+        // C) Delete List Button Click
+        const deleteListBtn = target.closest('[data-role="delete-list"]');
+        if (deleteListBtn && listEl) {
+          const listId = listEl.dataset.listId;
+          if (
+            confirm(
+              "Are you sure you want to delete this list and all its cards?",
+            )
+          ) {
+            appState.lists = appState.lists.filter((l) => l.id !== listId);
+            saveState();
+            renderBoard();
+          }
+          return;
+        }
+
+        // D) Add List Button (Outside delegation, but handled here for grouping)
+        const addListBtn = target.closest("#addListBtn");
+        if (addListBtn) {
+          const title = prompt("Enter new list title:");
+          if (title && title.trim()) {
+            appState.lists.push({
+              id: generateId(),
+              title: title.trim(),
+              cards: [],
+            });
+            saveState();
+            renderBoard();
+            // Scroll to right to show new list
+            boardEl.scrollTo({ left: boardEl.scrollWidth, behavior: "smooth" });
+          }
+        }
+      });
+
+      // Handle List Title Editing (Contenteditable blur event)
+      boardEl.addEventListener(
+        "blur",
+        (e) => {
+          if (e.target.dataset.role === "list-title") {
+            const listEl = e.target.closest(".list");
+            const listId = listEl.dataset.listId;
+            const newTitle = e.target.innerText.trim();
+
+            const list = appState.lists.find((l) => l.id === listId);
+            if (list && newTitle) {
+              list.title = newTitle;
+              saveState();
+            } else {
+              // Revert if empty
+              e.target.innerText = list.title;
+            }
+          }
+        },
+        true,
+      ); // Use capture phase for blur events
+
+      /**
+       * ============================================================
+       * 6. MODAL LOGIC (Editing Cards)
+       * ============================================================
+       */
+      function openModal(cardId) {
+        editingCardId = cardId;
+        // Find card data
+        let cardData = null;
+        for (const list of appState.lists) {
+          const found = list.cards.find((c) => c.id === cardId);
+          if (found) {
+            cardData = found;
+            break;
+          }
+        }
+
+        if (!cardData) return;
+
+        // Populate inputs
+        modalTitleInput.value = cardData.title;
+        modalDescInput.value = cardData.desc || "";
+
+        // Show modal with animation class
+        modalEl.classList.remove("hidden");
+        // Small timeout to allow CSS transition to trigger
+        setTimeout(() => modalEl.classList.add("active"), 10);
+      }
+
+      function closeModal() {
+        modalEl.classList.remove("active");
+        // Wait for transition to finish before hiding
+        setTimeout(() => {
+          modalEl.classList.add("hidden");
+          editingCardId = null;
+        }, 200); // Matches CSS transition time
+      }
+
+      // Save Changes
+      document.getElementById("modalSaveBtn").addEventListener("click", () => {
+        if (!editingCardId) return;
+
+        const newTitle = modalTitleInput.value.trim();
+        const newDesc = modalDescInput.value.trim();
+
+        if (!newTitle) {
+          alert("Title cannot be empty");
+          return;
+        }
+
+        // Update state
+        outerLoop: for (const list of appState.lists) {
+          for (const card of list.cards) {
+            if (card.id === editingCardId) {
+              card.title = newTitle;
+              card.desc = newDesc;
+              break outerLoop;
+            }
+          }
+        }
+
+        saveState();
+        renderBoard(); // Re-render to update title/badges on board
+        closeModal();
+      });
+
+      // Delete Card
+      document
+        .getElementById("modalDeleteBtn")
+        .addEventListener("click", () => {
+          if (!editingCardId) return;
+          if (confirm("Delete this card definitively?")) {
+            appState.lists.forEach((list) => {
+              list.cards = list.cards.filter((c) => c.id !== editingCardId);
+            });
+            saveState();
+            renderBoard();
+            closeModal();
+          }
+        });
+
+      // Close button and Overlay click
+      document
+        .getElementById("modalCloseBtn")
+        .addEventListener("click", closeModal);
+      modalEl.addEventListener("click", (e) => {
+        // Only close if clicking the dark overlay background, not the modal content
+        if (e.target === modalEl) closeModal();
+      });
+
+      /**
+       * ============================================================
+       * 7. INITIALIZATION & MISC
+       * ============================================================
+       */
+      document.getElementById("resetBtn").addEventListener("click", () => {
+        if (
+          confirm(
+            "This will wipe all your data and reset to default. Continue?",
+          )
+        ) {
+          localStorage.removeItem(STORAGE_KEY);
+          location.reload();
+        }
+      });
+
+      // Boot up the app
+      renderBoard();
+    </script>
+  </body>
+</html>

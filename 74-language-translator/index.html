@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Language Translator</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app-container">
+      <header>
+        <h1><i class="fa-solid fa-language"></i> OmniTranslate</h1>
+        <p>Powered by MyMemory API & Local Mock Data</p>
+      </header>
+
+      <div class="controls">
+        <div class="select-wrapper">
+          <select id="source-lang" aria-label="Source Language"></select>
+        </div>
+
+        <button id="swap-btn" class="icon-btn" aria-label="Swap Languages">
+          <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        </button>
+
+        <div class="select-wrapper">
+          <select id="target-lang" aria-label="Target Language"></select>
+        </div>
+      </div>
+
+      <main class="translation-grid">
+        <div class="panel input-panel">
+          <textarea
+            id="input-text"
+            placeholder="Enter text here..."
+            maxlength="5000"
+          ></textarea>
+          <div class="panel-footer">
+            <span id="char-count">0 / 5000</span>
+            <button
+              id="speak-source"
+              class="icon-btn-sm"
+              aria-label="Listen to source"
+            >
+              <i class="fa-solid fa-volume-high"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="panel output-panel">
+          <div
+            id="translated-text"
+            class="output-area"
+            role="textbox"
+            aria-readonly="true"
+          ></div>
+          <div class="loader hidden" id="loader">
+            <div class="spinner"></div>
+          </div>
+          <div class="panel-footer">
+            <div class="action-buttons">
+              <button
+                id="speak-target"
+                class="icon-btn-sm"
+                aria-label="Listen to translation"
+              >
+                <i class="fa-solid fa-volume-high"></i>
+              </button>
+              <button
+                id="copy-btn"
+                class="icon-btn-sm"
+                aria-label="Copy translation"
+              >
+                <i class="fa-regular fa-copy"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <div id="status-msg" class="status-msg"></div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

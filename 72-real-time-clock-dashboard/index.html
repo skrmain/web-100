@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-Time Clock Dashboard</title>
+    <style>
+      /* * =========================================
+         * CSS - Styling & Layout
+         * =========================================
+         */
+
+      /* CSS Variables for Theming */
+      :root {
+        --bg-color: #f4f6f8;
+        --text-color: #1a1a1a;
+        --card-bg: #ffffff;
+        --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        --accent-color: #3b82f6;
+        --danger-color: #ef4444;
+        --secondary-text: #64748b;
+        --font-display:
+          "Courier New", Courier, monospace; /* Monospaced for numbers */
+        --font-ui: system-ui, -apple-system, sans-serif;
+      }
+
+      /* Dark Mode Support */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-color: #0f172a;
+          --text-color: #e2e8f0;
+          --card-bg: #1e293b;
+          --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+          --secondary-text: #94a3b8;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-ui);
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        min-height: 100vh;
+        padding: 2rem;
+        transition:
+          background-color 0.3s,
+          color 0.3s;
+      }
+
+      /* Header Layout */
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--secondary-text);
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+
+      /* Controls */
+      .controls {
+        display: flex;
+        gap: 1rem;
+      }
+
+      button {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: opacity 0.2s;
+      }
+
+      .btn-primary {
+        background-color: var(--accent-color);
+        color: white;
+      }
+      .btn-danger {
+        background-color: transparent;
+        color: var(--danger-color);
+        border: 1px solid var(--danger-color);
+        font-size: 0.8rem;
+        padding: 0.2rem 0.5rem;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      /* Dashboard Grid Layout */
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+      }
+
+      /* Widget Card Styling */
+      .clock-widget {
+        background-color: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        /* View Transition name is set dynamically in JS for smooth animations */
+      }
+
+      .widget-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+      }
+
+      .location-label {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--secondary-text);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      /* Digital Clock Typography */
+      .time-display {
+        font-family: var(--font-display);
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-color);
+        line-height: 1;
+        margin: 0.5rem 0;
+        font-variant-numeric: tabular-nums; /* Prevents jitter as numbers change */
+      }
+
+      .date-display {
+        color: var(--secondary-text);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+      }
+
+      /* Widget Footer Controls */
+      .widget-footer {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(100, 116, 139, 0.2);
+      }
+
+      .toggle-label {
+        font-size: 0.8rem;
+        color: var(--secondary-text);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      /* Modal for adding widgets */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        z-index: 100;
+      }
+
+      .modal-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .modal {
+        background: var(--card-bg);
+        padding: 2rem;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 400px;
+      }
+
+      .modal select {
+        width: 100%;
+        padding: 0.8rem;
+        margin: 1rem 0;
+        border-radius: 6px;
+        border: 1px solid var(--secondary-text);
+        background: var(--bg-color);
+        color: var(--text-color);
+      }
+
+      /* Analog Clock Canvas (Optional visual) */
+      canvas.analog-clock {
+        align-self: center;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Global Time Dashboard</h1>
+        <small style="color: var(--secondary-text)"
+          >Real-time | Local Storage</small
+        >
+      </div>
+      <div class="controls">
+        <button class="btn-primary" onclick="openAddModal()">
+          + Add Clock
+        </button>
+      </div>
+    </header>
+
+    <main class="dashboard-grid" id="dashboard"></main>
+
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <h2>Add New Timezone</h2>
+        <select id="timezoneSelect"></select>
+        <div style="display: flex; justify-content: flex-end; gap: 10px">
+          <button onclick="closeAddModal()">Cancel</button>
+          <button class="btn-primary" onclick="confirmAddWidget()">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- 1. STATE MANAGEMENT ---
+
+      // Default state if nothing is in localStorage
+      const defaultWidgets = [
+        {
+          id: Date.now(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          format24: false,
+          showDate: true,
+          type: "digital",
+        },
+        {
+          id: Date.now() + 1,
+          timezone: "America/New_York",
+          format24: true,
+          showDate: true,
+          type: "digital",
+        },
+        {
+          id: Date.now() + 2,
+          timezone: "Asia/Tokyo",
+          format24: false,
+          showDate: true,
+          type: "analog",
+        },
+      ];
+
+      let widgets = [];
+
+      // Load config from LocalStorage
+      function loadState() {
+        const stored = localStorage.getItem("clock_dashboard_config");
+        widgets = stored ? JSON.parse(stored) : defaultWidgets;
+        renderAllWidgets(); // Initial Render
+      }
+
+      // Save config to LocalStorage
+      function saveState() {
+        localStorage.setItem("clock_dashboard_config", JSON.stringify(widgets));
+      }
+
+      // --- 2. DOM MANIPULATION & RENDERING ---
+
+      const dashboard = document.getElementById("dashboard");
+
+      // Render all widgets (called on load or add/remove)
+      function renderAllWidgets() {
+        dashboard.innerHTML = ""; // Clear current
+        widgets.forEach((widget) => {
+          const widgetEl = createWidgetElement(widget);
+          dashboard.appendChild(widgetEl);
+        });
+      }
+
+      // Create HTML structure for a single widget
+      function createWidgetElement(widget) {
+        const div = document.createElement("div");
+        div.className = "clock-widget";
+        div.id = `widget-${widget.id}`;
+
+        // Clean up timezone name for display (e.g., "America/New_York" -> "New York")
+        const displayLocation = widget.timezone
+          .split("/")
+          .pop()
+          .replace(/_/g, " ");
+
+        // Checkbox state helpers
+        const checked24 = widget.format24 ? "checked" : "";
+        const checkedDate = widget.showDate ? "checked" : "";
+
+        // Conditional HTML based on type (Analog vs Digital)
+        let clockHtml = "";
+        if (widget.type === "analog") {
+          clockHtml = `<canvas id="canvas-${widget.id}" class="analog-clock" width="150" height="150"></canvas>
+                             <div class="time-display" id="time-${widget.id}" style="font-size: 1.5rem; text-align: center;">--:--:--</div>`;
+        } else {
+          clockHtml = `<div class="time-display" id="time-${widget.id}">--:--:--</div>`;
+        }
+
+        div.innerHTML = `
+                <div class="widget-header">
+                    <div>
+                        <div class="location-label">${displayLocation}</div>
+                        <div style="font-size: 0.8rem; color: var(--secondary-text);">${widget.timezone}</div>
+                    </div>
+                    <button class="btn-danger" onclick="removeWidget(${widget.id})">✕</button>
+                </div>
+                
+                ${clockHtml}
+                
+                <div class="date-display" id="date-${widget.id}" style="display: ${widget.showDate ? "block" : "none"}">
+                    --
+                </div>
+
+                <div class="widget-footer">
+                    <label class="toggle-label">
+                        <input type="checkbox" onchange="toggleFormat(${widget.id})" ${checked24}> 24h
+                    </label>
+                    <label class="toggle-label">
+                        <input type="checkbox" onchange="toggleDate(${widget.id})" ${checkedDate}> Date
+                    </label>
+                </div>
+            `;
+        return div;
+      }
+
+      // --- 3. TIME FORMATTING & UPDATE LOOP ---
+
+      // Helper to format time strings
+      function formatTime(date, timezone, is24h) {
+        return new Intl.DateTimeFormat("en-US", {
+          timeZone: timezone,
+          hour: "numeric",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: !is24h,
+        }).format(date);
+      }
+
+      // Helper to format date strings
+      function formatDate(date, timezone) {
+        return new Intl.DateTimeFormat("en-US", {
+          timeZone: timezone,
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        }).format(date);
+      }
+
+      // Draw Analog Clock on Canvas
+      function drawAnalogClock(canvasId, date, timezone) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const ctx = canvas.getContext("2d");
+        const radius = canvas.height / 2;
+
+        // Get time parts for specific timezone
+        const parts = new Intl.DateTimeFormat("en-US", {
+          timeZone: timezone,
+          hour: "numeric",
+          minute: "numeric",
+          second: "numeric",
+          hour12: false,
+        }).formatToParts(date);
+
+        const h = parseInt(parts.find((p) => p.type === "hour").value);
+        const m = parseInt(parts.find((p) => p.type === "minute").value);
+        const s = parseInt(parts.find((p) => p.type === "second").value);
+
+        // Reset canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(radius, radius);
+
+        // Draw Face
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 0.9, 0, 2 * Math.PI);
+        ctx.strokeStyle = getComputedStyle(document.documentElement)
+          .getPropertyValue("--text-color")
+          .trim();
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Hour Hand
+        ctx.save();
+        ctx.rotate(
+          ((h % 12) * Math.PI) / 6 +
+            (m * Math.PI) / (6 * 60) +
+            (s * Math.PI) / (360 * 60),
+        );
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -radius * 0.5);
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = getComputedStyle(document.documentElement)
+          .getPropertyValue("--accent-color")
+          .trim();
+        ctx.stroke();
+        ctx.restore();
+
+        // Minute Hand
+        ctx.save();
+        ctx.rotate((m * Math.PI) / 30 + (s * Math.PI) / (30 * 60));
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -radius * 0.7);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = getComputedStyle(document.documentElement)
+          .getPropertyValue("--text-color")
+          .trim();
+        ctx.stroke();
+        ctx.restore();
+
+        // Second Hand
+        ctx.save();
+        ctx.rotate((s * Math.PI) / 30);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -radius * 0.8);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = getComputedStyle(document.documentElement)
+          .getPropertyValue("--danger-color")
+          .trim();
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.restore();
+      }
+
+      // The Heartbeat: Updates DOM elements directly (efficient)
+      function updateClocks() {
+        const now = new Date();
+
+        widgets.forEach((widget) => {
+          // 1. Update Text Time
+          const timeEl = document.getElementById(`time-${widget.id}`);
+          if (timeEl) {
+            timeEl.textContent = formatTime(
+              now,
+              widget.timezone,
+              widget.format24,
+            );
+          }
+
+          // 2. Update Date (if shown)
+          if (widget.showDate) {
+            const dateEl = document.getElementById(`date-${widget.id}`);
+            if (dateEl) {
+              dateEl.textContent = formatDate(now, widget.timezone);
+            }
+          }
+
+          // 3. Update Canvas (if analog)
+          if (widget.type === "analog") {
+            drawAnalogClock(`canvas-${widget.id}`, now, widget.timezone);
+          }
+        });
+
+        // Use RequestAnimationFrame for smooth updates
+        requestAnimationFrame(updateClocks);
+      }
+
+      // --- 4. INTERACTIVITY & ACTIONS ---
+
+      function addWidget(timezone) {
+        const newWidget = {
+          id: Date.now(),
+          timezone: timezone,
+          format24: false,
+          showDate: true,
+          type: "digital", // Default to digital
+        };
+        widgets.push(newWidget);
+        saveState();
+        renderAllWidgets();
+      }
+
+      function removeWidget(id) {
+        widgets = widgets.filter((w) => w.id !== id);
+        saveState();
+        renderAllWidgets();
+      }
+
+      function toggleFormat(id) {
+        const widget = widgets.find((w) => w.id === id);
+        if (widget) {
+          widget.format24 = !widget.format24;
+          saveState();
+          // We don't need to re-render the whole HTML, the loop will catch the format change
+        }
+      }
+
+      function toggleDate(id) {
+        const widget = widgets.find((w) => w.id === id);
+        if (widget) {
+          widget.showDate = !widget.showDate;
+          saveState();
+          // Toggle display property directly for immediate feedback
+          const el = document.getElementById(`date-${id}`);
+          if (el) el.style.display = widget.showDate ? "block" : "none";
+        }
+      }
+
+      // --- 5. MODAL LOGIC & INIT ---
+
+      // List of common timezones for the dropdown
+      const commonTimezones = [
+        "UTC",
+        "America/New_York",
+        "America/Los_Angeles",
+        "Europe/London",
+        "Europe/Paris",
+        "Asia/Tokyo",
+        "Asia/Kolkata",
+        "Australia/Sydney",
+        "Pacific/Auckland",
+      ];
+
+      function initModal() {
+        const select = document.getElementById("timezoneSelect");
+        // Try to get all supported timezones via Intl if supported, else fallback
+        let zones = commonTimezones;
+        if (Intl.supportedValuesOf) {
+          zones = Intl.supportedValuesOf("timeZone");
+        }
+
+        zones.forEach((zone) => {
+          const opt = document.createElement("option");
+          opt.value = zone;
+          opt.textContent = zone;
+          select.appendChild(opt);
+        });
+      }
+
+      function openAddModal() {
+        document.getElementById("modalOverlay").classList.add("open");
+      }
+
+      function closeAddModal() {
+        document.getElementById("modalOverlay").classList.remove("open");
+      }
+
+      function confirmAddWidget() {
+        const select = document.getElementById("timezoneSelect");
+        addWidget(select.value);
+        closeAddModal();
+      }
+
+      // Initialize App
+      document.addEventListener("DOMContentLoaded", () => {
+        loadState();
+        initModal();
+        requestAnimationFrame(updateClocks);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LinkPreviewer - URL Metadata Tool</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1>LinkPreviewer</h1>
+        <p>Generate social cards for any website</p>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="input-section">
+        <form id="preview-form">
+          <div class="input-group">
+            <input
+              type="url"
+              id="url-input"
+              placeholder="Paste a URL (e.g., https://github.com)"
+              required
+              autocomplete="off"
+            />
+            <button type="submit" id="submit-btn">Preview</button>
+          </div>
+        </form>
+        <p id="error-message" class="error hidden"></p>
+      </section>
+
+      <div id="loader" class="loader hidden">
+        <div class="spinner"></div>
+        <p>Fetching metadata...</p>
+      </div>
+
+      <section id="preview-container" class="preview-container hidden">
+        <div class="card">
+          <div class="card-image-wrapper">
+            <img
+              id="card-image"
+              src=""
+              alt="Preview Image"
+              onerror="this.style.display = 'none'"
+            />
+          </div>
+
+          <div class="card-content">
+            <h2 id="card-title" class="card-title"></h2>
+            <p id="card-description" class="card-description"></p>
+
+            <div class="card-footer">
+              <div class="domain-info">
+                <img id="card-favicon" src="" alt="" class="favicon" />
+                <span id="card-domain"></span>
+              </div>
+              <button id="copy-btn" class="icon-btn" title="Copy Link">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path
+                    d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <hr class="divider" />
+
+      <section class="history-section">
+        <h3>Recent Previews</h3>
+        <div id="history-list" class="history-grid">
+          <p class="empty-state">No recent history</p>
+        </div>
+        <button id="clear-history" class="text-btn hidden">
+          Clear History
+        </button>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
