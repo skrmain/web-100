@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Voting App</title>
+    <style>
+      /* =========================================
+           1. CSS VARIABLES & THEME SETUP
+           ========================================= */
+      :root {
+        /* Light Mode (Default) */
+        --bg-color: #f4f6f8;
+        --card-bg: #ffffff;
+        --text-primary: #333333;
+        --text-secondary: #666666;
+        --accent-color: #6366f1; /* Indigo */
+        --accent-hover: #4f46e5;
+        --border-color: #e5e7eb;
+        --bar-bg: #f3f4f6;
+        --success-color: #10b981;
+
+        /* Spacing & Radius */
+        --radius: 12px;
+        --shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+
+      /* Auto Dark Mode Support */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-color: #111827;
+          --card-bg: #1f2937;
+          --text-primary: #f9fafb;
+          --text-secondary: #9ca3af;
+          --border-color: #374151;
+          --bar-bg: #374151;
+        }
+      }
+
+      /* =========================================
+           2. GLOBAL STYLES & LAYOUT
+           ========================================= */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-primary);
+        min-height: 100vh;
+        display: flex; /* Flexbox for centering */
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        transition: background-color 0.3s ease;
+      }
+
+      /* The Main Container Card */
+      .poll-card {
+        background-color: var(--card-bg);
+        padding: 2rem;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        width: 100%;
+        max-width: 500px; /* Limits width on desktop */
+        /* View Transition name for smooth switching */
+        view-transition-name: poll-card;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        text-align: center;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: var(--text-secondary);
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+      }
+
+      /* =========================================
+           3. VOTING FORM STYLES
+           ========================================= */
+      .options-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      /* The Label acts as the clickable button */
+      .option-label {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+      }
+
+      /* Hover effect */
+      .option-label:hover {
+        border-color: var(--accent-color);
+        background-color: rgba(99, 102, 241, 0.05);
+      }
+
+      /* The actual radio button (hidden visually but kept for accessibility) */
+      .option-input {
+        opacity: 0;
+        position: absolute;
+        width: 0;
+        height: 0;
+      }
+
+      /* Custom Radio Circle */
+      .custom-radio {
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--text-secondary);
+        border-radius: 50%;
+        margin-right: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.2s;
+      }
+
+      .custom-radio::after {
+        content: "";
+        width: 10px;
+        height: 10px;
+        background-color: var(--accent-color);
+        border-radius: 50%;
+        transform: scale(0); /* Hidden by default */
+        transition: transform 0.2s;
+      }
+
+      /* State: When radio is checked */
+      .option-input:checked + .custom-radio {
+        border-color: var(--accent-color);
+      }
+
+      .option-input:checked + .custom-radio::after {
+        transform: scale(1); /* Show dot */
+      }
+
+      .option-input:checked ~ .option-text {
+        color: var(--accent-color);
+        font-weight: 600;
+      }
+
+      /* Focus ring for keyboard navigation accessibility */
+      .option-input:focus-visible + .custom-radio {
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.4);
+      }
+
+      .submit-btn {
+        margin-top: 1.5rem;
+        width: 100%;
+        padding: 1rem;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .submit-btn:hover {
+        background-color: var(--accent-hover);
+      }
+
+      .submit-btn:disabled {
+        background-color: var(--border-color);
+        cursor: not-allowed;
+      }
+
+      /* =========================================
+           4. RESULTS STYLES
+           ========================================= */
+      .result-item {
+        margin-bottom: 1.2rem;
+      }
+
+      .result-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+      }
+
+      /* The background track for the bar chart */
+      .bar-container {
+        width: 100%;
+        height: 12px;
+        background-color: var(--bar-bg);
+        border-radius: 20px;
+        overflow: hidden;
+      }
+
+      /* The colored fill of the bar */
+      .bar-fill {
+        height: 100%;
+        background-color: var(--accent-color);
+        width: 0%; /* JS will update this */
+        border-radius: 20px;
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Highlight the user's choice */
+      .user-choice .bar-fill {
+        background-color: var(--success-color);
+      }
+
+      .user-choice .result-header {
+        font-weight: bold;
+        color: var(--success-color);
+      }
+
+      .total-votes {
+        text-align: center;
+        margin-top: 2rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+
+      .reset-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        text-decoration: underline;
+        cursor: pointer;
+        margin-top: 10px;
+        font-size: 0.8rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="poll-card" id="app"></main>
+
+    <script>
+      /* =========================================
+           1. STATE MANAGEMENT
+           ========================================= */
+
+      // Define default poll data
+      const defaultPoll = {
+        question: "What is your favorite coding language?",
+        hasVoted: false,
+        userChoiceId: null,
+        options: [
+          { id: "opt1", label: "JavaScript", votes: 12 },
+          { id: "opt2", label: "Python", votes: 8 },
+          { id: "opt3", label: "Rust", votes: 3 },
+          { id: "opt4", label: "Go", votes: 5 },
+        ],
+      };
+
+      // Initialize state variable
+      let pollState = {};
+
+      /**
+       * Loads state from LocalStorage or falls back to default
+       */
+      function loadState() {
+        const saved = localStorage.getItem("votingApp_state");
+        if (saved) {
+          pollState = JSON.parse(saved);
+        } else {
+          // Deep copy defaultPoll to avoid reference issues
+          pollState = JSON.parse(JSON.stringify(defaultPoll));
+        }
+      }
+
+      /**
+       * Saves current state to LocalStorage
+       */
+      function saveState() {
+        localStorage.setItem("votingApp_state", JSON.stringify(pollState));
+      }
+
+      /* =========================================
+           2. DOM RENDERING FUNCTIONS
+           ========================================= */
+
+      const app = document.getElementById("app");
+
+      /**
+       * Renders the Voting Form
+       */
+      function renderVotingUI() {
+        let optionsHTML = pollState.options
+          .map(
+            (opt) => `
+                <label class="option-label" for="${opt.id}">
+                    <input type="radio" name="poll" id="${opt.id}" value="${opt.id}" class="option-input">
+                    <div class="custom-radio"></div>
+                    <span class="option-text">${opt.label}</span>
+                </label>
+            `,
+          )
+          .join("");
+
+        app.innerHTML = `
+                <h1>Community Poll</h1>
+                <p class="subtitle">${pollState.question}</p>
+                <form id="voteForm" class="options-container">
+                    ${optionsHTML}
+                    <button type="submit" class="submit-btn" id="submitBtn" disabled>Vote Now</button>
+                </form>
+            `;
+
+        // Attach Event Listeners
+        const form = document.getElementById("voteForm");
+        const submitBtn = document.getElementById("submitBtn");
+        const inputs = form.querySelectorAll('input[name="poll"]');
+
+        // Enable button only when an option is selected
+        inputs.forEach((input) => {
+          input.addEventListener("change", () => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = `Vote for ${pollState.options.find((o) => o.id === input.value).label}`;
+          });
+        });
+
+        // Handle Submission
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const selected = form.querySelector('input[name="poll"]:checked');
+          if (selected) {
+            handleVote(selected.value);
+          }
+        });
+      }
+
+      /**
+       * Renders the Results Chart
+       */
+      function renderResultsUI() {
+        // Calculate total votes
+        const totalVotes = pollState.options.reduce(
+          (acc, curr) => acc + curr.votes,
+          0,
+        );
+
+        // Generate HTML for bars
+        const barsHTML = pollState.options
+          .map((opt) => {
+            const percentage =
+              totalVotes === 0
+                ? 0
+                : ((opt.votes / totalVotes) * 100).toFixed(1);
+            const isUserChoice = opt.id === pollState.userChoiceId;
+
+            return `
+                    <div class="result-item ${isUserChoice ? "user-choice" : ""}">
+                        <div class="result-header">
+                            <span>${opt.label} ${isUserChoice ? "(You)" : ""}</span>
+                            <span>${percentage}%</span>
+                        </div>
+                        <div class="bar-container" aria-label="${percentage}% votes">
+                            <div class="bar-fill" style="width: 0%" data-width="${percentage}%"></div>
+                        </div>
+                    </div>
+                `;
+          })
+          .join("");
+
+        app.innerHTML = `
+                <h1>Poll Results</h1>
+                <p class="subtitle">Thank you for voting!</p>
+                <div class="results-container">
+                    ${barsHTML}
+                </div>
+                <div class="total-votes">
+                    Total Votes: <strong>${totalVotes}</strong>
+                    <br>
+                    <button onclick="resetPoll()" class="reset-btn">Reset Simulation</button>
+                </div>
+            `;
+
+        // Trigger animation after render (small delay to allow DOM paint)
+        setTimeout(() => {
+          document.querySelectorAll(".bar-fill").forEach((bar) => {
+            bar.style.width = bar.getAttribute("data-width");
+          });
+        }, 50);
+      }
+
+      /* =========================================
+           3. LOGIC & CONTROL FLOW
+           ========================================= */
+
+      /**
+       * Core logic to update state when user votes
+       */
+      function handleVote(optionId) {
+        // 1. Update Counts
+        const optionIndex = pollState.options.findIndex(
+          (o) => o.id === optionId,
+        );
+        if (optionIndex > -1) {
+          pollState.options[optionIndex].votes++;
+        }
+
+        // 2. Set User State
+        pollState.hasVoted = true;
+        pollState.userChoiceId = optionId;
+
+        // 3. Save
+        saveState();
+
+        // 4. Update UI (Use View Transitions API if supported)
+        if (document.startViewTransition) {
+          document.startViewTransition(() => renderResultsUI());
+        } else {
+          renderResultsUI();
+        }
+      }
+
+      /**
+       * Decides which view to show on load
+       */
+      function init() {
+        loadState();
+        if (pollState.hasVoted) {
+          renderResultsUI();
+        } else {
+          renderVotingUI();
+        }
+      }
+
+      /**
+       * Developer utility to clear storage
+       */
+      window.resetPoll = function () {
+        localStorage.removeItem("votingApp_state");
+        location.reload();
+      };
+
+      // Start the App
+      init();
+    </script>
+  </body>
+</html>
