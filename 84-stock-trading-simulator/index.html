@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QuantTrade | Pro Simulator</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="dashboard-header">
+        <div class="logo">Quant<span class="highlight">Trade</span></div>
+        <div class="metrics">
+          <div class="metric-card">
+            <span class="label">Net Worth</span>
+            <span id="display-net-worth" class="value">$10,000.00</span>
+          </div>
+          <div class="metric-card">
+            <span class="label">Available Cash</span>
+            <span id="display-cash" class="value">$10,000.00</span>
+          </div>
+        </div>
+      </header>
+
+      <main class="grid-layout">
+        <section class="panel market-panel">
+          <div class="panel-header">
+            <h3>Live Market</h3>
+            <span class="status-indicator">● Live</span>
+          </div>
+          <div class="table-container">
+            <table id="market-table">
+              <thead>
+                <tr>
+                  <th>Symbol</th>
+                  <th>Price</th>
+                  <th>Change</th>
+                </tr>
+              </thead>
+              <tbody id="market-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="right-column">
+          <section class="panel trade-panel" id="trade-panel">
+            <div class="panel-header">
+              <h3>Execution Deck</h3>
+            </div>
+            <div class="trade-controls">
+              <div class="selected-stock-info">
+                <h2 id="trade-symbol">SELECT A STOCK</h2>
+                <span id="trade-price" class="price-display">--</span>
+              </div>
+
+              <div class="input-group">
+                <label>Quantity</label>
+                <input type="number" id="trade-qty" min="1" value="1" />
+                <span class="hint" id="max-buy-hint">Max buy: 0</span>
+              </div>
+
+              <div class="action-buttons">
+                <button id="btn-buy" class="btn btn-buy" disabled>BUY</button>
+                <button id="btn-sell" class="btn btn-sell" disabled>
+                  SELL
+                </button>
+              </div>
+              <p id="trade-msg" class="trade-message"></p>
+            </div>
+          </section>
+
+          <section class="panel portfolio-panel">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="holdings">
+                Holdings
+              </button>
+              <button class="tab-btn" data-tab="history">History</button>
+            </div>
+
+            <div id="tab-holdings" class="tab-content active">
+              <ul id="holdings-list" class="list-view">
+                <li class="empty-state">No active holdings</li>
+              </ul>
+            </div>
+
+            <div id="tab-history" class="tab-content">
+              <ul id="history-list" class="list-view">
+                <li class="empty-state">No transactions yet</li>
+              </ul>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

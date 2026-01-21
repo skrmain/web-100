@@ -1,0 +1,246 @@
+:root {
+  --bg-dark: #1e1e1e;
+  --bg-sidebar: #252526;
+  --bg-active: #37373d;
+  --border: #333333;
+  --accent: #0e639c;
+  --text-main: #d4d4d4;
+  --text-muted: #858585;
+  --console-error: #f48771;
+  --console-warn: #cca700;
+  --font-code: "Consolas", "Monaco", "Courier New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Toolbar */
+.toolbar {
+  height: 50px;
+  background-color: #333333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  border-bottom: 1px solid #111;
+}
+
+.brand {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+.actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+/* Buttons & Toggles */
+.btn {
+  border: none;
+  padding: 6px 12px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: white;
+}
+.btn-primary {
+  background-color: var(--accent);
+}
+.btn-primary:hover {
+  background-color: #1177bb;
+}
+.btn-secondary {
+  background-color: transparent;
+  border: 1px solid #555;
+}
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.toggle-switch input {
+  display: none;
+}
+.slider {
+  width: 32px;
+  height: 16px;
+  background-color: #555;
+  border-radius: 16px;
+  position: relative;
+  transition: 0.4s;
+}
+.slider:before {
+  content: "";
+  position: absolute;
+  height: 12px;
+  width: 12px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.4s;
+}
+input:checked + .slider {
+  background-color: var(--accent);
+}
+input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+/* Main Workspace */
+.workspace {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 50px);
+}
+
+.pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.editor-pane {
+  border-right: 1px solid var(--border);
+}
+
+/* Code Editor */
+.editor-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  background-color: var(--bg-dark);
+  overflow: hidden;
+}
+
+/* Specific font settings to ensure alignment between line numbers and text */
+.line-numbers,
+#codeInput {
+  font-family: var(--font-code);
+  font-size: 14px;
+  line-height: 1.5; /* Critical for alignment */
+  padding: 10px;
+}
+
+.line-numbers {
+  width: 50px;
+  background-color: var(--bg-sidebar);
+  color: var(--text-muted);
+  text-align: right;
+  border-right: 1px solid var(--border);
+  user-select: none;
+  overflow: hidden; /* No scrollbar here */
+}
+
+#codeInput {
+  flex: 1;
+  background-color: transparent;
+  color: var(--text-main);
+  border: none;
+  resize: none;
+  outline: none;
+  white-space: pre;
+  overflow: auto; /* Scrollbar here */
+  tab-size: 2;
+}
+
+/* Right Pane: Tabs */
+.tabs {
+  display: flex;
+  background-color: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 10px 20px;
+  cursor: pointer;
+  border-top: 2px solid transparent;
+}
+.tab.active {
+  color: white;
+  background-color: var(--bg-dark);
+  border-top: 2px solid var(--accent);
+}
+
+.tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.hidden {
+  display: none;
+}
+
+/* Console Output */
+#consoleOutput {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  font-family: var(--font-code);
+  font-size: 13px;
+}
+
+.log-entry {
+  border-bottom: 1px solid #333;
+  padding: 4px 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.log-entry.error {
+  color: var(--console-error);
+}
+.log-entry.warn {
+  color: var(--console-warn);
+}
+.log-entry.log {
+  color: var(--text-main);
+}
+
+/* Iframe Container */
+#iframeContainer {
+  flex: 1;
+  background: white;
+} /* White bg for result so users see standard web */
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Responsive Mobile */
+@media (max-width: 768px) {
+  .workspace {
+    flex-direction: column;
+  }
+  .editor-pane {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    height: 50%;
+  }
+}

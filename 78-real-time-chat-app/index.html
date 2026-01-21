@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Serverless Sync Chat</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="chat-header">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <div class="header-info">
+          <h2>LocalMesh Chat</h2>
+          <p class="status">● Online <span id="user-id-display"></span></p>
+        </div>
+        <button id="clear-btn" class="icon-btn" title="Clear History">
+          🗑
+        </button>
+      </header>
+
+      <main class="chat-area" id="chat-area">
+        <div class="system-message">
+          Channel initialized. Open this page in a second tab to test.
+        </div>
+      </main>
+
+      <footer class="chat-input-area">
+        <form id="chat-form">
+          <input
+            type="text"
+            id="message-input"
+            placeholder="Type a message..."
+            autocomplete="off"
+            required
+          />
+          <button type="submit" class="send-btn">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+            </svg>
+          </button>
+        </form>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

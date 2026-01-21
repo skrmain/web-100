@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EdTech Teacher Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="logo-icon"></div>
+          <h2>Classroom<span class="highlight">OS</span></h2>
+        </div>
+        <nav>
+          <a href="#" class="active">Dashboard</a>
+          <a href="#">Students</a>
+          <a href="#">Reports</a>
+          <a href="#">Settings</a>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <header class="top-bar">
+          <h1>Math 101 - Gradebook</h1>
+          <div class="user-profile">
+            <span>Prof. Anderson</span>
+            <div class="avatar">PA</div>
+          </div>
+        </header>
+
+        <section class="stats-grid">
+          <div class="card stat-card">
+            <h3>Total Students</h3>
+            <p class="stat-value" id="stat-total">0</p>
+          </div>
+          <div class="card stat-card">
+            <h3>Class Average</h3>
+            <div class="flex-row">
+              <p class="stat-value" id="stat-average">0.0</p>
+              <div class="mini-chart">
+                <div class="bar-fill" id="avg-bar" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card stat-card">
+            <h3>Top Performer</h3>
+            <p class="stat-value highlight-text" id="stat-top">N/A</p>
+          </div>
+        </section>
+
+        <section class="controls-bar">
+          <div class="search-sort">
+            <button class="btn btn-outline" onclick="app.sortData('name')">
+              Sort Name (A-Z)
+            </button>
+            <button class="btn btn-outline" onclick="app.sortData('gpa')">
+              Sort GPA (High-Low)
+            </button>
+          </div>
+          <button class="btn btn-primary" onclick="app.toggleModal(true)">
+            + Add Student
+          </button>
+        </section>
+
+        <div class="table-container card">
+          <table>
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>ID</th>
+                <th>Math</th>
+                <th>Science</th>
+                <th>History</th>
+                <th>Attendance</th>
+                <th>GPA</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="gradebook-body"></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+
+    <div class="modal-overlay" id="add-modal">
+      <div class="modal card">
+        <h2>Add New Student</h2>
+        <form id="add-student-form">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="new-name" required />
+          </div>
+          <div class="form-group">
+            <label>Math</label>
+            <input type="number" id="new-math" min="0" max="100" required />
+          </div>
+          <div class="form-group">
+            <label>Science</label>
+            <input type="number" id="new-science" min="0" max="100" required />
+          </div>
+          <div class="form-group">
+            <label>History</label>
+            <input type="number" id="new-history" min="0" max="100" required />
+          </div>
+          <div class="form-group">
+            <label>Attendance %</label>
+            <input
+              type="number"
+              id="new-attendance"
+              min="0"
+              max="100"
+              required
+            />
+          </div>
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn btn-outline"
+              onclick="app.toggleModal(false)"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">Save Student</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

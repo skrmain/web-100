@@ -1,0 +1,136 @@
+:root {
+  --bg-color: #f4f4f9;
+  --dot-color: #d1d5db;
+  --card-bg: #ffffff;
+  --header-bg: #f8fafc;
+  --border-color: #e2e8f0;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --accent-color: #3b82f6; /* Blue for highlighting */
+  --line-color: #94a3b8;
+}
+
+* {
+  box-sizing: border-box;
+  user-select: none; /* Important for dragging */
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Prevent scrolling, infinite canvas simulation */
+  font-family:
+    "Segoe UI",
+    Inter,
+    -apple-system,
+    sans-serif;
+}
+
+/* Infinite Grid Canvas Effect */
+#canvas {
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bg-color);
+  background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+  background-size: 20px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Layer 1: SVG Lines */
+#svg-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Let clicks pass through to tables */
+  z-index: 0;
+}
+
+path {
+  fill: none;
+  stroke: var(--line-color);
+  stroke-width: 2px;
+  transition:
+    stroke 0.2s ease,
+    stroke-width 0.2s ease;
+}
+
+path.highlight {
+  stroke: var(--accent-color);
+  stroke-width: 3px;
+  z-index: 10;
+}
+
+/* Layer 2: Table Cards */
+.table-node {
+  position: absolute;
+  width: 200px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+  cursor: grab;
+  transition: box-shadow 0.2s ease;
+}
+
+.table-node:active {
+  cursor: grabbing;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 100; /* Bring to front while dragging */
+}
+
+/* Table Header */
+.table-header {
+  background: var(--header-bg);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 600;
+  color: var(--text-primary);
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-header:hover {
+  background-color: #eff6ff; /* Light blue tint on hover */
+}
+
+/* Table Columns */
+.table-rows {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.row {
+  padding: 8px 12px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid transparent; /* Placeholder to prevent layout shift */
+}
+
+.row:hover {
+  background-color: #f1f5f9;
+  color: var(--text-primary);
+}
+
+.row .type {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+}

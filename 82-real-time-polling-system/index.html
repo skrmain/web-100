@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Native SVG Real-Time Poll</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-container">
+      <header>
+        <h1>Real-Time Sentiment Poll</h1>
+        <p class="subtitle">
+          Cross-tab reactive · Native SVG Engine · No Frameworks
+        </p>
+      </header>
+
+      <section id="poll-interface" class="poll-section">
+        <h2 id="poll-question">Loading Question...</h2>
+        <div id="voting-grid" class="voting-grid"></div>
+      </section>
+
+      <section class="results-section">
+        <div class="results-header">
+          <h3>Live Results</h3>
+          <span id="total-votes">Total Votes: 0</span>
+        </div>
+
+        <div class="svg-container">
+          <svg
+            id="chart-svg"
+            viewBox="0 0 600 240"
+            preserveAspectRatio="xMidYMid meet"
+          ></svg>
+        </div>
+      </section>
+
+      <section class="admin-panel">
+        <h4>Control Deck</h4>
+        <div class="button-group">
+          <button id="btn-simulate" class="btn secondary">
+            ⚡ Simulate Traffic
+          </button>
+          <button id="btn-reset" class="btn danger">↺ Reset Poll</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

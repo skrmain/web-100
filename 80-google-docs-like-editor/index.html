@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DocuClone - Local Editor</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="logo-area">
+        <svg class="doc-icon" viewBox="0 0 24 24" fill="#4285F4">
+          <path
+            d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"
+          />
+        </svg>
+        <span class="doc-title">Untitled Document</span>
+      </div>
+      <div id="save-status" class="status-indicator">All changes saved</div>
+    </header>
+
+    <div class="toolbar" id="toolbar">
+      <div class="tool-group">
+        <button class="btn" data-cmd="undo" title="Undo">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"
+            />
+          </svg>
+        </button>
+        <button class="btn" data-cmd="redo" title="Redo">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M18.4 10.6C16.55 9 14.15 8 11.5 8c-4.65 0-8.58 3.03-9.96 7.22L3.9 16c1.05-3.19 4.05-5.5 7.6-5.5 1.95 0 3.73.72 5.12 1.88L13 16h9V7l-3.6 3.6z"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="tool-group">
+        <select id="heading-selector" class="dropdown">
+          <option value="P">Normal Text</option>
+          <option value="H1">Heading 1</option>
+          <option value="H2">Heading 2</option>
+        </select>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="tool-group">
+        <button class="btn" data-cmd="bold" title="Bold">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"
+            />
+          </svg>
+        </button>
+        <button class="btn" data-cmd="italic" title="Italic">
+          <svg viewBox="0 0 24 24">
+            <path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z" />
+          </svg>
+        </button>
+        <button class="btn" data-cmd="underline" title="Underline">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 17c3.31 0 6-2.69 6-6V3h-2.5v8c0 1.93-1.57 3.5-3.5 3.5S8.5 12.93 8.5 11V3H6v8c0 3.31 2.69 6 6 6zm-7 2v2h14v-2H5z"
+            />
+          </svg>
+        </button>
+        <div class="color-wrapper">
+          <input
+            type="color"
+            id="color-picker"
+            title="Text Color"
+            value="#000000"
+          />
+          <label for="color-picker" class="btn color-btn">
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M11 9.47L8.93 14h6.14L13 9.47zM12 5L5.27 21h2.53l1.52-3.8h5.36l1.52 3.8h2.53L12 5zM2 20h20v4H2v-4z"
+                fill-opacity=".3"
+              />
+              <path d="M0 20h24v4H0z" style="fill: currentColor" />
+            </svg>
+          </label>
+        </div>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="tool-group">
+        <button class="btn" data-cmd="justifyLeft" title="Align Left">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M15 15H3v2h12v-2zm0-8H3v2h12V7zM3 13h18v-2H3v2zm0 8h18v-2H3v2zM3 3v2h18V3H3z"
+            />
+          </svg>
+        </button>
+        <button class="btn" data-cmd="justifyCenter" title="Align Center">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M7 15v2h10v-2H7zm-4 6h18v-2H3v2zm0-8h18v-2H3v2zm4-6v2h10V7H7zM3 3v2h18V3H3z"
+            />
+          </svg>
+        </button>
+        <button class="btn" data-cmd="justifyRight" title="Align Right">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M3 21h18v-2H3v2zm6-4h12v-2H9v2zm-6-4h18v-2H3v2zm6-4h12V7H9v2zM3 3v2h18V3H3z"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div class="separator"></div>
+
+      <div class="tool-group">
+        <button class="btn" id="print-btn" title="Print / PDF">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M19 8h-1V3H6v5H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zM8 5h8v3H8V5zm8 12v4H8v-4h8zm2-2v-2H6v2H4v-4c0-.55.45-1 1-1h14c.55 0 1 .45 1 1v4h-2z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <main class="editor-container">
+      <div id="editor" class="page" contenteditable="true" spellcheck="false">
+        <h1>Project Proposal</h1>
+        <p>Start typing your document here...</p>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <span id="word-count">0 words</span>
+      <span id="char-count">0 chars</span>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

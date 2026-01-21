@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JS Sandbox IDE</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="toolbar">
+      <div class="brand">JS<strong>Sandbox</strong></div>
+      <div class="actions">
+        <label class="toggle-switch">
+          <input type="checkbox" id="autoRun" />
+          <span class="slider"></span>
+          <span class="label-text">Auto-Run</span>
+        </label>
+        <button id="runBtn" class="btn btn-primary">Run ▶</button>
+        <button id="clearBtn" class="btn btn-secondary">Clear Console ⊘</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="pane editor-pane">
+        <div class="editor-wrapper">
+          <div class="line-numbers" id="lineNumbers">1</div>
+          <textarea
+            id="codeInput"
+            spellcheck="false"
+            placeholder="// Write your JavaScript here..."
+          >
+console.log("Hello from the Sandbox!");
+const x = 10;
+const y = 20;
+console.warn("Calculating...");
+console.log(`Result: ${x + y}`);
+// Try a syntax error or DOM manipulation!</textarea
+          >
+        </div>
+      </section>
+
+      <section class="pane output-pane">
+        <div class="tabs">
+          <button class="tab active" data-target="console">Console</button>
+          <button class="tab" data-target="result">Result (DOM)</button>
+        </div>
+
+        <div class="tab-content" id="consoleContent">
+          <div id="consoleOutput" class="console-log-container"></div>
+        </div>
+
+        <div class="tab-content hidden" id="resultContent">
+          <div id="iframeContainer"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
