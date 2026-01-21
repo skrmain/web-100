@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineSearch | Movie Finder</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container header-content">
+        <h1>🎬 CineSearch</h1>
+        <p>Find your next favorite movie</p>
+
+        <form id="search-form" onsubmit="return false;">
+          <div class="search-box">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="Search movies (e.g. Batman, Matrix)..."
+              aria-label="Search movies"
+              autocomplete="off"
+            />
+            <button type="submit" aria-label="Search">🔍</button>
+          </div>
+        </form>
+      </div>
+    </header>
+
+    <main class="container">
+      <div id="status-message" class="status-msg hidden"></div>
+
+      <div id="movie-grid" class="grid"></div>
+    </main>
+
+    <dialog id="movie-modal" class="modal">
+      <div class="modal-content">
+        <button id="close-modal" aria-label="Close details">&times;</button>
+        <div id="modal-body"></div>
+      </div>
+    </dialog>
+
+    <script src="script.js"></script>
+  </body>
+</html>
