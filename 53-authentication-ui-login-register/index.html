@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Auth UI</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="auth-container">
+      <header class="auth-header">
+        <h1 id="page-title">Welcome Back</h1>
+        <p id="page-subtitle">Enter your details to sign in.</p>
+      </header>
+
+      <div class="form-wrapper">
+        <form id="login-form" class="auth-form active" novalidate>
+          <div class="input-group">
+            <input type="email" id="login-email" placeholder=" " required />
+            <label for="login-email">Email Address</label>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="input-group">
+            <input
+              type="password"
+              id="login-password"
+              placeholder=" "
+              required
+            />
+            <label for="login-password">Password</label>
+            <span class="error-msg"></span>
+          </div>
+
+          <button type="submit" class="btn-primary">Sign In</button>
+        </form>
+
+        <form id="register-form" class="auth-form hidden" novalidate>
+          <div class="input-group">
+            <input type="email" id="reg-email" placeholder=" " required />
+            <label for="reg-email">Email Address</label>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="input-group">
+            <input
+              type="password"
+              id="reg-password"
+              placeholder=" "
+              required
+              minlength="6"
+            />
+            <label for="reg-password">Password (Min 6 chars)</label>
+            <span class="error-msg"></span>
+          </div>
+
+          <div class="input-group">
+            <input type="password" id="reg-confirm" placeholder=" " required />
+            <label for="reg-confirm">Confirm Password</label>
+            <span class="error-msg"></span>
+          </div>
+
+          <button type="submit" class="btn-primary">Create Account</button>
+        </form>
+      </div>
+
+      <footer class="auth-footer">
+        <p id="toggle-text">
+          Don't have an account?
+          <a href="#" id="toggle-btn">Sign up</a>
+        </p>
+      </footer>
+
+      <div id="toast-container"></div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

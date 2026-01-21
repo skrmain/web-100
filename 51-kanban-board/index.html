@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vanilla JS Kanban Board</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>Kanban Board</h1>
+      <p>Drag and drop tasks to reorganize.</p>
+    </header>
+
+    <div class="board">
+      <div class="column" id="todo-column">
+        <div class="column-header">
+          <h2>To Do</h2>
+          <span class="count" id="todo-count">0</span>
+        </div>
+        <div class="task-container" id="todo" data-status="todo"></div>
+        <button class="add-btn" onclick="openAddModal('todo')">
+          + Add Task
+        </button>
+      </div>
+
+      <div class="column" id="progress-column">
+        <div class="column-header">
+          <h2>In Progress</h2>
+          <span class="count" id="in-progress-count">0</span>
+        </div>
+        <div
+          class="task-container"
+          id="in-progress"
+          data-status="in-progress"
+        ></div>
+        <button class="add-btn" onclick="openAddModal('in-progress')">
+          + Add Task
+        </button>
+      </div>
+
+      <div class="column" id="done-column">
+        <div class="column-header">
+          <h2>Done</h2>
+          <span class="count" id="done-count">0</span>
+        </div>
+        <div class="task-container" id="done" data-status="done"></div>
+        <button class="add-btn" onclick="openAddModal('done')">
+          + Add Task
+        </button>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

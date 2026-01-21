@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vanilla JS Markdown Editor</title>
+    <style>
+      /* * CSS VARIABLES & THEME TOKENS
+         * Using :root for easy theme switching and maintenance.
+         */
+      :root {
+        --bg-color: #ffffff;
+        --text-color: #24292e;
+        --border-color: #e1e4e8;
+        --sidebar-bg: #f6f8fa;
+        --accent-color: #0366d6;
+        --code-bg: #f6f8fa;
+        --blockquote-color: #6a737d;
+        --blockquote-border: #dfe2e5;
+        --font-main:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+        --font-mono:
+          "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier,
+          monospace;
+      }
+
+      /* Dark Mode Support via Media Query */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-color: #0d1117;
+          --text-color: #c9d1d9;
+          --border-color: #30363d;
+          --sidebar-bg: #161b22;
+          --accent-color: #58a6ff;
+          --code-bg: #161b22;
+          --blockquote-color: #8b949e;
+          --blockquote-border: #30363d;
+        }
+      }
+
+      /* * GLOBAL RESET & LAYOUT 
+         */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-main);
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* Prevent body scroll, handle in panels */
+        transition:
+          background-color 0.3s,
+          color 0.3s;
+      }
+
+      header {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        background-color: var(--sidebar-bg);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+      }
+
+      .status {
+        font-size: 0.85rem;
+        color: var(--blockquote-color);
+        font-weight: normal;
+      }
+
+      /* * MAIN EDITOR CONTAINER 
+         * Uses Flexbox to split screen 50/50
+         */
+      main {
+        display: flex;
+        flex: 1; /* Take remaining height */
+        height: 100%;
+        overflow: hidden;
+      }
+
+      /* Shared Panel Styles */
+      .panel {
+        flex: 1;
+        overflow-y: auto;
+        padding: 2rem;
+        height: 100%;
+        /* Smooth scrolling for JS sync */
+        scroll-behavior: auto;
+      }
+
+      /* * EDITOR STYLES (Left Panel)
+         */
+      .editor-pane {
+        border-right: 1px solid var(--border-color);
+        background-color: var(--bg-color);
+      }
+
+      #editor {
+        width: 100%;
+        height: 100%; /* Fill the pane */
+        border: none;
+        resize: none; /* Disable manual resize handle */
+        outline: none;
+        background: transparent;
+        color: var(--text-color);
+        font-family: var(--font-mono);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      /* * PREVIEW STYLES (Right Panel)
+         * Styling rendered Markdown elements to look like GitHub
+         */
+      .preview-pane {
+        background-color: var(--bg-color);
+        word-wrap: break-word;
+      }
+
+      /* Markdown Typography Elements */
+      .preview-pane h1,
+      .preview-pane h2,
+      .preview-pane h3 {
+        margin-top: 24px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        line-height: 1.25;
+      }
+
+      .preview-pane h1 {
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.3em;
+        font-size: 2em;
+      }
+      .preview-pane h2 {
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.3em;
+        font-size: 1.5em;
+      }
+      .preview-pane p {
+        margin-bottom: 16px;
+        line-height: 1.6;
+      }
+      .preview-pane a {
+        color: var(--accent-color);
+        text-decoration: none;
+      }
+      .preview-pane a:hover {
+        text-decoration: underline;
+      }
+
+      /* Blockquotes */
+      .preview-pane blockquote {
+        padding: 0 1em;
+        color: var(--blockquote-color);
+        border-left: 0.25em solid var(--blockquote-border);
+        margin-bottom: 16px;
+      }
+
+      /* Code Blocks */
+      .preview-pane pre {
+        padding: 16px;
+        overflow: auto;
+        font-size: 85%;
+        line-height: 1.45;
+        background-color: var(--code-bg);
+        border-radius: 6px;
+        margin-bottom: 16px;
+      }
+      .preview-pane code {
+        padding: 0.2em 0.4em;
+        margin: 0;
+        font-size: 85%;
+        background-color: var(--code-bg);
+        border-radius: 6px;
+        font-family: var(--font-mono);
+      }
+      .preview-pane pre code {
+        padding: 0;
+        background: transparent;
+      }
+
+      .preview-pane hr {
+        height: 0.25em;
+        padding: 0;
+        margin: 24px 0;
+        background-color: var(--border-color);
+        border: 0;
+      }
+
+      .preview-pane ul,
+      .preview-pane ol {
+        padding-left: 2em;
+        margin-bottom: 16px;
+      }
+      .preview-pane img {
+        max-width: 100%;
+        box-sizing: content-box;
+        background-color: #fff;
+      }
+
+      /* * MOBILE RESPONSIVENESS 
+         * Stack panels vertically on small screens
+         */
+      @media (max-width: 768px) {
+        main {
+          flex-direction: column;
+        }
+        .editor-pane {
+          border-right: none;
+          border-bottom: 1px solid var(--border-color);
+          height: 50%;
+        }
+        .preview-pane {
+          height: 50%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>Markdown Live</div>
+      <div class="status" id="status-msg">All changes saved</div>
+    </header>
+
+    <main>
+      <section class="panel editor-pane">
+        <textarea
+          id="editor"
+          placeholder="Type your markdown here..."
+          aria-label="Markdown Editor"
+        ></textarea>
+      </section>
+
+      <section class="panel preview-pane" id="preview"></section>
+    </main>
+
+    <script>
+      /**
+       * VANILLA JS MARKDOWN EDITOR
+       * 1. State Management
+       * 2. Parser Logic (Regex)
+       * 3. Sync Scrolling
+       * 4. Debouncing & Persistence
+       */
+
+      // --- DOM Elements ---
+      const editor = document.getElementById("editor");
+      const preview = document.getElementById("preview");
+      const statusMsg = document.getElementById("status-msg");
+
+      // --- State Management ---
+      const STORAGE_KEY = "md_editor_draft";
+
+      // Initialize Editor
+      function init() {
+        // Load from LocalStorage if available
+        const savedContent = localStorage.getItem(STORAGE_KEY);
+        if (savedContent) {
+          editor.value = savedContent;
+        } else {
+          // Default welcome text
+          editor.value = `# Welcome to Markdown Live\n\nType in the left panel to see the **live preview** on the right.\n\n## Features\n- Live Parsing\n- Sync Scrolling\n- LocalStorage Saving\n- Dark Mode Support\n\n> "Code is like humor. When you have to explain it, it’s bad."`;
+        }
+
+        // Initial Render
+        updatePreview();
+      }
+
+      // --- Parsing Logic (The Core) ---
+      // Converts Markdown string to HTML string using Regex replacement rules
+      function parseMarkdown(markdown) {
+        let html = markdown;
+
+        // 1. Sanitization (Basic) - prevent HTML injection
+        // Note: In a production app, use a library like DOMPurify.
+        // We escape < and > to prevent script tags from executing.
+        html = html.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        // 2. Block Elements (Order matters!)
+
+        // Headers (h1 - h6)
+        // Regex explanation: ^Start of line, (#+) captures hashes, \s captures space, (.*) captures text
+        html = html.replace(
+          /^(\#{1,6})\s+(.*)$/gm,
+          (match, hashes, content) => {
+            const level = hashes.length;
+            return `<h${level}>${content.trim()}</h${level}>`;
+          },
+        );
+
+        // Horizontal Rule
+        html = html.replace(/^(-{3,}|\*{3,})$/gm, "<hr>");
+
+        // Blockquotes
+        // Handles multi-line blockquotes strictly at start of line
+        html = html.replace(/^>\s+(.*)$/gm, "<blockquote>$1</blockquote>");
+
+        // Code Blocks (```)
+        // Uses non-greedy match ([\s\S]*?) to capture content between backticks
+        html = html.replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>");
+
+        // Unordered Lists
+        // Simple approach: Replace * or - with list items, then wrap in UL later or rely on browser
+        // A robust list parser needs a dedicated loop, but for this difficulty level:
+        // We transform bullet lines into <li>. Wrapping <ul> is tricky with Regex only.
+        // Strategy: Replace bullet lines, then we might need a second pass or CSS to handle list style.
+        html = html.replace(/^[\*\-]\s+(.*)$/gm, "<ul><li>$1</li></ul>");
+        // Fix nested ULs created by the simple regex above (merge adjacent ULs)
+        html = html.replace(/<\/ul>\s*<ul>/g, "");
+
+        // 3. Inline Elements
+
+        // Bold (**text**)
+        html = html.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+        // Italic (*text*)
+        html = html.replace(/\*(.*?)\*/g, "<em>$1</em>");
+
+        // Inline Code (`text`)
+        html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+        // Links [text](url)
+        html = html.replace(
+          /\[(.*?)\]\((.*?)\)/g,
+          '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+        );
+
+        // Images ![alt](url)
+        html = html.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1">');
+
+        // 4. Paragraphs
+        // Any line that isn't a tag yet should probably be a paragraph or break
+        // We replace double newlines with paragraphs
+        html = html.replace(/\n\n/g, "<br><br>");
+
+        return html;
+      }
+
+      // --- Event Handling ---
+
+      // Debounce utility: Prevents function execution until 'delay' ms have passed since last call
+      function debounce(func, delay) {
+        let timeout;
+        return function (...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+      }
+
+      // Update Logic
+      function updatePreview() {
+        const rawMarkdown = editor.value;
+
+        // 1. Save to storage
+        localStorage.setItem(STORAGE_KEY, rawMarkdown);
+        statusMsg.textContent = "Saving...";
+
+        // 2. Parse and Render
+        const renderedHtml = parseMarkdown(rawMarkdown);
+        preview.innerHTML = renderedHtml;
+
+        // 3. Update status
+        setTimeout(() => {
+          statusMsg.textContent = "All changes saved";
+        }, 500);
+      }
+
+      // --- Sync Scrolling Logic ---
+      // Calculates percentage of scroll in editor and applies to preview
+      let isScrolling = false;
+
+      const syncScroll = () => {
+        if (!isScrolling) {
+          isScrolling = true;
+
+          // Calculate percentage (0 to 1)
+          const percentage =
+            editor.scrollTop / (editor.scrollHeight - editor.clientHeight);
+
+          // Apply to preview
+          const previewScrollTop =
+            percentage * (preview.scrollHeight - preview.clientHeight);
+          preview.scrollTop = previewScrollTop;
+
+          // Reset lock after small delay
+          setTimeout(() => {
+            isScrolling = false;
+          }, 50);
+        }
+      };
+
+      // --- Wiring Listeners ---
+
+      // Input listener with debounce for performance (wait 50ms after typing stops)
+      editor.addEventListener("input", debounce(updatePreview, 50));
+
+      // Scroll listener for sync
+      editor.addEventListener("scroll", syncScroll);
+
+      // --- Kickoff ---
+      init();
+    </script>
+  </body>
+</html>

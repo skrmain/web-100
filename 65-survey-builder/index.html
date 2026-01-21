@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vanilla JS Survey Builder</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <input
+          type="text"
+          id="survey-title-input"
+          placeholder="Enter Survey Title..."
+          value="My Awesome Survey"
+        />
+        <div class="actions">
+          <button
+            id="btn-view-builder"
+            class="active"
+            onclick="app.switchMode('builder')"
+          >
+            Builder
+          </button>
+          <button id="btn-view-preview" onclick="app.switchMode('preview')">
+            Preview
+          </button>
+        </div>
+      </header>
+
+      <main id="builder-view" class="view active">
+        <aside class="toolbox">
+          <h3>Add Question</h3>
+          <div class="tool-grid">
+            <button onclick="app.addQuestion('short')">Short Text</button>
+            <button onclick="app.addQuestion('long')">Long Text</button>
+            <button onclick="app.addQuestion('single')">Single Choice</button>
+            <button onclick="app.addQuestion('multi')">Checkbox</button>
+            <button onclick="app.addQuestion('rating')">Rating (1-5)</button>
+          </div>
+        </aside>
+
+        <section id="questions-container" class="questions-list">
+          <div class="empty-state">Add a question to get started.</div>
+        </section>
+      </main>
+
+      <main id="preview-view" class="view hidden">
+        <div class="survey-form-container">
+          <h1 id="preview-title">Survey Title</h1>
+          <form id="preview-form"></form>
+          <button id="btn-submit" type="submit" form="preview-form">
+            Submit Survey
+          </button>
+        </div>
+        <pre id="json-output" class="hidden"></pre>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

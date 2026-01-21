@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DevJobs | Job Board Filter App</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-bg"></div>
+    </header>
+
+    <main class="container">
+      <section class="filter-panel" id="filterPanel">
+        <div class="filter-wrapper">
+          <div class="input-group">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search title or company..."
+            />
+
+            <select id="roleSelect">
+              <option value="">All Roles</option>
+              <option value="Frontend">Frontend</option>
+              <option value="Backend">Backend</option>
+              <option value="Fullstack">Fullstack</option>
+            </select>
+
+            <select id="levelSelect">
+              <option value="">All Levels</option>
+              <option value="Junior">Junior</option>
+              <option value="Midweight">Midweight</option>
+              <option value="Senior">Senior</option>
+            </select>
+
+            <select id="locationSelect">
+              <option value="">Any Location</option>
+              <option value="Remote">Remote</option>
+              <option value="USA Only">USA Only</option>
+              <option value="Worldwide">Worldwide</option>
+            </select>
+          </div>
+
+          <div class="active-tags-container" id="activeTags"></div>
+
+          <button id="clearBtn" class="clear-link">Clear</button>
+        </div>
+      </section>
+
+      <div id="jobList" class="job-list"></div>
+
+      <div id="emptyState" class="empty-state hidden">
+        <h3>No jobs found matching your criteria.</h3>
+        <p>Try clearing some filters or changing your search terms.</p>
+      </div>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

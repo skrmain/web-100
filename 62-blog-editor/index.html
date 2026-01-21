@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zenith Writer | WYSIWYG Blog Editor</title>
+    <style>
+      /* * CSS VARIABLES & THEME SETUP
+         * Using :root for token-based design and auto dark mode support.
+         */
+      :root {
+        --bg-body: #f4f4f9;
+        --bg-paper: #ffffff;
+        --text-main: #333333;
+        --text-muted: #666666;
+        --border-color: #e0e0e0;
+        --primary: #6366f1;
+        --primary-hover: #4f46e5;
+        --toolbar-bg: #ffffff;
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --radius: 8px;
+        --font-ui: system-ui, -apple-system, sans-serif;
+        --font-editor: "Merriweather", "Georgia", serif; /* Blog feel */
+      }
+
+      /* Dark Mode Override */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-body: #18181b;
+          --bg-paper: #27272a;
+          --text-main: #e4e4e7;
+          --text-muted: #a1a1aa;
+          --border-color: #3f3f46;
+          --toolbar-bg: #27272a;
+        }
+      }
+
+      /* GLOBAL RESET & LAYOUT */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-ui);
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: background-color 0.3s ease;
+      }
+
+      /* HEADER */
+      header {
+        width: 100%;
+        max-width: 900px;
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      h1 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-main);
+      }
+
+      .status-bar {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+
+      /* EDITOR CONTAINER */
+      .editor-container {
+        width: 100%;
+        max-width: 900px;
+        background: var(--bg-paper);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        height: 80vh;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* TOOLBAR STYLING */
+      .toolbar {
+        padding: 10px;
+        background: var(--toolbar-bg);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .toolbar-group {
+        display: flex;
+        gap: 4px;
+        padding-right: 8px;
+        border-right: 1px solid var(--border-color);
+      }
+      .toolbar-group:last-child {
+        border-right: none;
+      }
+
+      button.tool-btn {
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--text-main);
+        padding: 6px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.2s;
+      }
+
+      button.tool-btn:hover {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--primary);
+      }
+      button.tool-btn.active {
+        background: var(--primary);
+        color: white;
+      }
+
+      /* Mobile Responsive Toolbar */
+      @media (max-width: 600px) {
+        .toolbar {
+          overflow-x: auto;
+          flex-wrap: nowrap;
+        }
+        .toolbar-group {
+          border-right: none;
+        }
+      }
+
+      /* EDITING AREA (The Blog Surface) */
+      #editor {
+        flex: 1;
+        padding: 40px;
+        overflow-y: auto;
+        outline: none;
+        font-family: var(--font-editor);
+        font-size: 1.125rem;
+        line-height: 1.8;
+        color: var(--text-main);
+      }
+
+      /* Placeholder Logic using CSS */
+      #editor:empty:before {
+        content: "Start writing your story...";
+        color: var(--text-muted);
+        pointer-events: none;
+      }
+
+      /* TYPOGRAPHY WITHIN EDITOR (Blog Theme) */
+      #editor h1 {
+        font-size: 2.5rem;
+        margin: 1.5em 0 0.5em;
+        line-height: 1.2;
+      }
+      #editor h2 {
+        font-size: 2rem;
+        margin: 1.4em 0 0.5em;
+      }
+      #editor h3 {
+        font-size: 1.5rem;
+        margin: 1.2em 0 0.5em;
+      }
+      #editor p {
+        margin-bottom: 1.2em;
+      }
+      #editor a {
+        color: var(--primary);
+        text-decoration: underline;
+      }
+      #editor blockquote {
+        border-left: 4px solid var(--primary);
+        padding-left: 1rem;
+        color: var(--text-muted);
+        font-style: italic;
+        margin: 1.5em 0;
+      }
+      #editor ul,
+      #editor ol {
+        margin-left: 2rem;
+        margin-bottom: 1.2em;
+      }
+      #editor pre {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        font-family: monospace;
+        margin-bottom: 1.2em;
+      }
+
+      /* ACTIONS FOOTER */
+      .actions {
+        padding: 10px 20px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        background: var(--bg-paper);
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+      .btn-secondary {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-main);
+      }
+      .btn:hover {
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Zenith Writer</h1>
+      <span class="status-bar" id="status">Ready</span>
+    </header>
+
+    <main class="editor-container">
+      <div class="toolbar" role="toolbar" aria-label="Text Formatting">
+        <div class="toolbar-group">
+          <button
+            class="tool-btn"
+            data-cmd="bold"
+            title="Bold (Ctrl+B)"
+            aria-label="Bold"
+          >
+            <b>B</b>
+          </button>
+          <button
+            class="tool-btn"
+            data-cmd="italic"
+            title="Italic (Ctrl+I)"
+            aria-label="Italic"
+          >
+            <i>I</i>
+          </button>
+          <button
+            class="tool-btn"
+            data-cmd="underline"
+            title="Underline (Ctrl+U)"
+            aria-label="Underline"
+          >
+            <u>U</u>
+          </button>
+        </div>
+
+        <div class="toolbar-group">
+          <button
+            class="tool-btn"
+            data-cmd="formatBlock"
+            data-val="H1"
+            title="Heading 1"
+            aria-label="Heading 1"
+          >
+            H1
+          </button>
+          <button
+            class="tool-btn"
+            data-cmd="formatBlock"
+            data-val="H2"
+            title="Heading 2"
+            aria-label="Heading 2"
+          >
+            H2
+          </button>
+        </div>
+
+        <div class="toolbar-group">
+          <button
+            class="tool-btn"
+            data-cmd="insertUnorderedList"
+            title="Bullet List"
+            aria-label="Bullet List"
+          >
+            • List
+          </button>
+          <button
+            class="tool-btn"
+            data-cmd="insertOrderedList"
+            title="Numbered List"
+            aria-label="Numbered List"
+          >
+            1. List
+          </button>
+          <button
+            class="tool-btn"
+            data-cmd="formatBlock"
+            data-val="blockquote"
+            title="Quote"
+            aria-label="Blockquote"
+          >
+            ” Quote
+          </button>
+        </div>
+
+        <div class="toolbar-group">
+          <button
+            class="tool-btn"
+            id="btn-link"
+            title="Insert Link (Ctrl+K)"
+            aria-label="Insert Link"
+          >
+            🔗
+          </button>
+          <button
+            class="tool-btn"
+            id="btn-code"
+            title="Code Block"
+            aria-label="Code Block"
+          >
+            { }
+          </button>
+        </div>
+      </div>
+
+      <div
+        id="editor"
+        contenteditable="true"
+        role="textbox"
+        aria-multiline="true"
+        spellcheck="false"
+      ></div>
+
+      <div class="actions">
+        <button class="btn btn-secondary" id="btn-clear">Clear</button>
+        <button class="btn btn-primary" id="btn-export">Export HTML</button>
+      </div>
+    </main>
+
+    <script>
+      /**
+       * ZENITH WRITER - APP LOGIC
+       * * Core responsibilities:
+       * 1. Initialize State & DOM Elements
+       * 2. Handle Formatting (execCommand wrapper)
+       * 3. Persist Data (LocalStorage)
+       * 4. Export & Utility functions
+       */
+
+      document.addEventListener("DOMContentLoaded", () => {
+        // --- DOM ELEMENTS ---
+        const editor = document.getElementById("editor");
+        const toolbar = document.querySelector(".toolbar");
+        const statusSpan = document.getElementById("status");
+        const buttons = document.querySelectorAll(".tool-btn[data-cmd]");
+        const btnLink = document.getElementById("btn-link");
+        const btnCode = document.getElementById("btn-code");
+        const btnExport = document.getElementById("btn-export");
+        const btnClear = document.getElementById("btn-clear");
+
+        // --- STATE MANAGEMENT ---
+        const STORAGE_KEY = "zenith_blog_content";
+
+        // Load saved content
+        const savedContent = localStorage.getItem(STORAGE_KEY);
+        if (savedContent) {
+          editor.innerHTML = savedContent;
+        }
+
+        // --- FORMATTING ENGINE ---
+        /**
+         * Applies rich text formatting.
+         * Note: document.execCommand is technically deprecated but remains the
+         * only reliable way to handle rich text in Vanilla JS without writing
+         * a massive custom engine or using a library.
+         */
+        function format(command, value = null) {
+          document.execCommand(command, false, value);
+          editor.focus();
+          updateActiveStates();
+        }
+
+        // Toolbar Click Handlers (Generic)
+        buttons.forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.preventDefault(); // Prevent focus loss
+            const cmd = btn.dataset.cmd;
+            const val = btn.dataset.val || null;
+            format(cmd, val);
+          });
+        });
+
+        // Specific Handler: Link
+        btnLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          const url = prompt("Enter the URL:", "https://");
+          if (url) format("createLink", url);
+        });
+
+        // Specific Handler: Code Block
+        // This is "Hard" because execCommand doesn't support <pre><code> natively well.
+        // We implement a custom insertion.
+        btnCode.addEventListener("click", (e) => {
+          e.preventDefault();
+          const selection = window.getSelection();
+          if (!selection.rangeCount) return;
+
+          const range = selection.getRangeAt(0);
+          const pre = document.createElement("pre");
+          const code = document.createElement("code");
+
+          code.textContent = selection.toString() || " // Your code here ";
+          pre.appendChild(code);
+
+          range.deleteContents();
+          range.insertNode(pre);
+
+          // Add a newline after for continuation
+          const newline = document.createElement("div");
+          newline.innerHTML = "<br>";
+          range.collapse(false);
+          range.insertNode(newline);
+        });
+
+        // --- UI FEEDBACK & ACTIVE STATES ---
+        // Updates toolbar button styles based on current cursor position styles
+        function updateActiveStates() {
+          buttons.forEach((btn) => {
+            const cmd = btn.dataset.cmd;
+            // document.queryCommandState returns true if the formatting is currently applied
+            if (document.queryCommandState(cmd)) {
+              btn.classList.add("active");
+            } else {
+              btn.classList.remove("active");
+            }
+          });
+        }
+
+        // Listen for cursor movement to update toolbar
+        editor.addEventListener("keyup", updateActiveStates);
+        editor.addEventListener("mouseup", updateActiveStates);
+
+        // --- AUTO-SAVE & STATUS ---
+        let timeoutId;
+        editor.addEventListener("input", () => {
+          statusSpan.textContent = "Unsaved changes...";
+
+          // Debounce save to avoid hammering LocalStorage
+          clearTimeout(timeoutId);
+          timeoutId = setTimeout(() => {
+            localStorage.setItem(STORAGE_KEY, editor.innerHTML);
+            statusSpan.textContent =
+              "Saved locally @ " + new Date().toLocaleTimeString();
+          }, 1000);
+        });
+
+        // --- KEYBOARD SHORTCUTS ---
+        editor.addEventListener("keydown", (e) => {
+          if (e.ctrlKey || e.metaKey) {
+            switch (e.key.toLowerCase()) {
+              case "b":
+                e.preventDefault();
+                format("bold");
+                break;
+              case "i":
+                e.preventDefault();
+                format("italic");
+                break;
+              case "u":
+                e.preventDefault();
+                format("underline");
+                break;
+              case "k":
+                e.preventDefault();
+                const url = prompt("Enter URL");
+                if (url) format("createLink", url);
+                break;
+            }
+          }
+          // Allow Tab indentation in Code Blocks (Optional Polish)
+          if (e.key === "Tab") {
+            document.execCommand("insertHTML", false, "&#009");
+            e.preventDefault();
+          }
+        });
+
+        // --- EXPORT & ACTIONS ---
+        btnExport.addEventListener("click", () => {
+          const content = `
+<!DOCTYPE html>
+<html>
+<head><style>body{font-family:serif;line-height:1.6;max-width:800px;margin:auto;padding:2rem;}<\/style><\/head>
+<body>${editor.innerHTML}<\/body>
+<\/html>`;
+
+          const blob = new Blob([content], { type: "text/html" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "my-blog-post.html";
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+
+        btnClear.addEventListener("click", () => {
+          if (confirm("Are you sure you want to clear everything?")) {
+            editor.innerHTML = "";
+            localStorage.removeItem(STORAGE_KEY);
+            statusSpan.textContent = "Cleared";
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

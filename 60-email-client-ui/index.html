@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vanilla Email Client</title>
+    <style>
+      /* =========================================
+           CSS: Variables & Theming
+           ========================================= */
+      :root {
+        /* Light Theme Tokens */
+        --bg-body: #f5f7fa;
+        --bg-panel: #ffffff;
+        --bg-selected: #e8f0fe;
+        --bg-hover: #f1f3f4;
+        --text-primary: #202124;
+        --text-secondary: #5f6368;
+        --border-color: #dadce0;
+        --accent-color: #1a73e8;
+        --danger-color: #d93025;
+
+        /* Layout */
+        --sidebar-width: 250px;
+        --list-width: 350px;
+        --header-height: 60px;
+      }
+
+      /* Dark Theme Support */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-body: #202124;
+          --bg-panel: #2d2e30;
+          --bg-selected: #41331c; /* Warmer dark selection */
+          --bg-hover: #3c4043;
+          --text-primary: #e8eaed;
+          --text-secondary: #9aa0a6;
+          --border-color: #5f6368;
+          --accent-color: #8ab4f8;
+        }
+      }
+
+      /* Reset & Base */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+        height: 100vh;
+        overflow: hidden; /* Prevent body scroll, handle in panels */
+      }
+
+      /* =========================================
+           CSS: Grid Layout (3 Panels)
+           ========================================= */
+      .app-container {
+        display: grid;
+        grid-template-columns: var(--sidebar-width) var(--list-width) 1fr;
+        grid-template-rows: var(--header-height) 1fr;
+        height: 100vh;
+      }
+
+      /* Header (Logo / Search placeholder) */
+      .app-header {
+        grid-column: 1 / -1;
+        background-color: var(--bg-panel);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: var(--accent-color);
+      }
+
+      /* Sidebar (Folders) */
+      .sidebar {
+        background-color: var(--bg-body);
+        border-right: 1px solid var(--border-color);
+        padding: 20px 10px;
+        overflow-y: auto;
+      }
+
+      .folder-btn {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        background: none;
+        border: none;
+        padding: 10px 15px;
+        text-align: left;
+        cursor: pointer;
+        border-radius: 0 20px 20px 0;
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-bottom: 5px;
+      }
+
+      .folder-btn:hover {
+        background-color: var(--border-color);
+      }
+      .folder-btn.active {
+        background-color: var(--bg-selected);
+        color: var(--accent-color);
+        font-weight: bold;
+      }
+
+      /* Email List Panel */
+      .email-list {
+        background-color: var(--bg-panel);
+        border-right: 1px solid var(--border-color);
+        overflow-y: auto;
+      }
+
+      .email-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: background 0.1s;
+      }
+
+      .email-item:hover {
+        background-color: var(--bg-hover);
+      }
+      .email-item.selected {
+        background-color: var(--bg-selected);
+        border-left: 4px solid var(--accent-color);
+      }
+
+      /* Unread State Styling */
+      .email-item.unread .subject {
+        font-weight: 800;
+        color: var(--text-primary);
+      }
+      .email-item.unread .sender {
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .sender {
+        font-size: 0.9rem;
+        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .subject {
+        font-size: 0.95rem;
+        margin-bottom: 4px;
+        color: var(--text-primary);
+      }
+      .preview {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .date {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        font-weight: normal;
+      }
+
+      /* Email Detail Panel */
+      .email-detail {
+        background-color: var(--bg-panel);
+        padding: 40px;
+        overflow-y: auto;
+      }
+
+      .detail-header {
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+      }
+      .detail-subject {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+      }
+      .detail-meta {
+        display: flex;
+        justify-content: space-between;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+      }
+      .detail-actions {
+        margin-top: 15px;
+      }
+      .btn {
+        padding: 6px 12px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-panel);
+        color: var(--text-secondary);
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 8px;
+      }
+      .btn-danger {
+        color: var(--danger-color);
+        border-color: #fce8e6;
+      }
+      .btn:hover {
+        background-color: var(--bg-hover);
+      }
+
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--text-secondary);
+      }
+
+      /* Responsive Mobile Layout */
+      @media (max-width: 768px) {
+        .app-container {
+          /* Change to single column view */
+          grid-template-columns: 1fr;
+          grid-template-rows: 60px 1fr;
+        }
+
+        /* Hide panels by default on mobile */
+        .sidebar {
+          display: none;
+        }
+        .email-detail {
+          display: none;
+        }
+        .email-list {
+          display: block;
+          width: 100%;
+        }
+
+        /* Mobile classes to toggle views */
+        body.view-menu .sidebar {
+          display: block;
+          position: absolute;
+          z-index: 10;
+          height: calc(100vh - 60px);
+          top: 60px;
+          width: 80%;
+          background: var(--bg-panel);
+          box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+        body.view-detail .email-list {
+          display: none;
+        }
+        body.view-detail .email-detail {
+          display: block;
+        }
+
+        /* Hamburger menu for mobile */
+        .mobile-menu-btn {
+          display: inline-block;
+          margin-right: 10px;
+          cursor: pointer;
+        }
+      }
+      @media (min-width: 769px) {
+        .mobile-menu-btn {
+          display: none;
+        }
+        .back-btn {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <header class="app-header">
+        <span class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</span>
+        SparkMail
+      </header>
+
+      <nav class="sidebar" id="sidebar"></nav>
+
+      <aside class="email-list" id="email-list-container"></aside>
+
+      <main class="email-detail" id="email-detail-container">
+        <div class="empty-state">
+          <p>Select an email to read</p>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      /* =========================================
+           JS: Mock Data Generation
+           ========================================= */
+      const MOCK_EMAILS = [
+        {
+          id: 1,
+          folder: "inbox",
+          sender: "GitHub",
+          subject: "[GitHub] Security Alert",
+          body: "We noticed a new login to your account from a generic device.",
+          date: "10:30 AM",
+          read: false,
+        },
+        {
+          id: 2,
+          folder: "inbox",
+          sender: "Sarah Connor",
+          subject: "Project Timeline Update",
+          body: "Hi team, Just wanted to update everyone on the timeline for the Q4 launch.",
+          date: "Yesterday",
+          read: true,
+        },
+        {
+          id: 3,
+          folder: "inbox",
+          sender: "Newsletter",
+          subject: "Weekly Tech Digest",
+          body: "Top stories: AI taking over CSS, JS frameworks 2024, and more...",
+          date: "Jan 15",
+          read: false,
+        },
+        {
+          id: 4,
+          folder: "sent",
+          sender: "Me",
+          subject: "Re: Meeting notes",
+          body: "Thanks Sarah, I will review the docs tonight.",
+          date: "Jan 14",
+          read: true,
+        },
+        {
+          id: 5,
+          folder: "spam",
+          sender: "Prince of Nigeria",
+          subject: "Business Proposal",
+          body: "Dear Friend, I have a business proposal for you regarding 50 Million USD.",
+          date: "Jan 10",
+          read: false,
+        },
+        {
+          id: 6,
+          folder: "trash",
+          sender: "LinkedIn",
+          subject: "You appeared in 5 searches",
+          body: "See who is looking at your profile this week.",
+          date: "Jan 01",
+          read: true,
+        },
+      ];
+
+      /* =========================================
+           JS: State Management
+           ========================================= */
+      const state = {
+        emails: [...MOCK_EMAILS], // Clone to allow modification
+        currentFolder: "inbox",
+        selectedEmailId: null,
+
+        // Helper to get filtered emails
+        get currentEmails() {
+          return this.emails.filter((e) => e.folder === this.currentFolder);
+        },
+      };
+
+      /* =========================================
+           JS: DOM Elements
+           ========================================= */
+      const sidebarEl = document.getElementById("sidebar");
+      const listEl = document.getElementById("email-list-container");
+      const detailEl = document.getElementById("email-detail-container");
+
+      /* =========================================
+           JS: Render Functions
+           ========================================= */
+
+      /**
+       * Renders the folder list in the sidebar with unread counts
+       */
+      function renderSidebar() {
+        const folders = ["inbox", "sent", "drafts", "spam", "trash"];
+
+        sidebarEl.innerHTML = folders
+          .map((folder) => {
+            // Calculate unread count for this folder
+            const unreadCount = state.emails.filter(
+              (e) => e.folder === folder && !e.read,
+            ).length;
+            const activeClass = state.currentFolder === folder ? "active" : "";
+
+            return `
+                    <button class="folder-btn ${activeClass}" onclick="loadFolder('${folder}')">
+                        <span style="text-transform: capitalize;">${folder}</span>
+                        ${unreadCount > 0 ? `<span>${unreadCount}</span>` : ""}
+                    </button>
+                `;
+          })
+          .join("");
+      }
+
+      /**
+       * Renders the list of emails for the current folder
+       */
+      function renderEmailList() {
+        const emails = state.currentEmails;
+        listEl.innerHTML = "";
+
+        if (emails.length === 0) {
+          listEl.innerHTML =
+            '<div style="padding:20px; text-align:center; color:var(--text-secondary)">Folder is empty</div>';
+          return;
+        }
+
+        emails.forEach((email) => {
+          const isSelected =
+            state.selectedEmailId === email.id ? "selected" : "";
+          const isUnread = !email.read ? "unread" : "";
+
+          const el = document.createElement("div");
+          el.className = `email-item ${isSelected} ${isUnread}`;
+          el.onclick = () => openEmail(email.id);
+          el.innerHTML = `
+                    <div class="sender">
+                        <span>${email.sender}</span>
+                        <span class="date">${email.date}</span>
+                    </div>
+                    <div class="subject">${email.subject}</div>
+                    <div class="preview">${email.body}</div>
+                `;
+          listEl.appendChild(el);
+        });
+      }
+
+      /**
+       * Renders the content of the selected email
+       */
+      function renderEmailDetail() {
+        const email = state.emails.find((e) => e.id === state.selectedEmailId);
+
+        if (!email) {
+          detailEl.innerHTML = `
+                    <div class="empty-state">
+                        <p>Select an email to read</p>
+                    </div>`;
+          return;
+        }
+
+        // Render Detail View
+        detailEl.innerHTML = `
+                <button class="btn back-btn" onclick="closeMobileDetail()" style="margin-bottom:15px;">← Back</button>
+                <div class="detail-header">
+                    <div class="detail-subject">${email.subject}</div>
+                    <div class="detail-meta">
+                        <strong>${email.sender}</strong>
+                        <span>${email.date}</span>
+                    </div>
+                    <div class="detail-actions">
+                        <button class="btn" onclick="toggleReadStatus(${email.id})">
+                            Mark as ${email.read ? "Unread" : "Read"}
+                        </button>
+                        <button class="btn btn-danger" onclick="moveToTrash(${email.id})">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+                <div class="email-body" style="line-height: 1.6;">
+                    ${email.body}
+                </div>
+            `;
+      }
+
+      /* =========================================
+           JS: Logic & Actions
+           ========================================= */
+
+      function loadFolder(folderName) {
+        state.currentFolder = folderName;
+        state.selectedEmailId = null; // Deselect on folder change
+
+        // UI Updates
+        renderSidebar();
+        renderEmailList();
+        renderEmailDetail();
+
+        // Mobile: Close menu if open
+        document.body.classList.remove("view-menu");
+        document.body.classList.remove("view-detail");
+      }
+
+      function openEmail(id) {
+        const email = state.emails.find((e) => e.id === id);
+        if (!email) return;
+
+        // Update State
+        state.selectedEmailId = id;
+        if (!email.read) {
+          email.read = true; // Auto-mark read on open
+          renderSidebar(); // Update counts
+        }
+
+        // Render
+        renderEmailList(); // Re-render list to show selection state
+        renderEmailDetail();
+
+        // Mobile: Switch to detail view
+        document.body.classList.add("view-detail");
+      }
+
+      function toggleReadStatus(id) {
+        const email = state.emails.find((e) => e.id === id);
+        if (email) {
+          email.read = !email.read;
+          renderSidebar();
+          renderEmailList();
+          renderEmailDetail(); // Update button text
+        }
+      }
+
+      function moveToTrash(id) {
+        const email = state.emails.find((e) => e.id === id);
+        if (email) {
+          email.folder = "trash";
+          state.selectedEmailId = null; // Deselect
+
+          renderSidebar();
+          renderEmailList();
+          renderEmailDetail();
+
+          // If on mobile, go back to list
+          closeMobileDetail();
+        }
+      }
+
+      /* Mobile Specific Logic */
+      function toggleMobileMenu() {
+        document.body.classList.toggle("view-menu");
+      }
+
+      function closeMobileDetail() {
+        document.body.classList.remove("view-detail");
+        state.selectedEmailId = null;
+        renderEmailList(); // Remove selection highlight
+      }
+
+      /* =========================================
+           JS: Initialization
+           ========================================= */
+      function init() {
+        renderSidebar();
+        renderEmailList();
+      }
+
+      // Boot
+      init();
+    </script>
+  </body>
+</html>

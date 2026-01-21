@@ -1,0 +1,167 @@
+/* --- CSS Variables & Theming --- */
+:root {
+  --bg-color: #f4f6f8;
+  --card-bg: #ffffff;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --accent: #2563eb;
+  --border: #e2e8f0;
+  --highlight: #fef08a; /* Yellow for matches */
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Auto Dark Mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --highlight: #854d0e; /* Darker yellow/gold */
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  transition: background 0.3s ease;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* --- Header & Search Bar --- */
+header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+h1 {
+  margin-bottom: 10px;
+  font-size: 2.5rem;
+  color: var(--accent);
+}
+p {
+  color: var(--text-secondary);
+  margin-bottom: 30px;
+}
+
+.search-wrapper {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.5;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 16px 20px 16px 45px;
+  font-size: 1.1rem;
+  border: 2px solid var(--border);
+  border-radius: 50px;
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow);
+}
+
+input[type="text"]:focus {
+  border-color: var(--accent);
+  transform: scale(1.02);
+}
+
+.stats-text {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+/* --- Results Grid --- */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* --- Card Styles --- */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent);
+}
+
+.card-category {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent);
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+.card-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  flex-grow: 1;
+}
+.card-price {
+  margin-top: 15px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-align: right;
+}
+
+/* Highlight Style */
+mark {
+  background-color: var(--highlight);
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* Utilities */
+.hidden {
+  display: none;
+}
+#no-results {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-secondary);
+}

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vanilla JS Image Editor</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <header>
+        <h1>Image Editor</h1>
+        <button id="btn-upload" class="btn primary">
+          Upload Image
+          <input type="file" id="file-input" accept="image/*" hidden />
+        </button>
+      </header>
+
+      <main class="editor-workspace">
+        <div id="canvas-container" class="canvas-container">
+          <canvas id="editor-canvas"></canvas>
+
+          <div id="crop-overlay" class="crop-overlay hidden">
+            <div class="crop-area">
+              <div class="handle nw" data-handle="nw"></div>
+              <div class="handle ne" data-handle="ne"></div>
+              <div class="handle sw" data-handle="sw"></div>
+              <div class="handle se" data-handle="se"></div>
+            </div>
+          </div>
+
+          <div id="empty-state">Please upload an image to start editing</div>
+        </div>
+      </main>
+
+      <footer class="toolbar">
+        <div class="tool-group">
+          <button id="btn-rotate-left" class="btn icon" title="Rotate -90°">
+            ↺
+          </button>
+          <button id="btn-rotate-right" class="btn icon" title="Rotate +90°">
+            ↻
+          </button>
+        </div>
+
+        <div class="tool-group">
+          <button id="btn-crop-mode" class="btn" title="Toggle Crop Box">
+            Toggle Crop
+          </button>
+          <button id="btn-apply-crop" class="btn success" disabled>
+            Apply Crop
+          </button>
+        </div>
+
+        <div class="tool-group">
+          <button id="btn-reset" class="btn warning" disabled>Reset</button>
+          <button id="btn-download" class="btn primary" disabled>
+            Download
+          </button>
+        </div>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

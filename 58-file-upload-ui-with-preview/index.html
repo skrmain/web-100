@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern File Upload UI</title>
+
+    <style>
+      /* * 1. CSS VARIABLES & THEME TOKENS
+         * Uses HSL for easy color manipulation and follows prefers-color-scheme.
+         */
+      :root {
+        --primary-hue: 250;
+        --bg-body: hsl(220, 20%, 97%);
+        --bg-card: hsl(0, 0%, 100%);
+        --text-main: hsl(220, 10%, 20%);
+        --text-muted: hsl(220, 10%, 50%);
+        --border-color: hsl(220, 20%, 90%);
+
+        --accent-color: hsl(var(--primary-hue), 70%, 55%);
+        --accent-bg: hsl(var(--primary-hue), 70%, 96%);
+        --error-color: hsl(0, 70%, 60%);
+
+        --radius-md: 12px;
+        --radius-lg: 20px;
+        --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Dark Mode Support */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-body: hsl(220, 20%, 10%);
+          --bg-card: hsl(220, 20%, 15%);
+          --text-main: hsl(220, 10%, 90%);
+          --text-muted: hsl(220, 10%, 60%);
+          --border-color: hsl(220, 20%, 25%);
+          --accent-bg: hsl(var(--primary-hue), 30%, 20%);
+        }
+      }
+
+      /* * 2. LAYOUT & RESET
+         */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .app-container {
+        width: 100%;
+        max-width: 800px;
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow);
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      header h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+      header p {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+      }
+
+      /* * 3. DROPZONE STYLING
+         */
+      .dropzone-area {
+        border: 2px dashed var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 3rem 1.5rem;
+        text-align: center;
+        transition: var(--transition);
+        position: relative;
+        background: var(--bg-card);
+        cursor: pointer;
+      }
+
+      /* Active State (Drag Over) */
+      .dropzone-area.drag-active {
+        border-color: var(--accent-color);
+        background-color: var(--accent-bg);
+        transform: scale(0.99);
+      }
+
+      /* Error State */
+      .dropzone-area.error-shake {
+        animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        border-color: var(--error-color);
+      }
+
+      .icon-upload {
+        width: 48px;
+        height: 48px;
+        fill: var(--accent-color);
+        margin-bottom: 1rem;
+        opacity: 0.8;
+      }
+
+      .dropzone-text {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+      }
+      .dropzone-hint {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+      .browse-btn {
+        color: var(--accent-color);
+        font-weight: 600;
+        text-decoration: underline;
+      }
+
+      /* Hide the actual input */
+      #fileInput {
+        display: none;
+      }
+
+      /* * 4. GALLERY GRID (Preview Area)
+         */
+      .file-gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        width: 100%;
+      }
+
+      .file-card {
+        background: var(--bg-body);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        position: relative;
+        transition: var(--transition);
+        /* View Transition name is set dynamically in JS */
+      }
+
+      .file-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+      }
+
+      .preview-container {
+        width: 100%;
+        height: 140px;
+        background: var(--bg-card);
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .preview-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .file-icon {
+        font-size: 3rem;
+        color: var(--text-muted);
+      }
+
+      .file-info {
+        font-size: 0.85rem;
+      }
+      .file-name {
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .file-meta {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        margin-top: 2px;
+      }
+
+      /* Remove Button */
+      .remove-btn {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: var(--error-color);
+        color: white;
+        border: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        transform: scale(0.8);
+        transition: var(--transition);
+      }
+
+      .file-card:hover .remove-btn {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      /* * 5. ANIMATIONS & UTILS
+         */
+      @keyframes shake {
+        10%,
+        90% {
+          transform: translate3d(-1px, 0, 0);
+        }
+        20%,
+        80% {
+          transform: translate3d(2px, 0, 0);
+        }
+        30%,
+        50%,
+        70% {
+          transform: translate3d(-4px, 0, 0);
+        }
+        40%,
+        60% {
+          transform: translate3d(4px, 0, 0);
+        }
+      }
+
+      .toast-message {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--text-main);
+        color: var(--bg-card);
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      .toast-message.show {
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <header>
+        <h1>Upload Files</h1>
+        <p>Drag & drop images, text, or PDF files here</p>
+      </header>
+
+      <label for="fileInput" class="dropzone-area" id="dropzone">
+        <svg class="icon-upload" viewBox="0 0 24 24">
+          <path
+            d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"
+          />
+        </svg>
+
+        <div class="dropzone-text">
+          Drop files here or <span class="browse-btn">browse</span>
+        </div>
+        <div class="dropzone-hint">Supports: PNG, JPG, PDF, TXT (Max 5MB)</div>
+
+        <input
+          type="file"
+          id="fileInput"
+          multiple
+          accept="image/png, image/jpeg, application/pdf, text/plain"
+        />
+      </label>
+
+      <div class="file-gallery" id="gallery"></div>
+    </div>
+
+    <div id="toast" class="toast-message">Error message here</div>
+
+    <script>
+      /**
+       * CONFIGURATION & CONSTANTS
+       */
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+      const ALLOWED_TYPES = [
+        "image/jpeg",
+        "image/png",
+        "application/pdf",
+        "text/plain",
+      ];
+
+      /**
+       * STATE MANAGEMENT
+       * Using a Map to store file objects keyed by a unique ID.
+       */
+      const state = {
+        files: new Map(), // Key: ID, Value: File Object
+      };
+
+      /**
+       * DOM ELEMENTS
+       */
+      const dropzone = document.getElementById("dropzone");
+      const fileInput = document.getElementById("fileInput");
+      const gallery = document.getElementById("gallery");
+      const toast = document.getElementById("toast");
+
+      /**
+       * UTILITY FUNCTIONS
+       */
+
+      // Generate a unique ID for each file (timestamp + random)
+      const generateId = () =>
+        `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      // Format bytes into readable string (KB, MB)
+      const formatSize = (bytes) => {
+        if (bytes === 0) return "0 Bytes";
+        const k = 1024;
+        const sizes = ["Bytes", "KB", "MB"];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+      };
+
+      // Show a toast message for errors or info
+      const showToast = (message, isError = false) => {
+        toast.textContent = message;
+        toast.style.background = isError
+          ? "var(--error-color)"
+          : "var(--text-main)";
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 3000);
+      };
+
+      /**
+       * CORE LOGIC: VALIDATION & HANDLING
+       */
+
+      // Validate individual file
+      const validateFile = (file) => {
+        if (!ALLOWED_TYPES.includes(file.type)) {
+          return { valid: false, msg: `File type not supported: ${file.name}` };
+        }
+        if (file.size > MAX_FILE_SIZE) {
+          return {
+            valid: false,
+            msg: `File too large (Max 5MB): ${file.name}`,
+          };
+        }
+        // Check for duplicates based on name and size
+        for (let existingFile of state.files.values()) {
+          if (
+            existingFile.name === file.name &&
+            existingFile.size === file.size
+          ) {
+            return { valid: false, msg: `File already added: ${file.name}` };
+          }
+        }
+        return { valid: true };
+      };
+
+      // Process a list of files (from input or drop)
+      const handleFiles = (fileList) => {
+        const files = Array.from(fileList);
+        let addedCount = 0;
+
+        files.forEach((file) => {
+          const validation = validateFile(file);
+
+          if (validation.valid) {
+            const id = generateId();
+
+            // Add to State
+            state.files.set(id, file);
+
+            // Render UI
+            renderPreview(file, id);
+            addedCount++;
+          } else {
+            showToast(validation.msg, true);
+            triggerShake();
+          }
+        });
+
+        if (addedCount > 0) {
+          // Reset input value to allow selecting the same file again if deleted
+          fileInput.value = "";
+        }
+      };
+
+      /**
+       * RENDERING UI
+       */
+      const renderPreview = (file, id) => {
+        const isImage = file.type.startsWith("image/");
+        const fileTypeLabel = file.type.split("/")[1].toUpperCase();
+
+        // Create Object URL for images
+        const previewUrl = isImage ? URL.createObjectURL(file) : null;
+
+        // HTML Template for the card
+        const card = document.createElement("div");
+        card.className = "file-card";
+        card.id = id;
+
+        // View Transitions API support (unique transition name)
+        if (document.startViewTransition) {
+          card.style.viewTransitionName = `card-${id}`;
+        }
+
+        card.innerHTML = `
+                <button class="remove-btn" onclick="removeFile('${id}')" aria-label="Remove file">×</button>
+                <div class="preview-container">
+                    ${
+                      isImage
+                        ? `<img src="${previewUrl}" class="preview-image" alt="${file.name}">`
+                        : `<div class="file-icon">${fileTypeLabel}</div>`
+                    }
+                </div>
+                <div class="file-info">
+                    <div class="file-name" title="${file.name}">${file.name}</div>
+                    <div class="file-meta">${formatSize(file.size)} • ${fileTypeLabel}</div>
+                </div>
+            `;
+
+        gallery.appendChild(card);
+      };
+
+      const removeFile = (id) => {
+        const card = document.getElementById(id);
+        if (!card) return;
+
+        // Optional: View Transition for removal
+        const performRemove = () => {
+          const file = state.files.get(id);
+          // Clean up memory if it was an image
+          if (file && file.type.startsWith("image/")) {
+            const img = card.querySelector("img");
+            if (img) URL.revokeObjectURL(img.src);
+          }
+
+          state.files.delete(id);
+          card.remove();
+        };
+
+        if (document.startViewTransition) {
+          document.startViewTransition(() => performRemove());
+        } else {
+          performRemove();
+        }
+      };
+
+      /**
+       * EVENT LISTENERS
+       */
+
+      // 1. Drag & Drop Events
+      const events = ["dragenter", "dragover", "dragleave", "drop"];
+
+      events.forEach((eventName) => {
+        dropzone.addEventListener(
+          eventName,
+          (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          },
+          false,
+        );
+      });
+
+      // Add visual cue
+      dropzone.addEventListener("dragenter", () =>
+        dropzone.classList.add("drag-active"),
+      );
+      dropzone.addEventListener("dragover", () =>
+        dropzone.classList.add("drag-active"),
+      );
+
+      // Remove visual cue
+      dropzone.addEventListener("dragleave", () =>
+        dropzone.classList.remove("drag-active"),
+      );
+
+      // Handle Drop
+      dropzone.addEventListener("drop", (e) => {
+        dropzone.classList.remove("drag-active");
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles(files);
+      });
+
+      // 2. Click / Input Change Events
+      fileInput.addEventListener("change", (e) => {
+        handleFiles(e.target.files);
+      });
+
+      // 3. Paste Event (Clipboard API)
+      window.addEventListener("paste", (e) => {
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        const files = [];
+
+        for (let item of items) {
+          if (item.kind === "file") {
+            files.push(item.getAsFile());
+          }
+        }
+
+        if (files.length > 0) {
+          handleFiles(files);
+          showToast("Files pasted from clipboard");
+        }
+      });
+
+      // Visual Error Feedback Helper
+      function triggerShake() {
+        dropzone.classList.add("error-shake");
+        setTimeout(() => dropzone.classList.remove("error-shake"), 500);
+      }
+    </script>
+  </body>
+</html>

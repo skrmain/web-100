@@ -1,0 +1,176 @@
+/* style.css */
+
+/* 1. CSS Variables & Theme Setup */
+:root {
+  --bg-body: #f4f5f7;
+  --bg-column: #ebecf0;
+  --bg-card: #ffffff;
+  --text-primary: #172b4d;
+  --text-secondary: #5e6c84;
+  --accent-color: #0079bf;
+  --shadow-card: 0 1px 0 rgba(9, 30, 66, 0.25);
+  --radius: 8px;
+  --transition: 0.2s ease;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-body: #1d2125;
+    --bg-column: #22272b;
+    --bg-card: #2c333a;
+    --text-primary: #b6c2cf;
+    --text-secondary: #9fadbc;
+    --accent-color: #579dff;
+    --shadow-card: 0 1px 0 rgba(0, 0, 0, 0.5);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  padding: 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* 2. Board Layout */
+.board {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+  height: 100%;
+  align-items: flex-start;
+}
+
+/* 3. Column Styling */
+.column {
+  background-color: var(--bg-column);
+  min-width: 300px;
+  max-width: 300px;
+  border-radius: var(--radius);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+}
+
+.column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 5px;
+  margin-bottom: 10px;
+}
+
+.column h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.count {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+}
+
+/* 4. Task Container (Drop Zone) */
+.task-container {
+  flex-grow: 1;
+  overflow-y: auto;
+  min-height: 100px; /* Essential for dropping into empty columns */
+  padding-bottom: 10px;
+}
+
+/* 5. Card Styling */
+.card {
+  background-color: var(--bg-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+  margin-bottom: 10px;
+  cursor: grab;
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition);
+  position: relative;
+}
+
+.card:hover {
+  background-color: var(--bg-card);
+  filter: brightness(0.98);
+}
+.card p {
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+/* Visual feedback while dragging */
+.card.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+  border: 2px dashed var(--accent-color);
+  box-shadow: none;
+  cursor: grabbing;
+}
+
+/* Add Button */
+.add-btn {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-align: left;
+  border-radius: var(--radius);
+  margin-top: 5px;
+}
+.add-btn:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: var(--text-primary);
+}
+
+/* Delete Button on Card */
+.delete-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.card:hover .delete-btn {
+  opacity: 1;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .board {
+    flex-direction: column;
+    align-items: stretch;
+    overflow-y: auto;
+  }
+  .column {
+    max-width: 100%;
+    min-width: 0;
+  }
+}

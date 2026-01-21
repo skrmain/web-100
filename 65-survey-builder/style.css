@@ -1,0 +1,198 @@
+:root {
+  /* Theme Tokens */
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --bg-body: #f3f4f6;
+  --bg-card: #ffffff;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --danger: #ef4444;
+  --radius: 8px;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-body: #111827;
+    --bg-card: #1f2937;
+    --text-main: #f9fafb;
+    --text-muted: #9ca3af;
+    --border: #374151;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  font-family: -apple-system, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  margin: 0;
+  padding: 0;
+  transition: background 0.3s;
+}
+
+/* Layout */
+#app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+input[type="text"] {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  color: var(--text-main);
+  width: 100%;
+}
+
+#survey-title-input {
+  font-size: 1.5rem;
+  font-weight: bold;
+  border: none;
+  background: transparent;
+}
+
+/* Buttons */
+button {
+  cursor: pointer;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-main);
+  border-radius: var(--radius);
+  transition: all 0.2s;
+}
+button:hover {
+  background: var(--border);
+}
+button.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* Builder Grid */
+#builder-view {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 20px;
+}
+
+.toolbox {
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+}
+.tool-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Question Card */
+.question-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: var(--shadow);
+  position: relative;
+  /* Transition for smooth reordering */
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+/* Drag & Drop Styles */
+.question-card.dragging {
+  opacity: 0.5;
+  border: 2px dashed var(--primary);
+}
+.question-card .drag-handle {
+  cursor: grab;
+  color: var(--text-muted);
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-top: 10px;
+  gap: 10px;
+}
+.card-body {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+}
+
+/* Options List (for Radio/Checkbox) */
+.options-list {
+  margin-top: 10px;
+}
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+/* Preview View */
+.hidden {
+  display: none !important;
+}
+.survey-form-container {
+  background: var(--bg-card);
+  padding: 40px;
+  border-radius: var(--radius);
+  max-width: 600px;
+  margin: 0 auto;
+}
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.error-msg {
+  color: var(--danger);
+  font-size: 0.875rem;
+  display: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+  #builder-view {
+    grid-template-columns: 1fr;
+  }
+  .toolbox {
+    position: static;
+    margin-bottom: 20px;
+  }
+  .tool-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}

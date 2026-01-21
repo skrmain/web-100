@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Virtual Whiteboard</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="canvas-container">
+      <canvas id="board"></canvas>
+    </main>
+
+    <div id="cursor-brush" class="cursor-brush"></div>
+
+    <aside class="toolbar" id="toolbar">
+      <div class="toolbar-header">
+        <span>Tools</span>
+        <button id="toggle-menu" aria-label="Toggle Menu">_</button>
+      </div>
+
+      <div class="toolbar-content">
+        <div class="tool-group">
+          <label for="color-picker">Color</label>
+          <input type="color" id="color-picker" value="#000000" />
+        </div>
+
+        <div class="tool-group">
+          <label for="brush-size"
+            >Size: <span id="size-display">5</span>px</label
+          >
+          <input type="range" id="brush-size" min="1" max="50" value="5" />
+        </div>
+
+        <div class="tool-actions">
+          <button id="btn-draw" class="active" title="Draw (D)">Draw</button>
+          <button id="btn-erase" title="Eraser (E)">Eraser</button>
+        </div>
+
+        <hr />
+
+        <div class="tool-actions">
+          <button id="btn-undo" disabled title="Undo (Ctrl+Z)">&#8617;</button>
+          <button id="btn-redo" disabled title="Redo (Ctrl+Y)">&#8618;</button>
+        </div>
+
+        <hr />
+
+        <div class="tool-actions">
+          <button id="btn-clear" class="danger" title="Clear Board">
+            Clear
+          </button>
+          <button id="btn-save" title="Save as PNG">Save</button>
+        </div>
+      </div>
+    </aside>
+
+    <dialog id="confirm-modal">
+      <p>Are you sure you want to clear the board?</p>
+      <div class="modal-actions">
+        <button id="modal-cancel">Cancel</button>
+        <button id="modal-confirm" class="danger">Clear It</button>
+      </div>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>

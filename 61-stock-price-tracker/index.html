@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Stock Tracker</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <header>
+        <div class="brand">
+          <h1>Market<span class="highlight">Watch</span></h1>
+          <p class="subtitle">Real-time Financial Data</p>
+        </div>
+
+        <div class="search-container">
+          <input
+            type="text"
+            id="symbolInput"
+            placeholder="Enter Symbol (e.g., AAPL)"
+            autocomplete="off"
+          />
+          <button id="searchBtn">Search</button>
+        </div>
+      </header>
+
+      <main id="dashboard" class="hidden">
+        <div class="stock-header">
+          <div>
+            <h2 id="stockSymbol">---</h2>
+            <p id="stockName">---</p>
+          </div>
+          <div class="badge" id="marketBadge">US MARKET</div>
+        </div>
+
+        <div class="price-container">
+          <h1 id="currentPrice" class="price-animate">---</h1>
+          <div id="priceChange" class="change-pill">
+            <span id="changeValue">---</span>
+            <span id="changePercent">---</span>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="label">Open</span>
+            <span class="value" id="statOpen">---</span>
+          </div>
+          <div class="stat-card">
+            <span class="label">High</span>
+            <span class="value" id="statHigh">---</span>
+          </div>
+          <div class="stat-card">
+            <span class="label">Low</span>
+            <span class="value" id="statLow">---</span>
+          </div>
+          <div class="stat-card">
+            <span class="label">Prev Close</span>
+            <span class="value" id="statPrev">---</span>
+          </div>
+        </div>
+
+        <div class="last-updated">
+          Last updated: <span id="lastUpdatedTime">--:--:--</span>
+        </div>
+      </main>
+
+      <div id="loadingState" class="state-message hidden">
+        <div class="spinner"></div>
+        <p>Fetching market data...</p>
+      </div>
+
+      <div id="errorState" class="state-message hidden">
+        <p id="errorMessage">Stock not found or API limit reached.</p>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

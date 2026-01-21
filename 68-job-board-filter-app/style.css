@@ -1,0 +1,294 @@
+/* --------------------------
+   1. CSS Variables & Reset
+--------------------------- */
+:root {
+  --primary: #5ba4a4;
+  --background: #effafa;
+  --card-bg: #ffffff;
+  --text-dark: #2c3a3a;
+  --text-muted: #7b8e8e;
+  --filter-tablet: #eef6f6;
+  --shadow: 0 15px 20px -5px rgba(13, 113, 130, 0.15);
+  --font-main: "League Spartan", sans-serif;
+  --transition: all 0.3s ease;
+}
+
+/* Auto Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #6abecd;
+    --background: #1a202c;
+    --card-bg: #2d3748;
+    --text-dark: #f7fafc;
+    --text-muted: #a0aec0;
+    --filter-tablet: #2d3748;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--background);
+  font-size: 15px;
+  color: var(--text-dark);
+  transition: background-color 0.3s;
+}
+
+/* --------------------------
+   2. Layout & Header
+--------------------------- */
+.site-header {
+  background-color: var(--primary);
+  height: 156px;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDQwIiBoZWlnaHQ9IjE1NiI+PHBhdGggZmlsbD0iIzVCQTRBNCIgZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMCAwaDE0NDB2MTU2SDB6Ii8+PC9zdmc+"); /* Simple color placeholder */
+  margin-bottom: 40px;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+  position: relative;
+}
+
+/* --------------------------
+   3. Filter Panel
+--------------------------- */
+.filter-panel {
+  background: var(--card-bg);
+  border-radius: 5px;
+  box-shadow: var(--shadow);
+  padding: 20px 30px;
+  margin-top: -76px; /* Overlap header */
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  min-height: 70px;
+}
+
+.filter-wrapper {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-grow: 1;
+}
+
+/* Inputs styling */
+input,
+select {
+  padding: 10px;
+  border: 1px solid var(--text-muted);
+  border-radius: 4px;
+  background: var(--background);
+  color: var(--text-dark);
+  font-family: inherit;
+}
+
+/* Filter Tags (Chips) */
+.active-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.tag-chip {
+  background: var(--filter-tablet);
+  color: var(--primary);
+  font-weight: 700;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.tag-text {
+  padding: 8px;
+}
+
+.remove-tag {
+  background: var(--primary);
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: white;
+  font-weight: 700;
+  transition: var(--transition);
+}
+
+.remove-tag:hover {
+  background: #2c3a3a;
+}
+
+.clear-link {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.clear-link:hover {
+  color: var(--primary);
+}
+
+/* --------------------------
+   4. Job Cards
+--------------------------- */
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.job-card {
+  background: var(--card-bg);
+  border-radius: 5px;
+  box-shadow: var(--shadow);
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-left: 5px solid transparent;
+  transition: transform 0.2s;
+}
+
+.job-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Featured Logic */
+.job-card.featured {
+  border-left-color: var(--primary);
+}
+
+.card-left {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.logo img {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+}
+
+.job-info h4 {
+  color: var(--primary);
+  font-size: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge {
+  color: white;
+  text-transform: uppercase;
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 11px;
+  padding-top: 6px; /* optical adjustment */
+}
+.badge-new {
+  background: var(--primary);
+}
+.badge-featured {
+  background: #2c3a3a;
+}
+
+.job-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  cursor: pointer;
+  color: var(--text-dark);
+}
+.job-title:hover {
+  color: var(--primary);
+}
+
+.job-meta {
+  color: var(--text-muted);
+  font-size: 14px;
+  list-style: none;
+  display: flex;
+  gap: 15px;
+}
+.job-meta li + li::before {
+  content: "•";
+  margin-right: 15px;
+  color: var(--text-muted);
+}
+
+/* Tags on Card */
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.tag-btn {
+  background: var(--filter-tablet);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.tag-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* --------------------------
+   5. Mobile Responsiveness
+--------------------------- */
+@media (max-width: 768px) {
+  .job-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .logo {
+    margin-top: -60px;
+    margin-bottom: 10px;
+  }
+
+  .logo img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .card-left {
+    flex-direction: column;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--text-muted);
+    padding-bottom: 15px;
+    width: 100%;
+    margin-bottom: 15px;
+  }
+}

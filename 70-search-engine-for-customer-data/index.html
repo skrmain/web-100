@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vanilla JS Search Engine</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <h1>TechFind 🔍</h1>
+        <p>Instant client-side search for custom data</p>
+
+        <div class="search-wrapper">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search for laptops, phones, or keywords..."
+            autocomplete="off"
+          />
+        </div>
+        <div id="stats" class="stats-text">Showing all items</div>
+      </div>
+    </header>
+
+    <main class="container">
+      <div id="results-container" class="results-grid"></div>
+
+      <div id="no-results" class="hidden">
+        <h3>No results found 😔</h3>
+        <p>Try adjusting your search terms.</p>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VanillaJS Code Editor</title>
+    <style>
+      /* * CSS VARIABLES & THEME TOKENS
+         * handled via :root and prefers-color-scheme
+         */
+      :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f3f4f6;
+        --text-primary: #1f2937;
+        --text-secondary: #6b7280;
+        --accent-color: #3b82f6;
+        --border-color: #e5e7eb;
+        --editor-bg: #fafafa;
+        --gutter-bg: #f3f4f6;
+        --resizer-bg: #d1d5db;
+      }
+
+      /* Auto Dark Mode Support */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #111827;
+          --bg-secondary: #1f2937;
+          --text-primary: #f9fafb;
+          --text-secondary: #9ca3af;
+          --accent-color: #60a5fa;
+          --border-color: #374151;
+          --editor-bg: #0f1218; /* Deep dark for editor */
+          --gutter-bg: #1f2937;
+          --resizer-bg: #4b5563;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* --- HEADER & TOOLBAR --- */
+      header {
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1rem;
+        border-bottom: 1px solid var(--border-color);
+        background-color: var(--bg-secondary);
+      }
+
+      h1 {
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+
+      .toolbar-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      button {
+        padding: 0.4rem 1rem;
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+      }
+
+      button:hover {
+        background: var(--border-color);
+      }
+
+      button.primary {
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+      }
+
+      button.primary:hover {
+        opacity: 0.9;
+      }
+
+      /* --- MAIN LAYOUT (Split View) --- */
+      .workspace {
+        flex: 1;
+        display: flex;
+        flex-direction: column; /* Starts vertical: Editors Top, Preview Bottom */
+        height: calc(100vh - 50px);
+        position: relative;
+      }
+
+      /* Editor Container (Top Half) */
+      .editors-container {
+        display: flex;
+        flex-direction: row;
+        height: 50%; /* Initial height */
+        min-height: 100px;
+        overflow: hidden;
+      }
+
+      /* Individual Editor Panel */
+      .editor-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--border-color);
+        min-width: 100px;
+        position: relative;
+      }
+
+      .editor-panel:last-child {
+        border-right: none;
+      }
+
+      .panel-header {
+        background: var(--bg-secondary);
+        padding: 5px 10px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: flex;
+        justify-content: space-between;
+        user-select: none;
+      }
+
+      /* Code Input Area with Line Numbers */
+      .code-wrapper {
+        flex: 1;
+        display: flex;
+        position: relative;
+        background-color: var(--editor-bg);
+        overflow: hidden;
+      }
+
+      .line-numbers {
+        width: 40px;
+        text-align: right;
+        padding: 10px 5px;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--text-secondary);
+        background-color: var(--gutter-bg);
+        border-right: 1px solid var(--border-color);
+        user-select: none;
+        overflow: hidden;
+      }
+
+      textarea {
+        flex: 1;
+        border: none;
+        resize: none;
+        background-color: transparent;
+        color: var(--text-primary);
+        padding: 10px;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 14px;
+        line-height: 1.5;
+        white-space: pre;
+        overflow: auto;
+        outline: none;
+        tab-size: 2;
+      }
+
+      /* --- RESIZER BAR --- */
+      .resizer-horizontal {
+        height: 8px;
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        cursor: row-resize;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+      }
+
+      /* Little grip handle icon */
+      .resizer-horizontal::after {
+        content: "";
+        width: 40px;
+        height: 4px;
+        background: var(--resizer-bg);
+        border-radius: 2px;
+      }
+
+      .resizer-active {
+        background: var(--accent-color);
+      }
+
+      /* --- PREVIEW AREA (Bottom Half) --- */
+      .preview-container {
+        flex: 1;
+        background-color: white; /* Preview is always white by default unless user styles it */
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        min-height: 100px;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: #fff;
+      }
+
+      /* Overlay to capture mouse events during resizing */
+      .iframe-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: none;
+        z-index: 20;
+      }
+
+      /* --- UTILS --- */
+      .hidden {
+        display: none;
+      }
+
+      /* Mobile adjustment: Stack editors on very small screens */
+      @media (max-width: 768px) {
+        .editors-container {
+          flex-direction: column;
+        }
+        .editor-panel {
+          border-right: none;
+          border-bottom: 1px solid var(--border-color);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>JS<span style="color: var(--accent-color)">FiddleLite</span></h1>
+      <div class="toolbar-actions">
+        <button id="reset-btn">Reset</button>
+        <button id="run-btn" class="primary" title="Ctrl + Enter">Run ▶</button>
+      </div>
+    </header>
+
+    <div class="workspace" id="workspace">
+      <div class="editors-container" id="editors-box">
+        <div class="editor-panel">
+          <div class="panel-header">
+            HTML <span class="badge">index.html</span>
+          </div>
+          <div class="code-wrapper">
+            <div class="line-numbers" id="ln-html">1</div>
+            <textarea
+              id="html-code"
+              spellcheck="false"
+              placeholder=""
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="editor-panel">
+          <div class="panel-header">
+            CSS <span class="badge">style.css</span>
+          </div>
+          <div class="code-wrapper">
+            <div class="line-numbers" id="ln-css">1</div>
+            <textarea
+              id="css-code"
+              spellcheck="false"
+              placeholder="/* Write CSS here */"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="editor-panel">
+          <div class="panel-header">
+            JS <span class="badge">script.js</span>
+          </div>
+          <div class="code-wrapper">
+            <div class="line-numbers" id="ln-js">1</div>
+            <textarea
+              id="js-code"
+              spellcheck="false"
+              placeholder="// Write JavaScript here"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="resizer-horizontal" id="resizer"></div>
+
+      <div class="preview-container" id="preview-box">
+        <div
+          class="panel-header"
+          style="border-bottom: 1px solid var(--border-color)"
+        >
+          Live Preview
+          <span id="status-indicator" style="font-size: 10px; color: green"
+            >● Ready</span
+          >
+        </div>
+        <iframe
+          id="preview-frame"
+          sandbox="allow-scripts allow-modals"
+        ></iframe>
+        <div class="iframe-overlay" id="iframe-overlay"></div>
+      </div>
+    </div>
+
+    <script>
+      /**
+       * APPLICATION STATE & CONFIG
+       */
+      const elements = {
+        html: document.getElementById("html-code"),
+        css: document.getElementById("css-code"),
+        js: document.getElementById("js-code"),
+        iframe: document.getElementById("preview-frame"),
+        runBtn: document.getElementById("run-btn"),
+        resetBtn: document.getElementById("reset-btn"),
+        resizer: document.getElementById("resizer"),
+        editorsBox: document.getElementById("editors-box"),
+        previewBox: document.getElementById("preview-box"),
+        iframeOverlay: document.getElementById("iframe-overlay"),
+        workspace: document.getElementById("workspace"),
+      };
+
+      const DEFAULTS = {
+        html: `<div class="container">
+  <h1>Hello World</h1>
+  <p>Edit the code to see changes!</p>
+  <button id="alertBtn">Click Me</button>
+</div>`,
+        css: `body {
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.container {
+  text-align: center;
+  padding: 2rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+button {
+  margin-top: 1rem;
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}`,
+        js: `// Interactive Logic
+document.getElementById('alertBtn')
+  .addEventListener('click', () => {
+    alert('Code is running securely!');
+  });
+
+console.log('Sandbox ready');`,
+      };
+
+      /**
+       * 1. STATE MANAGEMENT
+       * Load from LocalStorage or use Defaults
+       */
+      function loadState() {
+        elements.html.value = localStorage.getItem("ce_html") || DEFAULTS.html;
+        elements.css.value = localStorage.getItem("ce_css") || DEFAULTS.css;
+        elements.js.value = localStorage.getItem("ce_js") || DEFAULTS.js;
+        updateLineNumbers("html");
+        updateLineNumbers("css");
+        updateLineNumbers("js");
+      }
+
+      function saveState() {
+        localStorage.setItem("ce_html", elements.html.value);
+        localStorage.setItem("ce_css", elements.css.value);
+        localStorage.setItem("ce_js", elements.js.value);
+      }
+
+      /**
+       * 2. EXECUTION ENGINE (SANDBOX)
+       * Uses Blob URL to create a unique origin context
+       */
+      function updatePreview() {
+        saveState(); // Auto-save on run
+
+        const html = elements.html.value;
+        const css = elements.css.value;
+        const js = elements.js.value;
+
+        // Construct the full document
+        // We inject the CSS in <style> and JS in <script>
+        // We wrap JS in a try-catch to log errors to the preview console if we were to build one
+        const source = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <style>${css}</style>
+                <\/head>
+                <body>
+                    ${html}
+                    <script>
+                        try {
+                            ${js}
+                        } catch (err) {
+                            document.body.innerHTML += '<div style="color:red; background:#ffebeb; padding:10px; margin-top:10px; border:1px solid red;">JS Error: ' + err.message + '</div>';
+                        }
+                    <\/script>
+                <\/body>
+                <\/html>
+            `;
+
+        // Create a Blob to serve the content
+        const blob = new Blob([source], { type: "text/html" });
+        const url = URL.createObjectURL(blob);
+
+        // Set iframe src
+        elements.iframe.src = url;
+
+        // Clean up old object URLs to prevent memory leaks (simple debounce logic is better in prod)
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      }
+
+      /**
+       * 3. UI/UX: RESIZABLE SPLIT PANELS
+       * Draggable Divider Logic
+       */
+      let isResizing = false;
+
+      elements.resizer.addEventListener("mousedown", (e) => {
+        isResizing = true;
+        elements.resizer.classList.add("resizer-active");
+        elements.iframeOverlay.style.display = "block"; // Block iframe events
+        document.body.style.cursor = "row-resize";
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", stopResize);
+      });
+
+      function handleMouseMove(e) {
+        if (!isResizing) return;
+
+        // Calculate percentage based on mouse Y position relative to workspace
+        const containerRect = elements.workspace.getBoundingClientRect();
+        const relativeY = e.clientY - containerRect.top;
+        const percentage = (relativeY / containerRect.height) * 100;
+
+        // Constrain between 10% and 90%
+        if (percentage > 10 && percentage < 90) {
+          elements.editorsBox.style.height = `${percentage}%`;
+          // Preview box takes remaining space via flex: 1, no need to set height explicitly
+        }
+      }
+
+      function stopResize() {
+        isResizing = false;
+        elements.resizer.classList.remove("resizer-active");
+        elements.iframeOverlay.style.display = "none";
+        document.body.style.cursor = "default";
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", stopResize);
+      }
+
+      /**
+       * 4. UI/UX: LINE NUMBERS & SYNC SCROLL
+       */
+      function updateLineNumbers(type) {
+        const textarea =
+          type === "html"
+            ? elements.html
+            : type === "css"
+              ? elements.css
+              : elements.js;
+        const lineNumEl = document.getElementById(`ln-${type}`);
+
+        const lines = textarea.value.split("\n").length;
+        lineNumEl.innerHTML = Array(lines)
+          .fill(0)
+          .map((_, i) => i + 1)
+          .join("<br>");
+      }
+
+      function syncScroll(type) {
+        const textarea =
+          type === "html"
+            ? elements.html
+            : type === "css"
+              ? elements.css
+              : elements.js;
+        const lineNumEl = document.getElementById(`ln-${type}`);
+        lineNumEl.scrollTop = textarea.scrollTop;
+      }
+
+      // Attach listeners to editors
+      ["html", "css", "js"].forEach((type) => {
+        const el = elements[type];
+        // Update line numbers on input
+        el.addEventListener("input", () => {
+          updateLineNumbers(type);
+          // Optional: Debounced auto-run could go here
+        });
+        // Sync scroll
+        el.addEventListener("scroll", () => syncScroll(type));
+        // Tab key support (Basic)
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Tab") {
+            e.preventDefault();
+            document.execCommand("insertText", false, "  ");
+          }
+        });
+      });
+
+      /**
+       * 5. EVENT LISTENERS & INITIALIZATION
+       */
+      elements.runBtn.addEventListener("click", updatePreview);
+
+      elements.resetBtn.addEventListener("click", () => {
+        if (confirm("Reset all code to defaults?")) {
+          localStorage.clear();
+          loadState();
+          updatePreview();
+        }
+      });
+
+      // Keyboard Shortcut: Ctrl + Enter to Run
+      document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+          updatePreview();
+        }
+      });
+
+      // Initialize
+      loadState();
+      updatePreview();
+    </script>
+  </body>
+</html>

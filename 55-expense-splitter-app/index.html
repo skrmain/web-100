@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FairShare - Expense Splitter</title>
+    <style>
+      /* CSS will be placed here */
+    </style>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>FairShare 💸</h1>
+      <p>Split expenses simply and fairly.</p>
+    </header>
+
+    <main class="container">
+      <section class="card" id="participants-section">
+        <div class="card-header">
+          <h2>1. Participants</h2>
+          <small>Who is involved?</small>
+        </div>
+        <div class="card-body">
+          <div class="input-group">
+            <input
+              type="text"
+              id="participant-name"
+              placeholder="Enter name (e.g., Alice)"
+              onkeypress="handleEnter(event, addParticipant)"
+            />
+            <button class="btn-primary" onclick="addParticipant()">Add</button>
+          </div>
+          <ul id="participant-list" class="tag-list"></ul>
+        </div>
+      </section>
+
+      <section class="card" id="expenses-section">
+        <div class="card-header">
+          <h2>2. Add Expense</h2>
+          <small>Who paid for what?</small>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <input
+              type="text"
+              id="expense-desc"
+              placeholder="Description (e.g., Dinner)"
+            />
+            <input
+              type="number"
+              id="expense-amount"
+              placeholder="Amount (0.00)"
+              min="0"
+              step="0.01"
+            />
+          </div>
+
+          <div class="form-row">
+            <label>Paid By:</label>
+            <select id="payer-select">
+              <option value="" disabled selected>Select Payer</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label>Split Amongst:</label>
+            <div id="split-checkboxes" class="checkbox-group">
+              <p class="text-muted">Add participants first.</p>
+            </div>
+          </div>
+
+          <button class="btn-primary full-width" onclick="addExpense()">
+            Add Expense
+          </button>
+
+          <div id="expense-list" class="expense-log"></div>
+        </div>
+      </section>
+
+      <section class="card result-card" id="results-section">
+        <div class="card-header">
+          <h2>3. Settlement</h2>
+          <small>Who owes whom?</small>
+        </div>
+        <div class="card-body">
+          <button
+            class="btn-secondary full-width"
+            onclick="calculateSettlement()"
+          >
+            Recalculate Split
+          </button>
+
+          <div id="results-output" class="results-box">
+            <p class="text-muted text-center">
+              Add expenses and click Recalculate.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

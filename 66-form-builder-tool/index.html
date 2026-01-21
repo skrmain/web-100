@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vanilla JS Form Builder</title>
+    <style>
+      /* =========================================
+           CSS: Variables & Reset
+           ========================================= */
+      :root {
+        /* Theme Tokens */
+        --primary-color: #2563eb;
+        --primary-hover: #1d4ed8;
+        --bg-color: #f8fafc;
+        --surface-color: #ffffff;
+        --border-color: #e2e8f0;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --danger-color: #ef4444;
+        --radius: 8px;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --font-family: "Segoe UI", system-ui, sans-serif;
+      }
+
+      /* Dark Mode Support */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-color: #0f172a;
+          --surface-color: #1e293b;
+          --border-color: #334155;
+          --text-main: #f8fafc;
+          --text-muted: #94a3b8;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-family);
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* Prevent body scroll, use inner scrolls */
+      }
+
+      /* =========================================
+           CSS: Layout & Structure
+           ========================================= */
+      header {
+        background: var(--surface-color);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      h1 {
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      .btn {
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: var(--radius);
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s;
+      }
+
+      .btn-primary {
+        background: var(--primary-color);
+        color: white;
+      }
+      .btn-primary:hover {
+        background: var(--primary-hover);
+      }
+      .btn-danger {
+        background: var(--danger-color);
+        color: white;
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--text-muted);
+      }
+      .btn-ghost:hover {
+        background: var(--border-color);
+      }
+
+      /* Main Workspace Grid */
+      main {
+        display: grid;
+        grid-template-columns: 250px 1fr 300px; /* Toolbox | Canvas | Properties */
+        flex: 1;
+        overflow: hidden;
+      }
+
+      /* =========================================
+           CSS: Toolbox (Left Sidebar)
+           ========================================= */
+      .toolbox {
+        background: var(--surface-color);
+        border-right: 1px solid var(--border-color);
+        padding: 1rem;
+        overflow-y: auto;
+      }
+
+      .toolbox h3 {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+      }
+
+      .tool-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        user-select: none;
+      }
+
+      .tool-item:hover {
+        border-color: var(--primary-color);
+        transform: translateX(4px);
+      }
+
+      /* =========================================
+           CSS: Builder Canvas (Middle)
+           ========================================= */
+      .canvas-container {
+        padding: 2rem;
+        overflow-y: auto;
+        position: relative;
+      }
+
+      .empty-state {
+        text-align: center;
+        color: var(--text-muted);
+        margin-top: 3rem;
+        border: 2px dashed var(--border-color);
+        padding: 3rem;
+        border-radius: var(--radius);
+      }
+
+      .form-field {
+        background: var(--surface-color);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        position: relative;
+        cursor: move; /* Indicates drag capability */
+        transition:
+          box-shadow 0.2s,
+          border-color 0.2s;
+      }
+
+      .form-field:hover,
+      .form-field.active {
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow);
+      }
+
+      .form-field.active {
+        border-left: 4px solid var(--primary-color);
+      }
+
+      /* Dragging Styles */
+      .form-field.dragging {
+        opacity: 0.5;
+        background: var(--bg-color);
+        border-style: dashed;
+      }
+
+      .field-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        pointer-events: none; /* Let clicks pass through to container */
+      }
+
+      .field-label {
+        font-weight: 600;
+        font-size: 0.95rem;
+      }
+      .field-type {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        background: var(--bg-color);
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+
+      .field-preview-input {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--bg-color);
+        pointer-events: none; /* Disable interaction in builder */
+        color: var(--text-muted);
+      }
+
+      .delete-btn {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        z-index: 10;
+      }
+
+      /* =========================================
+           CSS: Properties Panel (Right Sidebar)
+           ========================================= */
+      .properties-panel {
+        background: var(--surface-color);
+        border-left: 1px solid var(--border-color);
+        padding: 1rem;
+        overflow-y: auto;
+      }
+
+      .prop-group {
+        margin-bottom: 1rem;
+      }
+      .prop-group label {
+        display: block;
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+        color: var(--text-muted);
+      }
+
+      .prop-input,
+      .prop-select,
+      .prop-textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        background: var(--bg-color);
+        color: var(--text-main);
+      }
+
+      .prop-textarea {
+        min-height: 80px;
+        font-family: monospace;
+        font-size: 0.85rem;
+      }
+
+      /* =========================================
+           CSS: Preview Modal
+           ========================================= */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+
+      .modal-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .modal-content {
+        background: var(--surface-color);
+        width: 90%;
+        max-width: 500px;
+        border-radius: var(--radius);
+        padding: 2rem;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
+      .modal-body .form-group {
+        margin-bottom: 1rem;
+      }
+      .modal-body label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+      .modal-body input,
+      .modal-body select,
+      .modal-body textarea {
+        width: 100%;
+        padding: 0.6rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        background: var(--bg-color);
+        color: var(--text-main);
+      }
+      .modal-body button {
+        width: 100%;
+        margin-top: 1rem;
+      }
+
+      /* Mobile Responsive */
+      @media (max-width: 768px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+        .toolbox,
+        .properties-panel {
+          display: none;
+        } /* Hide in mobile view for simplicity, or use tabs */
+        /* Note: A full mobile implementation would require tabs to switch views */
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Form Builder</h1>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="app.clearForm()">Clear</button>
+        <button class="btn btn-primary" onclick="app.togglePreview()">
+          Preview Form
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <aside class="toolbox">
+        <h3>Form Fields</h3>
+        <div class="tool-item" onclick="app.addField('text')">
+          🔤 Text Input
+        </div>
+        <div class="tool-item" onclick="app.addField('email')">📧 Email</div>
+        <div class="tool-item" onclick="app.addField('number')">#️⃣ Number</div>
+        <div class="tool-item" onclick="app.addField('textarea')">
+          📝 Textarea
+        </div>
+        <div class="tool-item" onclick="app.addField('select')">
+          🔽 Dropdown
+        </div>
+        <div class="tool-item" onclick="app.addField('checkbox')">
+          ☑️ Checkbox
+        </div>
+        <div class="tool-item" onclick="app.addField('radio')">
+          🔘 Radio Group
+        </div>
+        <div class="tool-item" onclick="app.addField('date')">📅 Date</div>
+      </aside>
+
+      <section class="canvas-container" id="canvas-container">
+        <div id="form-canvas"></div>
+        <div id="empty-state" class="empty-state">
+          Drag and drop is supported.<br />Click a field on the left to add one.
+        </div>
+      </section>
+
+      <aside class="properties-panel">
+        <h3>Properties</h3>
+        <div id="properties-content">
+          <p style="color: var(--text-muted); font-size: 0.9rem">
+            Select a field to edit properties.
+          </p>
+        </div>
+      </aside>
+    </main>
+
+    <div id="preview-modal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Form Preview</h2>
+          <button class="btn btn-ghost" onclick="app.togglePreview()">✕</button>
+        </div>
+        <form
+          id="preview-form"
+          class="modal-body"
+          onsubmit="
+            event.preventDefault();
+            alert('Form Valid & Submitted!');
+          "
+        ></form>
+      </div>
+    </div>
+
+    <script>
+      /**
+       * Form Builder Application Logic
+       * Implements Module Pattern for encapsulation
+       */
+      const app = (function () {
+        // --- State Management ---
+        let schema = []; // Stores the form field definitions
+        let selectedFieldId = null; // ID of the currently selected field for editing
+
+        // --- DOM Elements ---
+        const canvas = document.getElementById("form-canvas");
+        const propertiesContent = document.getElementById("properties-content");
+        const emptyState = document.getElementById("empty-state");
+
+        // --- Initialization ---
+        function init() {
+          loadFromStorage();
+          renderBuilder();
+        }
+
+        // --- Core Actions ---
+
+        function addField(type) {
+          const newField = {
+            id: Date.now().toString(), // Simple unique ID
+            type: type,
+            label: `New ${capitalize(type)}`,
+            placeholder: "",
+            required: false,
+            options:
+              type === "select" || type === "radio"
+                ? ["Option 1", "Option 2"]
+                : [],
+          };
+
+          schema.push(newField);
+          selectField(newField.id); // Auto-select new field
+          saveToStorage();
+          renderBuilder();
+        }
+
+        function deleteField(id, event) {
+          if (event) event.stopPropagation(); // Prevent triggering selection
+          schema = schema.filter((f) => f.id !== id);
+
+          if (selectedFieldId === id) {
+            selectedFieldId = null;
+            renderProperties();
+          }
+
+          saveToStorage();
+          renderBuilder();
+        }
+
+        function updateField(id, key, value) {
+          const field = schema.find((f) => f.id === id);
+          if (field) {
+            field[key] = value;
+            saveToStorage();
+            renderBuilder(); // Re-render canvas to show updates (e.g. label change)
+          }
+        }
+
+        function selectField(id) {
+          selectedFieldId = id;
+          renderBuilder(); // Re-render to highlight selection
+          renderProperties();
+        }
+
+        function reorderFields(fromIndex, toIndex) {
+          const item = schema.splice(fromIndex, 1)[0];
+          schema.splice(toIndex, 0, item);
+          saveToStorage();
+          renderBuilder();
+        }
+
+        function clearForm() {
+          if (confirm("Delete all fields?")) {
+            schema = [];
+            selectedFieldId = null;
+            saveToStorage();
+            renderBuilder();
+            renderProperties();
+          }
+        }
+
+        // --- Rendering Logic (Builder) ---
+
+        function renderBuilder() {
+          canvas.innerHTML = "";
+
+          if (schema.length === 0) {
+            emptyState.style.display = "block";
+            return;
+          } else {
+            emptyState.style.display = "none";
+          }
+
+          schema.forEach((field, index) => {
+            const el = document.createElement("div");
+            el.className = `form-field ${field.id === selectedFieldId ? "active" : ""}`;
+            el.draggable = true;
+            el.dataset.index = index; // Store index for drag logic
+            el.dataset.id = field.id;
+
+            // Event Listeners for Interaction
+            el.onclick = () => selectField(field.id);
+
+            // Drag Events
+            addDragListeners(el, index);
+
+            // Create HTML content based on type
+            let inputHtml = "";
+            if (["text", "email", "number", "date"].includes(field.type)) {
+              inputHtml = `<input type="${field.type}" class="field-preview-input" placeholder="${field.placeholder}" disabled>`;
+            } else if (field.type === "textarea") {
+              inputHtml = `<textarea class="field-preview-input" placeholder="${field.placeholder}" disabled></textarea>`;
+            } else if (field.type === "select") {
+              inputHtml = `<select class="field-preview-input" disabled><option>Select option...</option></select>`;
+            } else if (field.type === "checkbox") {
+              inputHtml = `<div><input type="checkbox" disabled> <label>${field.label}</label></div>`;
+            } else if (field.type === "radio") {
+              inputHtml = field.options
+                .map(
+                  (opt) =>
+                    `<div><input type="radio" disabled> <label>${opt}</label></div>`,
+                )
+                .join("");
+            }
+
+            el.innerHTML = `
+                        <button class="btn btn-danger delete-btn" onclick="app.deleteField('${field.id}', event)">✕</button>
+                        <div class="field-header">
+                            <span class="field-label">${field.label} ${field.required ? '<span style="color:red">*</span>' : ""}</span>
+                            <span class="field-type">${field.type}</span>
+                        </div>
+                        ${field.type !== "checkbox" && field.type !== "radio" ? inputHtml : ""}
+                        ${field.type === "checkbox" || field.type === "radio" ? inputHtml : ""}
+                    `;
+
+            canvas.appendChild(el);
+          });
+        }
+
+        // --- Rendering Logic (Properties Panel) ---
+
+        function renderProperties() {
+          if (!selectedFieldId) {
+            propertiesContent.innerHTML =
+              '<p style="color:var(--text-muted);">Select a field to edit.</p>';
+            return;
+          }
+
+          const field = schema.find((f) => f.id === selectedFieldId);
+          if (!field) return;
+
+          let html = `
+                    <div class="prop-group">
+                        <label>Label</label>
+                        <input type="text" class="prop-input" value="${field.label}" 
+                            oninput="app.updateField('${field.id}', 'label', this.value)">
+                    </div>
+                `;
+
+          // Placeholder (not for date/checkbox/radio/select usually, but good for text inputs)
+          if (["text", "email", "number", "textarea"].includes(field.type)) {
+            html += `
+                        <div class="prop-group">
+                            <label>Placeholder</label>
+                            <input type="text" class="prop-input" value="${field.placeholder || ""}" 
+                                oninput="app.updateField('${field.id}', 'placeholder', this.value)">
+                        </div>
+                    `;
+          }
+
+          // Options (Select/Radio)
+          if (["select", "radio"].includes(field.type)) {
+            html += `
+                        <div class="prop-group">
+                            <label>Options (comma separated)</label>
+                            <textarea class="prop-textarea" 
+                                onchange="app.updateField('${field.id}', 'options', this.value.split(',').map(s=>s.trim()))"
+                            >${field.options.join(", ")}</textarea>
+                        </div>
+                    `;
+          }
+
+          // Required Checkbox
+          html += `
+                    <div class="prop-group">
+                        <label>
+                            <input type="checkbox" ${field.required ? "checked" : ""} 
+                                onchange="app.updateField('${field.id}', 'required', this.checked)">
+                            Required Field
+                        </label>
+                    </div>
+                `;
+
+          propertiesContent.innerHTML = html;
+        }
+
+        // --- Rendering Logic (Preview) ---
+
+        function togglePreview() {
+          const modal = document.getElementById("preview-modal");
+          const formBody = document.getElementById("preview-form");
+
+          // Toggle visibility
+          modal.classList.toggle("open");
+
+          // If opening, render the form
+          if (modal.classList.contains("open")) {
+            formBody.innerHTML = ""; // Clear previous
+
+            schema.forEach((field) => {
+              const wrapper = document.createElement("div");
+              wrapper.className = "form-group";
+
+              const labelHtml = `<label>${field.label} ${field.required ? '<span style="color:red">*</span>' : ""}</label>`;
+
+              let fieldHtml = "";
+
+              // Construct actual usable HTML inputs
+              if (["text", "email", "number", "date"].includes(field.type)) {
+                fieldHtml = `<input type="${field.type}" placeholder="${field.placeholder}" ${field.required ? "required" : ""}>`;
+              } else if (field.type === "textarea") {
+                fieldHtml = `<textarea placeholder="${field.placeholder}" ${field.required ? "required" : ""}></textarea>`;
+              } else if (field.type === "select") {
+                const optionsHtml = field.options
+                  .map((opt) => `<option value="${opt}">${opt}</option>`)
+                  .join("");
+                fieldHtml = `<select ${field.required ? "required" : ""}><option value="">Select...</option>${optionsHtml}</select>`;
+              } else if (field.type === "checkbox") {
+                fieldHtml = `<div><input type="checkbox" ${field.required ? "required" : ""}> ${field.label}</div>`;
+                // For checkbox, label usually goes after input, so we adjust wrapper
+                wrapper.innerHTML = fieldHtml;
+                formBody.appendChild(wrapper);
+                return; // Skip default append
+              } else if (field.type === "radio") {
+                fieldHtml = field.options
+                  .map(
+                    (opt) => `
+                                <div style="margin-bottom:0.25rem">
+                                    <input type="radio" name="${field.id}" value="${opt}" ${field.required ? "required" : ""}> ${opt}
+                                </div>
+                             `,
+                  )
+                  .join("");
+              }
+
+              wrapper.innerHTML = labelHtml + fieldHtml;
+              formBody.appendChild(wrapper);
+            });
+
+            // Add submit button
+            const submitBtn = document.createElement("button");
+            submitBtn.type = "submit";
+            submitBtn.className = "btn btn-primary";
+            submitBtn.innerText = "Submit Form";
+            formBody.appendChild(submitBtn);
+          }
+        }
+
+        // --- Drag and Drop Logic ---
+        let dragSrcIndex = null;
+
+        function addDragListeners(el, index) {
+          el.addEventListener("dragstart", (e) => {
+            dragSrcIndex = index;
+            el.classList.add("dragging");
+            e.dataTransfer.effectAllowed = "move";
+          });
+
+          el.addEventListener("dragend", () => {
+            el.classList.remove("dragging");
+            // Remove hover styles from all fields
+            document
+              .querySelectorAll(".form-field")
+              .forEach((f) => (f.style.borderTop = ""));
+          });
+
+          el.addEventListener("dragover", (e) => {
+            e.preventDefault(); // Necessary for drop to fire
+            e.dataTransfer.dropEffect = "move";
+            return false;
+          });
+
+          el.addEventListener("drop", (e) => {
+            e.stopPropagation();
+            const dragDestIndex = index;
+            if (dragSrcIndex !== dragDestIndex) {
+              reorderFields(dragSrcIndex, dragDestIndex);
+            }
+            return false;
+          });
+        }
+
+        // --- Utils & Persistence ---
+
+        function capitalize(str) {
+          return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function saveToStorage() {
+          localStorage.setItem("formBuilderSchema", JSON.stringify(schema));
+        }
+
+        function loadFromStorage() {
+          const data = localStorage.getItem("formBuilderSchema");
+          if (data) {
+            try {
+              schema = JSON.parse(data);
+            } catch (e) {
+              console.error("Failed to parse schema", e);
+            }
+          }
+        }
+
+        // --- Public API ---
+        return {
+          init,
+          addField,
+          deleteField,
+          updateField,
+          clearForm,
+          togglePreview,
+        };
+      })();
+
+      // Start App
+      document.addEventListener("DOMContentLoaded", app.init);
+    </script>
+  </body>
+</html>

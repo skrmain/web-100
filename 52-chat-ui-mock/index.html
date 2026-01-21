@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Vanilla Chat UI</title>
+    <style>
+      /* * CSS VARIABLES & THEMING 
+         * Using :root for easy theme switching and maintenance.
+         */
+      :root {
+        --bg-color: #f0f2f5;
+        --chat-bg: #ffffff;
+        --input-bg: #f0f2f5;
+        --text-main: #1c1e21;
+        --text-secondary: #65676b;
+        --accent-color: #0084ff; /* Messenger Blue */
+        --accent-text: #ffffff;
+        --bot-bubble-bg: #e4e6eb;
+        --bot-bubble-text: #050505;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        --font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+      }
+
+      /* Dark Mode Support via Media Query */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-color: #18191a;
+          --chat-bg: #242526;
+          --input-bg: #3a3b3c;
+          --text-main: #e4e6eb;
+          --text-secondary: #b0b3b8;
+          --bot-bubble-bg: #3e4042;
+          --bot-bubble-text: #e4e6eb;
+        }
+      }
+
+      /* * GLOBAL RESET & LAYOUT 
+         */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-family);
+        background-color: var(--bg-color);
+        height: 100dvh; /* Dynamic Viewport Height for mobile browsers */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      /* * MAIN APP CONTAINER 
+         * Using Flexbox to stack Header, Chat List, and Input.
+         */
+      #app {
+        width: 100%;
+        max-width: 600px; /* Mobile-first, but restricted width on desktop */
+        height: 100%;
+        background-color: var(--chat-bg);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* HEADER */
+      header {
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--bot-bubble-bg);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-shrink: 0;
+        background: var(--chat-bg);
+        z-index: 10;
+      }
+
+      .avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #ff6b6b, #556270);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+      }
+
+      .header-info h1 {
+        font-size: 1.1rem;
+        color: var(--text-main);
+      }
+      .header-info span {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      /* Status dot */
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #31a24c;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      /* * CHAT AREA (MESSAGE LIST)
+         */
+      #chat-container {
+        flex: 1; /* Takes up all available space */
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        scroll-behavior: smooth;
+      }
+
+      /* MESSAGE BUBBLES */
+      .message-wrapper {
+        display: flex;
+        flex-direction: column;
+        max-width: 80%;
+        animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      /* Animation for new messages */
+      @keyframes popIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      /* Alignments */
+      .message-wrapper.user {
+        align-self: flex-end;
+        align-items: flex-end;
+      }
+      .message-wrapper.bot {
+        align-self: flex-start;
+        align-items: flex-start;
+      }
+
+      .bubble {
+        padding: 10px 16px;
+        border-radius: 18px;
+        font-size: 0.95rem;
+        line-height: 1.4;
+        position: relative;
+        word-wrap: break-word;
+      }
+
+      /* User Bubble Styling */
+      .user .bubble {
+        background-color: var(--accent-color);
+        color: var(--accent-text);
+        border-bottom-right-radius: 4px; /* "Tail" effect */
+      }
+
+      /* Bot Bubble Styling */
+      .bot .bubble {
+        background-color: var(--bot-bubble-bg);
+        color: var(--bot-bubble-text);
+        border-bottom-left-radius: 4px; /* "Tail" effect */
+      }
+
+      .timestamp {
+        font-size: 0.7rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+        margin-left: 4px;
+        margin-right: 4px;
+      }
+
+      /* * TYPING INDICATOR 
+         */
+      .typing-indicator {
+        display: none; /* Hidden by default */
+        background-color: var(--bot-bubble-bg);
+        padding: 12px 16px;
+        border-radius: 18px;
+        border-bottom-left-radius: 4px;
+        width: fit-content;
+        margin-bottom: 10px;
+        align-self: flex-start;
+      }
+
+      .typing-indicator span {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background-color: var(--text-secondary);
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out both;
+        margin: 0 2px;
+      }
+
+      .typing-indicator span:nth-child(1) {
+        animation-delay: -0.32s;
+      }
+      .typing-indicator span:nth-child(2) {
+        animation-delay: -0.16s;
+      }
+
+      @keyframes bounce {
+        0%,
+        80%,
+        100% {
+          transform: scale(0);
+        }
+        40% {
+          transform: scale(1);
+        }
+      }
+
+      /* * INPUT AREA 
+         */
+      footer {
+        padding: 15px;
+        background-color: var(--chat-bg);
+        display: flex;
+        align-items: flex-end; /* Aligns button to bottom of textarea */
+        gap: 10px;
+        border-top: 1px solid var(--bot-bubble-bg);
+      }
+
+      /* Auto-growing Textarea */
+      textarea {
+        flex: 1;
+        background-color: var(--input-bg);
+        border: none;
+        border-radius: 20px;
+        padding: 12px 15px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        color: var(--text-main);
+        resize: none; /* User cannot manually resize */
+        max-height: 120px; /* Limit height */
+        outline: none;
+        overflow-y: hidden; /* Hide scrollbar initially */
+      }
+
+      button {
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+
+      button:hover {
+        transform: scale(1.05);
+      }
+      button:active {
+        transform: scale(0.95);
+      }
+      button:disabled {
+        background-color: var(--bot-bubble-bg);
+        cursor: not-allowed;
+      }
+
+      /* SVG Icon styling */
+      button svg {
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
+        margin-left: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <div class="avatar">AI</div>
+        <div class="header-info">
+          <h1>MockBot 3000</h1>
+          <span
+            ><div class="status-dot"></div>
+            Online</span
+          >
+        </div>
+      </header>
+
+      <main id="chat-container"></main>
+
+      <footer>
+        <textarea
+          id="message-input"
+          rows="1"
+          placeholder="Type a message..."
+        ></textarea>
+        <button id="send-btn" aria-label="Send Message">
+          <svg viewBox="0 0 24 24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+          </svg>
+        </button>
+      </footer>
+    </div>
+
+    <script>
+      /**
+       * CONFIGURATION & STATE
+       * Store messages in memory. LocalStorage is optional but implemented below.
+       */
+      const CONFIG = {
+        botName: "MockBot",
+        typingSpeed: 1200, // ms
+        storageKey: "chat_history_v1",
+      };
+
+      // Initialize State
+      let state = {
+        messages: [],
+      };
+
+      /**
+       * DOM ELEMENTS
+       * Selecting elements once to improve performance.
+       */
+      const elements = {
+        chatContainer: document.getElementById("chat-container"),
+        input: document.getElementById("message-input"),
+        sendBtn: document.getElementById("send-btn"),
+      };
+
+      /**
+       * MOCK REPLIES LOGIC
+       * A mix of regex matching and random generic answers.
+       */
+      const mockLogic = {
+        // Simple regex rules
+        rules: [
+          {
+            pattern: /hello|hi|hey/i,
+            replies: ["Hello there! 👋", "Hi! How can I help?", "Greetings!"],
+          },
+          {
+            pattern: /how are you/i,
+            replies: [
+              "I'm just a few lines of code, but I'm doing great!",
+              "Functioning within normal parameters.",
+            ],
+          },
+          {
+            pattern: /time/i,
+            replies: [`Current time is ${new Date().toLocaleTimeString()}`],
+          },
+          {
+            pattern: /name/i,
+            replies: ["I am MockBot 3000.", "You can call me Bot."],
+          },
+          {
+            pattern: /help/i,
+            replies: [
+              "I can chat, tell you the time, or simulate empathy. Try saying 'Hello'.",
+            ],
+          },
+        ],
+        // Fallback if no rules match
+        defaults: [
+          "That's interesting! Tell me more.",
+          "I see. 🤔",
+          "Could you elaborate on that?",
+          "I'm listening...",
+          "Cool!",
+        ],
+
+        getResponse(userText) {
+          // 1. Check rules
+          for (const rule of this.rules) {
+            if (rule.pattern.test(userText)) {
+              return this.randomPick(rule.replies);
+            }
+          }
+          // 2. Return random default
+          return this.randomPick(this.defaults);
+        },
+
+        randomPick(arr) {
+          return arr[Math.floor(Math.random() * arr.length)];
+        },
+      };
+
+      /**
+       * CORE FUNCTIONS
+       */
+
+      // Load History from LocalStorage
+      function init() {
+        const stored = localStorage.getItem(CONFIG.storageKey);
+        if (stored) {
+          state.messages = JSON.parse(stored);
+          // Render existing history
+          state.messages.forEach((msg) => renderMessageHTML(msg));
+          scrollToBottom();
+        } else {
+          // Add welcome message if new
+          addMessage("Hello! I'm a JS-only mock bot. Type something!", "bot");
+        }
+      }
+
+      // Add Message to State and UI
+      function addMessage(text, sender) {
+        const message = {
+          id: Date.now(),
+          text: text,
+          sender: sender, // 'user' or 'bot'
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        };
+
+        state.messages.push(message);
+        saveState();
+        renderMessageHTML(message);
+        scrollToBottom();
+      }
+
+      // Render HTML for a single message
+      function renderMessageHTML(message) {
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("message-wrapper", message.sender);
+
+        wrapper.innerHTML = `
+                <div class="bubble">${escapeHTML(message.text)}</div>
+                <div class="timestamp">${message.timestamp}</div>
+            `;
+
+        elements.chatContainer.appendChild(wrapper);
+      }
+
+      // Save to LocalStorage
+      function saveState() {
+        localStorage.setItem(CONFIG.storageKey, JSON.stringify(state.messages));
+      }
+
+      // Scroll helper
+      function scrollToBottom() {
+        elements.chatContainer.scrollTop = elements.chatContainer.scrollHeight;
+      }
+
+      // Security: Prevent HTML injection
+      function escapeHTML(str) {
+        return str.replace(
+          /[&<>'"]/g,
+          (tag) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              "'": "&#39;",
+              '"': "&quot;",
+            })[tag],
+        );
+      }
+
+      // Simulate Bot Typing
+      function triggerBotReply(userText) {
+        // 1. Show Typing Indicator
+        const typingIndicator = document.createElement("div");
+        typingIndicator.className = "typing-indicator";
+        typingIndicator.innerHTML = "<span></span><span></span><span></span>";
+        elements.chatContainer.appendChild(typingIndicator);
+        scrollToBottom();
+
+        // 2. Generate Reply
+        const replyText = mockLogic.getResponse(userText);
+
+        // 3. Wait (simulate thinking), then remove indicator and add message
+        setTimeout(() => {
+          typingIndicator.remove();
+          addMessage(replyText, "bot");
+        }, CONFIG.typingSpeed);
+      }
+
+      /**
+       * EVENT HANDLERS
+       */
+
+      // Handle sending
+      function handleSend() {
+        const text = elements.input.value.trim();
+        if (!text) return;
+
+        // 1. Add User Message
+        addMessage(text, "user");
+
+        // 2. Clear Input & Reset Height
+        elements.input.value = "";
+        elements.input.style.height = "auto";
+        elements.input.focus();
+
+        // 3. Trigger Bot
+        triggerBotReply(text);
+      }
+
+      // Auto-resize Textarea
+      elements.input.addEventListener("input", function () {
+        this.style.height = "auto"; // Reset to calculate shrink
+        this.style.height = this.scrollHeight + "px";
+        if (this.value === "") this.style.height = "auto";
+      });
+
+      // Handle Enter Key (Shift+Enter for new line)
+      elements.input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault(); // Prevent newline
+          handleSend();
+        }
+      });
+
+      elements.sendBtn.addEventListener("click", handleSend);
+
+      // Start App
+      init();
+    </script>
+  </body>
+</html>
