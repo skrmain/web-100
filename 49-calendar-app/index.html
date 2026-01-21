@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vanilla JS Calendar</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="calendar-container">
+      <header class="calendar-header">
+        <div class="calendar-info">
+          <h2 id="month-year">Month Year</h2>
+          <button id="btn-today" class="btn-text">Jump to Today</button>
+        </div>
+
+        <div class="calendar-nav">
+          <button id="prev-month" aria-label="Previous Month">&lt;</button>
+          <button id="next-month" aria-label="Next Month">&gt;</button>
+        </div>
+      </header>
+
+      <div class="calendar-weekdays">
+        <div>Sun</div>
+        <div>Mon</div>
+        <div>Tue</div>
+        <div>Wed</div>
+        <div>Thu</div>
+        <div>Fri</div>
+        <div>Sat</div>
+      </div>
+
+      <div id="calendar-grid" class="calendar-grid"></div>
+
+      <footer class="calendar-footer">
+        <p>Selected Date: <span id="selected-date-display">None</span></p>
+      </footer>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
