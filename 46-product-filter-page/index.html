@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Product Filter | Vanilla JS</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>storefront.</h1>
+    </header>
+
+    <div class="container">
+      <aside class="filters-sidebar">
+        <div class="filter-group">
+          <label for="search-input" class="filter-label">Search</label>
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Find a product..."
+            aria-label="Search products"
+          />
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Category</span>
+          <div class="category-buttons" id="category-container">
+            <button class="cat-btn active" data-category="all">All</button>
+            <button class="cat-btn" data-category="Electronics">
+              Electronics
+            </button>
+            <button class="cat-btn" data-category="Fashion">Fashion</button>
+            <button class="cat-btn" data-category="Home">Home</button>
+            <button class="cat-btn" data-category="Sports">Sports</button>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="price-header">
+            <span class="filter-label">Max Price</span>
+            <span id="price-value" class="price-display">$200</span>
+          </div>
+          <input
+            type="range"
+            id="price-range"
+            min="0"
+            max="200"
+            value="200"
+            step="10"
+          />
+        </div>
+      </aside>
+
+      <main class="products-area">
+        <div id="product-grid" class="product-grid"></div>
+
+        <div id="empty-state" class="empty-state hidden">
+          <div class="empty-icon">🔍</div>
+          <h3>No products found</h3>
+          <p>
+            Try adjusting your search or filters to find what you're looking
+            for.
+          </p>
+          <button id="clear-filters-btn">Clear All Filters</button>
+        </div>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
