@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebTerminal v1.0</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="scanline"></div>
+    <div
+      id="terminal"
+      onclick="document.getElementById('hidden-input').focus()"
+    >
+      <div id="output"></div>
+
+      <div id="input-line">
+        <span id="prompt">user@web-terminal:~$</span>
+        <span id="typed-text"></span><span id="cursor">█</span>
+      </div>
+
+      <input type="text" id="hidden-input" autocomplete="off" autofocus />
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

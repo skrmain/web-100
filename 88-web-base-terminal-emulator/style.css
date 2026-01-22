@@ -1,0 +1,117 @@
+:root {
+  --bg-color: #300a24; /* Ubuntu Terminal Purple */
+  --text-color: #efefef; /* White/Grey */
+  --prompt-color: #87ceeb; /* Sky Blue */
+  --dir-color: #729fcf; /* Directory Blue */
+  --cmd-success: #8ae234; /* Green */
+  --font-stack: "Fira Code", "Courier New", monospace;
+}
+
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: var(--bg-color);
+  font-family: var(--font-stack);
+  overflow: hidden; /* Prevent body scroll, terminal handles it */
+}
+
+#terminal {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto; /* Auto scroll */
+  color: var(--text-color);
+  font-size: 16px;
+  line-height: 1.5;
+  cursor: text;
+}
+
+/* Retro Scanline Effect */
+.scanline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0) 50%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0.1)
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Output Formatting */
+.output-cmd {
+  margin-top: 10px;
+}
+.output-text {
+  white-space: pre-wrap;
+  color: #ccc;
+}
+.error {
+  color: #cc0000;
+}
+.directory {
+  color: var(--dir-color);
+  font-weight: bold;
+}
+.file {
+  color: var(--text-color);
+}
+
+/* Input Line Styling */
+#input-line {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+#prompt {
+  color: var(--cmd-success);
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+#hidden-input {
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  left: 0;
+  height: 0;
+  width: 0;
+}
+
+/* Cursor Animation */
+#cursor {
+  color: var(--text-color);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+::-webkit-scrollbar-thumb {
+  background: #555;
+}

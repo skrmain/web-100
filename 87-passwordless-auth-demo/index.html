@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure Passwordless Demo</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main id="app-container">
+      <section id="login-view" class="card active">
+        <div class="header">
+          <div class="lock-icon">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <h2>Sign in</h2>
+          <p>Enter your email to receive a magic link.</p>
+        </div>
+
+        <form id="login-form">
+          <div class="input-group">
+            <label for="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="name@company.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+          <button type="submit" id="send-btn" class="btn primary">
+            <span class="btn-text">Send Magic Link</span>
+            <span class="loader hidden"></span>
+          </button>
+        </form>
+
+        <div id="otp-container" class="hidden fade-in">
+          <div class="divider">or enter code manually</div>
+          <div class="otp-input-group">
+            <input
+              type="text"
+              id="otp-code"
+              placeholder="123456"
+              maxlength="6"
+              pattern="\d*"
+            />
+            <button id="verify-otp-btn" class="btn secondary">Verify</button>
+          </div>
+          <p class="status-msg" id="status-msg"></p>
+        </div>
+      </section>
+
+      <section id="dashboard-view" class="card hidden">
+        <div class="header">
+          <div class="success-icon">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <h2>Welcome Back</h2>
+          <p>Secure Session Active</p>
+        </div>
+        <div class="user-details">
+          <p>User: <strong id="user-email-display"></strong></p>
+          <p class="token-preview">Session ID: <span id="session-id"></span></p>
+        </div>
+        <button id="logout-btn" class="btn outline">Sign Out</button>
+      </section>
+    </main>
+
+    <aside id="virtual-inbox" class="inbox-drawer">
+      <div class="inbox-toggle" id="inbox-toggle">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+          ></path>
+          <polyline points="22,6 12,13 2,6"></polyline>
+        </svg>
+        <span id="notification-badge" class="badge hidden">0</span>
+      </div>
+
+      <div class="inbox-content">
+        <div class="inbox-header">
+          <h3>Virtual Inbox</h3>
+          <button id="clear-inbox">Clear</button>
+        </div>
+        <div id="email-list" class="email-list">
+          <div class="empty-state">No new emails</div>
+        </div>
+      </div>
+    </aside>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline-First Notes</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="status-bar" class="status-bar hidden"></div>
+
+    <header>
+      <h1>MinimaNotes</h1>
+      <div class="storage-indicator">
+        <span id="quota-text">Checking storage...</span>
+        <div class="progress-bg">
+          <div id="quota-bar" class="progress-fill"></div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="note-editor">
+        <input
+          type="text"
+          id="note-title"
+          placeholder="Title"
+          autocomplete="off"
+        />
+        <textarea
+          id="note-body"
+          placeholder="Take a note..."
+          rows="3"
+        ></textarea>
+        <button id="save-btn">Save Note</button>
+      </div>
+
+      <div id="notes-list" class="notes-grid"></div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

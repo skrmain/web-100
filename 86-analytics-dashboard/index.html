@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Analytics Lite | Custom SVG Engine</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <header>
+        <h1>Analytics<span class="lite">Lite</span></h1>
+        <div class="controls">
+          <button class="filter-btn active" data-range="7">Last 7 Days</button>
+          <button class="filter-btn" data-range="30">Last 30 Days</button>
+          <button class="filter-btn" data-range="all">All Time</button>
+        </div>
+      </header>
+
+      <section class="kpi-grid">
+        <div class="card">
+          <h3>Total Pageviews</h3>
+          <p class="metric-value" id="kpi-views">0</p>
+          <span class="trend up">▲ 12%</span>
+        </div>
+        <div class="card">
+          <h3>Unique Visitors</h3>
+          <p class="metric-value" id="kpi-visitors">0</p>
+          <span class="trend up">▲ 8%</span>
+        </div>
+        <div class="card">
+          <h3>Avg. Time on Page</h3>
+          <p class="metric-value" id="kpi-time">0m 0s</p>
+          <span class="trend down">▼ 2%</span>
+        </div>
+        <div class="card">
+          <h3>Bounce Rate</h3>
+          <p class="metric-value" id="kpi-bounce">0%</p>
+          <span class="trend down">▼ 1%</span>
+        </div>
+      </section>
+
+      <section class="chart-section card">
+        <div class="chart-header">
+          <h2>Traffic Overview</h2>
+        </div>
+        <div id="chart-container"></div>
+        <div id="tooltip" class="tooltip hidden"></div>
+      </section>
+
+      <section class="table-section card">
+        <h2>Top Performing Pages</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Page URL</th>
+              <th>Views</th>
+              <th>Unique</th>
+              <th>Bounce Rate</th>
+            </tr>
+          </thead>
+          <tbody id="top-pages-body"></tbody>
+        </table>
+      </section>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

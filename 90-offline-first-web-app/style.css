@@ -1,0 +1,201 @@
+:root {
+  --bg-color: #ffffff;
+  --card-bg: #fff9c4; /* Yellowish Keep style */
+  --card-border: #f0e68c;
+  --text-primary: #202124;
+  --text-secondary: #5f6368;
+  --accent: #fbc02d;
+  --danger: #e53935;
+  --success: #4caf50;
+  --offline-gray: #757575;
+}
+
+* {
+  box-sizing: border-box;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  transition: filter 0.5s ease;
+}
+
+/* --- OFFLINE MODE VISUALS --- */
+body.offline-mode {
+  filter: grayscale(100%); /* The "Very Hard" constraint */
+}
+
+/* Status Bar Animation */
+.status-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 12px;
+  text-align: center;
+  color: white;
+  font-weight: 600;
+  transform: translateY(-100%);
+  transition:
+    transform 0.3s ease-in-out,
+    background-color 0.3s;
+  z-index: 1000;
+}
+
+.status-bar.visible {
+  transform: translateY(0);
+}
+.status-bar.offline {
+  background-color: var(--text-secondary);
+}
+.status-bar.online {
+  background-color: var(--success);
+}
+
+/* Layout */
+header {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+}
+
+.storage-indicator {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: right;
+}
+.progress-bg {
+  width: 100px;
+  height: 6px;
+  background: #eee;
+  border-radius: 3px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--text-secondary);
+  width: 0%;
+  transition: width 0.5s;
+}
+
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Editor */
+.note-editor {
+  box-shadow:
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 2px 6px 2px rgba(60, 64, 67, 0.15);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
+
+.note-editor input,
+.note-editor textarea {
+  border: none;
+  outline: none;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.note-editor input {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.note-editor textarea {
+  resize: none;
+  font-size: 1rem;
+}
+
+#save-btn {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-weight: bold;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 4px;
+}
+#save-btn:hover {
+  background-color: #f1f3f4;
+}
+
+/* Notes Grid */
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 15px;
+}
+
+.note-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 15px;
+  position: relative;
+  transition: box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.note-card:hover {
+  box-shadow:
+    0 1px 2px 0 rgba(60, 64, 67, 0.3),
+    0 1px 3px 1px rgba(60, 64, 67, 0.15);
+}
+
+.note-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+.note-body {
+  white-space: pre-wrap;
+  font-size: 0.95rem;
+  flex-grow: 1;
+  margin-bottom: 15px;
+}
+
+.note-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 10px;
+}
+
+.delete-btn {
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+.delete-btn:hover {
+  color: var(--danger);
+}
+
+/* Sync Icons */
+.sync-icon {
+  font-weight: bold;
+}
+.synced {
+  color: var(--success);
+} /* Green check */
+.pending {
+  color: var(--text-secondary);
+} /* Gray clock */
