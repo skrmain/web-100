@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Discord Clone | MockSocket</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <aside class="sidebar">
+        <div class="server-header">
+          <h3>Dev Server</h3>
+        </div>
+        <div class="channels-list" id="channels-list"></div>
+        <button id="add-channel-btn" class="add-channel-btn">
+          + New Channel
+        </button>
+      </aside>
+
+      <main class="chat-area">
+        <header class="chat-header">
+          <h3 id="current-room-name"># general</h3>
+          <span class="room-desc"> - Talk about everything here</span>
+        </header>
+
+        <div class="message-stream" id="message-stream">
+          <div class="welcome-placeholder">
+            Select a channel to start chatting.
+          </div>
+        </div>
+
+        <div class="input-area">
+          <form id="chat-form">
+            <input
+              type="text"
+              id="message-input"
+              autocomplete="off"
+              placeholder="Message #general"
+            />
+          </form>
+          <div class="input-help">
+            Commands: <span class="code">/nick [name]</span>,
+            <span class="code">/join [room]</span>,
+            <span class="code">/clear</span>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

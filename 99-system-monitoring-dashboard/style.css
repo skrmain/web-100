@@ -1,0 +1,213 @@
+:root {
+  --bg-color: #050505;
+  --card-bg: rgba(20, 20, 20, 0.6);
+  --border-color: #333;
+
+  /* Neon Palette */
+  --neon-blue: #00f3ff;
+  --neon-purple: #bc13fe;
+  --neon-green: #0aff00;
+  --neon-red: #ff003c;
+
+  --font-mono: "Fira Code", "Consolas", "Courier New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: #eee;
+  font-family: var(--font-mono);
+  height: 100vh;
+  overflow: hidden;
+  /* Grid Background Effect */
+  background-image:
+    linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+  transition: box-shadow 0.2s ease;
+}
+
+/* Alert State */
+body.critical-alert {
+  box-shadow: inset 0 0 50px var(--neon-red);
+  animation: alarmFlash 1s infinite;
+}
+
+@keyframes alarmFlash {
+  0% {
+    border: 5px solid transparent;
+  }
+  50% {
+    border: 5px solid var(--neon-red);
+  }
+  100% {
+    border: 5px solid transparent;
+  }
+}
+
+/* Layout */
+.dashboard-container {
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cyber-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--neon-blue);
+  padding-bottom: 10px;
+}
+
+.cyber-header h1 {
+  font-size: 1.5rem;
+  color: var(--neon-blue);
+  text-shadow: 0 0 10px var(--neon-blue);
+}
+
+.blink {
+  animation: blinker 1s linear infinite;
+}
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1.5fr 1fr; /* Top row taller for graphs */
+  gap: 20px;
+  height: 100%;
+  grid-template-areas:
+    "cpu ram net"
+    "proc proc log";
+}
+
+/* Card Styling (Glassmorphism) */
+.card {
+  background: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(5px);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid var(--neon-blue);
+  border-left: 2px solid var(--neon-blue);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+.value-display {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: white;
+}
+
+/* Grid Areas */
+.cpu-card {
+  grid-area: cpu;
+  border-top: 2px solid var(--neon-blue);
+}
+.ram-card {
+  grid-area: ram;
+  border-top: 2px solid var(--neon-purple);
+}
+.net-card {
+  grid-area: net;
+  border-top: 2px solid var(--neon-green);
+}
+.proc-card {
+  grid-area: proc;
+  overflow: hidden;
+}
+.log-card {
+  grid-area: log;
+}
+
+/* Canvas */
+.canvas-wrapper {
+  flex-grow: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Tables & Logs */
+.table-container {
+  overflow-y: hidden;
+  height: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+th {
+  text-align: left;
+  color: var(--neon-blue);
+  padding-bottom: 8px;
+}
+td {
+  padding: 4px 0;
+  border-bottom: 1px solid #222;
+}
+
+.log-terminal {
+  height: 100%;
+  overflow-y: auto;
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.log-entry {
+  margin-bottom: 5px;
+}
+.log-entry.alert {
+  color: var(--neon-red);
+}
+
+/* Colors specific */
+#cpuValue {
+  color: var(--neon-blue);
+}
+#ramValue {
+  color: var(--neon-purple);
+}
+#netValue {
+  color: var(--neon-green);
+}

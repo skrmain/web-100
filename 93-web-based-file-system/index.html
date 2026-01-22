@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CloudOS File Manager</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="top-bar">
+      <div class="logo">☁️ CloudOS</div>
+      <div class="search-container">
+        <input type="text" placeholder="Search files..." disabled />
+      </div>
+      <div class="view-controls">
+        <button id="btn-grid" class="active" title="Grid View">Grid</button>
+        <button id="btn-list" title="List View">List</button>
+      </div>
+    </header>
+
+    <div class="sub-bar">
+      <div class="actions">
+        <button id="btn-new-folder">📁 New Folder</button>
+        <button id="btn-new-file">📄 New Text File</button>
+      </div>
+      <div class="breadcrumbs" id="breadcrumbs"></div>
+    </div>
+
+    <main class="viewport" id="viewport"></main>
+
+    <div id="context-menu" class="context-menu hidden">
+      <ul>
+        <li id="ctx-open">Open</li>
+        <li id="ctx-rename">Rename</li>
+        <li id="ctx-delete" class="danger">Delete</li>
+        <hr />
+        <li id="ctx-props">Properties</li>
+      </ul>
+    </div>
+
+    <div id="file-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span id="modal-title">Filename.txt</span>
+          <button id="modal-close">&times;</button>
+        </div>
+        <textarea id="modal-body" readonly></textarea>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

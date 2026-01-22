@@ -1,0 +1,275 @@
+:root {
+  --bg-overlay: rgba(255, 255, 255, 0.65);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+  --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 15px 35px rgba(0, 0, 0, 0.2);
+  --accent: #0078d4;
+  --text: #222;
+  --taskbar-height: 48px;
+}
+
+* {
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  overflow: hidden;
+  height: 100vh;
+  background: url("https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80")
+    center/cover no-repeat;
+  transition: background-image 0.5s ease;
+}
+
+/* Glassmorphism Utility */
+.glass {
+  background: var(--bg-overlay);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: var(--glass-border);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Desktop */
+#desktop {
+  height: calc(100vh - var(--taskbar-height));
+  position: relative;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 10px;
+}
+
+.desktop-icon {
+  width: 80px;
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.desktop-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.icon-img {
+  font-size: 32px;
+  margin-bottom: 5px;
+}
+
+/* Windows */
+.window {
+  position: absolute;
+  min-width: 300px;
+  min-height: 200px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  animation: popIn 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
+  overflow: hidden;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.window-header {
+  height: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.3);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.window-title {
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.window-controls button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.window-controls button:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+.window-controls button.close:hover {
+  background: #e81123;
+  color: white;
+}
+
+.window-body {
+  flex: 1;
+  padding: 10px;
+  overflow: auto;
+  position: relative;
+  user-select: text;
+}
+.resize-handle {
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  cursor: se-resize;
+}
+
+/* Internal Apps Styling */
+textarea.notepad-area {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  resize: none;
+  font-family: monospace;
+}
+iframe.browser-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: white;
+}
+.calc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  height: 100%;
+}
+.calc-grid button {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.calc-display {
+  grid-column: span 4;
+  background: rgba(255, 255, 255, 0.8);
+  text-align: right;
+  padding: 10px;
+  font-size: 20px;
+  border-radius: 4px;
+}
+
+/* Taskbar */
+#taskbar {
+  height: var(--taskbar-height);
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  z-index: 99999;
+}
+
+.start-btn {
+  font-size: 24px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.start-btn:hover {
+  transform: scale(1.1);
+}
+
+.dock {
+  display: flex;
+  gap: 5px;
+  flex: 1;
+  justify-content: center;
+}
+.dock-item {
+  padding: 5px 15px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: 0.2s;
+}
+.dock-item.active {
+  border-bottom: 2px solid var(--accent);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.system-tray {
+  display: flex;
+  gap: 15px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Start Menu */
+#start-menu {
+  position: absolute;
+  bottom: 55px;
+  left: 10px;
+  width: 320px;
+  height: 400px;
+  border-radius: 8px;
+  z-index: 100000;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+.hidden {
+  display: none !important;
+}
+.app-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+}
+.app-grid button {
+  padding: 15px;
+  border: none;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* Tablet / Mobile Mode */
+@media (max-width: 768px) {
+  .window {
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: calc(100% - 48px) !important;
+    border-radius: 0;
+  }
+  .window-header {
+    cursor: default;
+  } /* Disable drag on mobile */
+  .resize-handle {
+    display: none;
+  }
+  #desktop {
+    align-content: flex-start;
+  }
+}

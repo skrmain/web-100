@@ -1,0 +1,49 @@
+:root {
+  --bg-color: #111;
+  --arcade-glow: 0 0 20px rgba(0, 255, 204, 0.2);
+  --border-color: #333;
+}
+
+body {
+  background-color: var(--bg-color);
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-family: "Courier New", Courier, monospace;
+  overflow: hidden;
+}
+
+.arcade-cabinet {
+  position: relative;
+  border: 10px solid var(--border-color);
+  box-shadow: var(--arcade-glow);
+  border-radius: 4px;
+}
+
+canvas {
+  display: block;
+  background-color: #000; /* Fallback */
+  /* Cursor hidden during gameplay */
+  cursor: none;
+}
+
+/* CRT Scanline Effect Overlay */
+.scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0) 50%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0.1)
+  );
+  background-size: 100% 4px;
+  pointer-events: none; /* Let clicks pass through */
+  z-index: 10;
+}

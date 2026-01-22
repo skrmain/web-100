@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic Form Architect</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="app-container">
+      <aside class="builder-pane">
+        <header>
+          <h2>Toolbox</h2>
+        </header>
+
+        <div class="toolbox-grid">
+          <button class="tool-btn" data-type="text">Text Input</button>
+          <button class="tool-btn" data-type="textarea">Text Area</button>
+          <button class="tool-btn" data-type="select">Dropdown</button>
+          <button class="tool-btn" data-type="checkbox">Checkbox</button>
+          <button class="tool-btn" data-type="radio">Radio Group</button>
+        </div>
+
+        <div id="property-editor" class="property-editor hidden">
+          <h3>Edit Properties</h3>
+          <div class="form-group">
+            <label>Label</label>
+            <input type="text" id="prop-label" />
+          </div>
+          <div class="form-group">
+            <label>Placeholder</label>
+            <input type="text" id="prop-placeholder" />
+          </div>
+
+          <div class="form-group hidden" id="prop-options-group">
+            <label>Options (comma separated)</label>
+            <input type="text" id="prop-options" />
+          </div>
+
+          <h4>Validation</h4>
+          <div class="checkbox-group">
+            <input type="checkbox" id="prop-required" />
+            <label for="prop-required">Required</label>
+          </div>
+
+          <h4>Logic (Visible If)</h4>
+          <div class="form-group">
+            <label>Depends on Field ID</label>
+            <select id="prop-dependency-target">
+              <option value="">-- None --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Value Equals</label>
+            <input type="text" id="prop-dependency-value" />
+          </div>
+
+          <button id="save-props-btn" class="primary-btn">Update Field</button>
+          <button id="cancel-props-btn" class="secondary-btn">Cancel</button>
+        </div>
+      </aside>
+
+      <main class="preview-pane">
+        <header class="preview-header">
+          <h2>Live Preview</h2>
+          <button id="export-btn" class="export-btn">
+            Export Data (Console)
+          </button>
+        </header>
+
+        <div class="form-wrapper">
+          <form id="generated-form" novalidate></form>
+        </div>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

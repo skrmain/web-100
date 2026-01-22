@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NOC_DASHBOARD // v.1.0.4</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <header class="cyber-header">
+        <h1>SYSTEM_MONITOR <span class="blink">_</span></h1>
+        <div class="status-indicator" id="globalStatus">STATUS: NOMINAL</div>
+      </header>
+
+      <main class="grid-layout">
+        <div class="card cpu-card">
+          <div class="card-header">
+            <h3>CPU_USAGE</h3>
+            <span class="value-display" id="cpuValue">0%</span>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="cpuCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="card ram-card">
+          <div class="card-header">
+            <h3>MEM_ALLOCATION</h3>
+            <span class="value-display" id="ramValue">0%</span>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="ramCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="card net-card">
+          <div class="card-header">
+            <h3>NET_I/O (Mbps)</h3>
+            <span class="value-display" id="netValue">0</span>
+          </div>
+          <div class="canvas-wrapper">
+            <canvas id="netCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="card proc-card">
+          <div class="card-header">
+            <h3>TOP_PROCESSES</h3>
+          </div>
+          <div class="table-container">
+            <table id="procTable">
+              <thead>
+                <tr>
+                  <th>PID</th>
+                  <th>CMD</th>
+                  <th>CPU%</th>
+                  <th>MEM%</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card log-card">
+          <div class="card-header">
+            <h3>SYS_LOGS</h3>
+          </div>
+          <div class="log-terminal" id="logTerminal">
+            <div class="log-entry system">> INIT_SEQUENCE_COMPLETE...</div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

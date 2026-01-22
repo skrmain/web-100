@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advanced Kanban Board</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <h1>Kanban Board</h1>
+        <button id="add-column-btn" class="btn-primary">Add Column</button>
+      </header>
+      <div class="board" id="board"></div>
+    </div>
+
+    <div class="modal-overlay" id="card-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Card</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <label>Task Content</label>
+          <textarea id="modal-text-input" rows="4"></textarea>
+
+          <label>Color Label</label>
+          <div class="color-picker">
+            <div
+              class="color-option"
+              data-color="none"
+              style="background: #ffffff; border: 1px solid #ccc"
+            ></div>
+            <div
+              class="color-option"
+              data-color="red"
+              style="background: #ffadad"
+            ></div>
+            <div
+              class="color-option"
+              data-color="green"
+              style="background: #b7e4c7"
+            ></div>
+            <div
+              class="color-option"
+              data-color="blue"
+              style="background: #a0c4ff"
+            ></div>
+            <div
+              class="color-option"
+              data-color="yellow"
+              style="background: #fdffb6"
+            ></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="delete-card-btn" class="btn-danger">Delete</button>
+          <button id="save-card-btn" class="btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Chat Interface</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Roboto+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="settings-modal" class="modal">
+      <div class="modal-content">
+        <h2>Settings</h2>
+        <p>Enter your OpenAI API Key (saved locally):</p>
+        <input type="password" id="api-key-input" placeholder="sk-..." />
+        <div class="modal-actions">
+          <button id="save-key-btn">Save</button>
+          <button id="close-modal-btn" class="secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-container">
+      <aside class="sidebar">
+        <button id="new-chat-btn">+ New Chat</button>
+        <div class="history-list" id="history-list"></div>
+        <div class="sidebar-footer">
+          <button id="settings-btn">⚙️ Settings</button>
+        </div>
+      </aside>
+
+      <main class="chat-interface">
+        <div id="chat-container" class="chat-container">
+          <div class="welcome-message">
+            <h1>How can I help you today?</h1>
+          </div>
+        </div>
+
+        <div class="input-area">
+          <form id="chat-form">
+            <div class="input-wrapper">
+              <textarea
+                id="user-input"
+                placeholder="Message ChatGPT..."
+                rows="1"
+              ></textarea>
+              <button type="submit" id="send-btn" disabled>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M7 11L12 6L17 11M12 18V7"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </button>
+            </div>
+          </form>
+          <div class="footer-text">
+            AI can make mistakes. Consider checking important information.
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

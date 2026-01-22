@@ -1,0 +1,276 @@
+:root {
+  --bg-dark: #1e1e24;
+  --bg-panel: #2b2b36;
+  --text-light: #ececf1;
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --bg-preview: #f3f4f6;
+  --shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+body,
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-container {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  height: 100vh;
+}
+
+/* Builder Pane (Left) */
+.builder-pane {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  padding: 20px;
+  border-right: 1px solid #444;
+  overflow-y: auto;
+}
+
+h2,
+h3,
+h4 {
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+h4 {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #888;
+}
+
+.toolbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.tool-btn {
+  background: var(--bg-panel);
+  border: 1px solid #444;
+  color: white;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.tool-btn:hover {
+  border-color: var(--accent);
+  background: #333;
+}
+
+/* Property Editor */
+.property-editor {
+  background: var(--bg-panel);
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #444;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 5px;
+  color: #aaa;
+}
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  background: #1e1e24;
+  border: 1px solid #555;
+  color: white;
+  border-radius: 4px;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.primary-btn,
+.secondary-btn,
+.export-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 10px;
+}
+.primary-btn {
+  background: var(--accent);
+  color: white;
+}
+.secondary-btn {
+  background: transparent;
+  border: 1px solid #555;
+  color: #ccc;
+}
+.export-btn {
+  background: var(--accent);
+  color: white;
+  width: auto;
+  padding: 8px 20px;
+}
+
+/* Preview Pane (Right) */
+.preview-pane {
+  background-color: var(--bg-preview);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.form-wrapper {
+  background: white;
+  max-width: 700px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  min-height: 500px;
+}
+
+/* Generated Fields */
+.field-container {
+  position: relative;
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.field-container:hover {
+  border-color: #e5e7eb;
+  background: #f9fafb;
+}
+
+/* Edit/Delete Overlay */
+.field-actions {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: none; /* Hidden by default */
+  gap: 5px;
+}
+
+.field-container:hover .field-actions {
+  display: flex;
+}
+
+.action-btn {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.action-btn.delete {
+  color: red;
+  border-color: #fca5a5;
+}
+
+/* Form Inputs Styling */
+.form-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #374151;
+}
+.required-star {
+  color: red;
+  margin-left: 2px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* Validation Errors */
+.error-message {
+  color: #ef4444;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.2s;
+}
+.error-message.active {
+  height: auto;
+  padding-top: 2px;
+}
+.form-input.invalid {
+  border-color: #ef4444;
+}
+
+/* Conditional Logic Animations */
+.field-container.hidden {
+  display: none;
+  opacity: 0;
+  transform: translateY(-10px);
+}
+.field-container.visible {
+  display: block;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hidden {
+  display: none !important;
+}

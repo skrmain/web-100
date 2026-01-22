@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AeroOS Web Interface</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main id="desktop">
+      <div class="desktop-icon" data-app="pc">
+        <div class="icon-img">💻</div>
+        <span>My PC</span>
+      </div>
+      <div class="desktop-icon" data-app="notepad">
+        <div class="icon-img">📝</div>
+        <span>Notepad</span>
+      </div>
+      <div class="desktop-icon" data-app="browser">
+        <div class="icon-img">🌐</div>
+        <span>Browser</span>
+      </div>
+      <div class="desktop-icon" data-app="calculator">
+        <div class="icon-img">🧮</div>
+        <span>Calc</span>
+      </div>
+      <div class="desktop-icon" data-app="settings">
+        <div class="icon-img">⚙️</div>
+        <span>Settings</span>
+      </div>
+    </main>
+
+    <div id="start-menu" class="glass hidden">
+      <div class="start-header">Pinned Apps</div>
+      <div class="app-grid">
+        <button onclick="os.launch('notepad')">📝 Notepad</button>
+        <button onclick="os.launch('calculator')">🧮 Calculator</button>
+        <button onclick="os.launch('browser')">🌐 Browser</button>
+        <button onclick="os.launch('settings')">⚙️ Settings</button>
+      </div>
+    </div>
+
+    <footer id="taskbar" class="glass">
+      <div class="start-btn" id="start-btn" title="Start">🪟</div>
+
+      <div id="dock" class="dock"></div>
+
+      <div class="system-tray">
+        <div id="battery-level">🔋 --%</div>
+        <div id="clock">00:00</div>
+      </div>
+    </footer>
+
+    <template id="window-template">
+      <div class="window glass">
+        <div class="window-header">
+          <div class="window-title">
+            <span class="win-icon"></span>
+            <span class="win-text">Application</span>
+          </div>
+          <div class="window-controls">
+            <button class="minimize" title="Minimize">─</button>
+            <button class="maximize" title="Maximize">□</button>
+            <button class="close" title="Close">✕</button>
+          </div>
+        </div>
+        <div class="window-body"></div>
+        <div class="resize-handle"></div>
+      </div>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>

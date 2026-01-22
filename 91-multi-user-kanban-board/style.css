@@ -1,0 +1,254 @@
+:root {
+  --bg-gradient: linear-gradient(135deg, #0079bf, #5067c5);
+  --column-bg: #ebecf0;
+  --card-bg: #ffffff;
+  --text-color: #172b4d;
+  --shadow-card: 0 1px 0 rgba(9, 30, 66, 0.25);
+  --shadow-hover: 0 4px 8px rgba(9, 30, 66, 0.15);
+  --placeholder-bg: rgba(9, 30, 66, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background: var(--bg-gradient);
+  height: 100vh;
+  overflow: hidden; /* Prevent body scroll, handle in board */
+  color: var(--text-color);
+}
+
+/* Header */
+header {
+  height: 60px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+header h1 {
+  color: white;
+  font-size: 1.2rem;
+}
+
+/* Board Container - Horizontal Scroll */
+.board {
+  display: flex;
+  align-items: flex-start;
+  padding: 20px;
+  height: calc(100vh - 60px);
+  overflow-x: auto;
+  gap: 12px;
+}
+
+/* Scrollbar styling */
+.board::-webkit-scrollbar {
+  height: 12px;
+}
+.board::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+}
+
+/* Columns */
+.column {
+  background: var(--column-bg);
+  min-width: 272px;
+  max-width: 272px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+}
+
+.column-header {
+  padding: 12px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  cursor: grab;
+}
+
+.delete-col-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b778c;
+}
+.delete-col-btn:hover {
+  color: #eb5a46;
+}
+
+/* Task List Area - Vertical Scroll */
+.task-list {
+  padding: 0 8px;
+  flex-grow: 1;
+  overflow-y: auto;
+  min-height: 20px; /* Drop target area */
+}
+
+/* Cards */
+.card {
+  background: var(--card-bg);
+  border-radius: 4px;
+  box-shadow: var(--shadow-card);
+  padding: 10px;
+  margin-bottom: 8px;
+  cursor: grab;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  position: relative;
+  user-select: none;
+}
+
+.card:hover {
+  background: #f4f5f7;
+}
+
+/* Color Labels */
+.card-label {
+  height: 6px;
+  width: 40px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  display: none;
+}
+.card[data-label="red"] .card-label {
+  background: #ffadad;
+  display: block;
+}
+.card[data-label="green"] .card-label {
+  background: #b7e4c7;
+  display: block;
+}
+.card[data-label="blue"] .card-label {
+  background: #a0c4ff;
+  display: block;
+}
+.card[data-label="yellow"] .card-label {
+  background: #fdffb6;
+  display: block;
+}
+
+/* Dragging States */
+.card.dragging {
+  opacity: 0.5;
+  transform: rotate(3deg); /* Aesthetic Requirement */
+}
+
+.placeholder {
+  background: var(--placeholder-bg);
+  border: 2px dashed rgba(9, 30, 66, 0.3);
+  border-radius: 4px;
+  margin-bottom: 8px;
+  pointer-events: none; /* Let events pass through to calculation logic */
+}
+
+/* Buttons */
+.add-card-btn {
+  padding: 10px;
+  background: transparent;
+  border: none;
+  color: #5e6c84;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  border-radius: 0 0 8px 8px;
+}
+.add-card-btn:hover {
+  background-color: rgba(9, 30, 66, 0.08);
+  color: #172b4d;
+}
+
+.btn-primary {
+  background: #0079bf;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: #026aa7;
+}
+.btn-danger {
+  background: #eb5a46;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-overlay.active {
+  display: flex;
+}
+.modal-content {
+  background: white;
+  width: 400px;
+  padding: 20px;
+  border-radius: 8px;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+.modal-body textarea {
+  width: 100%;
+  border: 2px solid #dfe1e6;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 15px;
+  resize: vertical;
+}
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Color Picker in Modal */
+.color-picker {
+  display: flex;
+  gap: 10px;
+}
+.color-option {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.color-option:hover {
+  transform: scale(1.1);
+}
+.color-option.selected {
+  border: 2px solid #000;
+}
