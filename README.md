@@ -3,7 +3,7 @@
 ## 🟢 SIMPLE (Beginner – HTML/CSS/Basic JS) – 25 Projects
 
 1. Digital Clock - Claude.ai
-2. Stopwatch
+2. Stopwatch - Claude.ai
 3. Countdown Timer
 4. Random Quote Generator
 5. Color Picker Tool
