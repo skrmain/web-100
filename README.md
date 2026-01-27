@@ -2,7 +2,7 @@
 
 ## 🟢 SIMPLE (Beginner – HTML/CSS/Basic JS) – 25 Projects
 
-1. Digital Clock
+1. Digital Clock - Claude.ai
 2. Stopwatch
 3. Countdown Timer
 4. Random Quote Generator
