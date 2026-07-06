@@ -12,7 +12,7 @@
 8. Number Guessing Game
 9. Temperature Converter
 10. Unit Converter (length/weight)
-11. Random Password Generator
+11. Random Password Generator - ToolkitHQ
 12. Image Slider
 13. Light/Dark Mode Toggle
 14. Simple Calculator
